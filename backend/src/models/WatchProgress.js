@@ -5,6 +5,7 @@ const WatchProgressSchema = new mongoose.Schema({
   studentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Student', required: true },
   videoId: { type: mongoose.Schema.Types.ObjectId, ref: 'Video', required: true },
   progress: { type: Number, default: 0 },
+  completed: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });

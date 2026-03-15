@@ -14,6 +14,7 @@ import playlistRoutes from './src/routes/playlistRoutes.js';
 import blogRoutes from './src/routes/blogRoutes.js';
 import categoryRoutes from './src/routes/categoryRoutes.js';
 import streamRoutes from './src/routes/streamRoutes.js';
+import progressRoutes from './src/routes/progressRoutes.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -37,6 +38,7 @@ app.use('/api/playlists', playlistRoutes);
 app.use('/api/blogs', blogRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/stream', streamRoutes);
+app.use('/api/progress', progressRoutes);
 
 /* Health Check */
 app.get('/api/health', (req, res) => {
