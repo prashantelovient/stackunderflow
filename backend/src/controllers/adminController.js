@@ -1,26 +1,41 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import prisma from '../utils/db.js';
+import { Admin } from '../models/index.js';
 
 export const register = async (req, res, next) => {
   try {
     const { email, password } = req.body;
+    const normalizedEmail = email?.toLowerCase();
 
-    const existingAdmin = await prisma.admin.findUnique({ where: { email } });
+    if (!email || !password) {
+      return res.status(400).json({
+        message: "Email and password required"
+      });
+    }
+
+    const existingAdmin = await Admin.findOne({ email: normalizedEmail });
+
     if (existingAdmin) {
-      return res.status(400).json({ message: 'Admin already exists' });
+      return res.status(400).json({
+        message: "Admin already exists"
+      });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    
-    const admin = await prisma.admin.create({
-      data: {
-        email,
-        password: hashedPassword,
+
+    const admin = await Admin.create({
+      email: normalizedEmail,
+      password: hashedPassword,
+    });
+
+    res.status(201).json({
+      message: "Admin registered successfully",
+      admin: {
+        id: admin.id,
+        email: admin.email,
       },
     });
 
-    res.status(201).json({ message: 'Admin registered successfully', admin: { id: admin.id, email: admin.email } });
   } catch (error) {
     next(error);
   }
@@ -28,29 +43,47 @@ export const register = async (req, res, next) => {
 
 export const login = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
 
-    const admin = await prisma.admin.findUnique({ where: { email } });
+    const { email, password } = req.body;
+    const normalizedEmail = email?.toLowerCase();
+
+    if (!email || !password) {
+      return res.status(400).json({
+        message: "Email and password required"
+      });
+    }
+
+    const admin = await Admin.findOne({ email: normalizedEmail });
+
     if (!admin) {
-      return res.status(401).json({ message: 'Invalid email or password' });
+      return res.status(401).json({
+        message: "Invalid email or password"
+      });
     }
 
     const isMatch = await bcrypt.compare(password, admin.password);
+
     if (!isMatch) {
-      return res.status(401).json({ message: 'Invalid email or password' });
+      return res.status(401).json({
+        message: "Invalid email or password"
+      });
     }
 
     const token = jwt.sign(
       { id: admin.id, email: admin.email },
       process.env.JWT_SECRET,
-      { expiresIn: '1d' }
+      { expiresIn: "1d" }
     );
 
     res.json({
-      message: 'Login successful',
+      message: "Login successful",
       token,
-      admin: { id: admin.id, email: admin.email },
+      admin: {
+        id: admin.id,
+        email: admin.email,
+      },
     });
+
   } catch (error) {
     next(error);
   }

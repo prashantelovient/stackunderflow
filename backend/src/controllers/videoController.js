@@ -1,4 +1,5 @@
-import prisma from '../utils/db.js';
+import mongoose from 'mongoose';
+import { Video } from '../models/index.js';
 import { processVideoToHLS } from '../workers/videoProcessor.js';
 
 export const uploadVideo = async (req, res, next) => {
@@ -15,16 +16,16 @@ export const uploadVideo = async (req, res, next) => {
     const rawVideoPath = videoFile.path;
     const thumbnailPath = thumbnailFile ? `/thumbnails/${thumbnailFile.filename}` : null;
 
-    const video = await prisma.video.create({
-      data: {
-        title,
-        description,
-        videoPath: '', // Will be updated by the worker
-        thumbnail: thumbnailPath,
-        duration: duration ? parseInt(duration) : null,
-        playlistId: playlistId || null,
-        status: 'processing'
-      },
+    const playlistObjectId = playlistId && mongoose.Types.ObjectId.isValid(playlistId) ? playlistId : null;
+
+    const video = await Video.create({
+      title,
+      description,
+      videoPath: '', // Will be updated by the worker
+      thumbnail: thumbnailPath,
+      duration: duration ? parseInt(duration, 10) : null,
+      playlistId: playlistObjectId,
+      status: 'processing',
     });
 
     // Run HLS conversion worker in background
@@ -38,17 +39,14 @@ export const uploadVideo = async (req, res, next) => {
 
 export const getVideos = async (req, res, next) => {
   try {
-    const videos = await prisma.video.findMany({
-      include: {
-        playlist: true
-      }
-    });
+    const videos = await Video.find().populate('playlistId', 'title').exec();
     
     const formatted = videos.map(v => ({
-      ...v,
-      playlistTitle: v.playlist ? v.playlist.title : 'No Playlist',
+      ...v.toObject(),
+      playlistId: v.playlistId ? (v.playlistId.id || v.playlistId._id?.toString?.()) : null,
+      playlistTitle: v.playlistId ? v.playlistId.title : 'No Playlist',
       uploadDate: v.createdAt,
-      duration: v.duration ? `${Math.floor(v.duration/60)}:${(v.duration%60).toString().padStart(2, '0')}` : '0:00'
+      duration: v.duration ? `${Math.floor(v.duration / 60)}:${(v.duration % 60).toString().padStart(2, '0')}` : '0:00',
     }));
     
     res.json(formatted);
@@ -59,20 +57,20 @@ export const getVideos = async (req, res, next) => {
 
 export const getVideoById = async (req, res, next) => {
   try {
-    const v = await prisma.video.findUnique({
-      where: { id: req.params.id },
-      include: {
-        playlist: true
-      }
-    });
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).json({ message: 'Video not found' });
+    }
+
+    const v = await Video.findById(req.params.id).populate('playlistId', 'title').exec();
     
     if (!v) return res.status(404).json({ message: 'Video not found' });
     
     const formatted = {
-      ...v,
-      playlistTitle: v.playlist ? v.playlist.title : 'No Playlist',
+      ...v.toObject(),
+      playlistId: v.playlistId ? (v.playlistId.id || v.playlistId._id?.toString?.()) : null,
+      playlistTitle: v.playlistId ? v.playlistId.title : 'No Playlist',
       uploadDate: v.createdAt,
-      duration: v.duration ? `${Math.floor(v.duration/60)}:${(v.duration%60).toString().padStart(2, '0')}` : '0:00'
+      duration: v.duration ? `${Math.floor(v.duration / 60)}:${(v.duration % 60).toString().padStart(2, '0')}` : '0:00',
     };
     
     res.json(formatted);
@@ -85,15 +83,22 @@ export const updateVideo = async (req, res, next) => {
   try {
     const { title, description, duration, playlistId } = req.body;
     
-    const video = await prisma.video.update({
-      where: { id: req.params.id },
-      data: {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).json({ message: 'Video not found' });
+    }
+
+    const playlistObjectId = playlistId && mongoose.Types.ObjectId.isValid(playlistId) ? playlistId : null;
+
+    const video = await Video.findByIdAndUpdate(
+      req.params.id,
+      {
         title,
         description,
-        duration: duration ? parseInt(duration) : undefined,
-        playlistId: playlistId || null,
+        duration: duration ? parseInt(duration, 10) : undefined,
+        playlistId: playlistObjectId,
       },
-    });
+      { new: true }
+    ).exec();
     
     res.json(video);
   } catch (error) {
@@ -103,9 +108,10 @@ export const updateVideo = async (req, res, next) => {
 
 export const deleteVideo = async (req, res, next) => {
   try {
-    await prisma.video.delete({
-      where: { id: req.params.id },
-    });
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).json({ message: 'Video not found' });
+    }
+    await Video.findByIdAndDelete(req.params.id).exec();
     res.json({ message: 'Video deleted successfully' });
   } catch (error) {
     next(error);

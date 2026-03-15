@@ -1,5 +1,5 @@
 import express from 'express';
-import { getStudents, getStudentById, deleteStudent, suspendStudent, registerStudent, loginStudent } from '../controllers/studentController.js';
+import { getStudents, getStudentById, deleteStudent, suspendStudent, activateStudent, registerStudent, loginStudent } from '../controllers/studentController.js';
 import { authMiddleware } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
@@ -13,5 +13,6 @@ router.get('/', getStudents);
 router.get('/:id', getStudentById);
 router.delete('/:id', deleteStudent);
 router.patch('/:id/suspend', suspendStudent);
+router.patch('/:id/activate', activateStudent);
 
 export default router;

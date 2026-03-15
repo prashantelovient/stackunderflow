@@ -3,7 +3,7 @@ import path from 'path';
 import ffmpeg from 'fluent-ffmpeg';
 import ffmpegPath from 'ffmpeg-static';
 import crypto from 'crypto';
-import prisma from '../utils/db.js';
+import { Video } from '../models/index.js';
 
 ffmpeg.setFfmpegPath(ffmpegPath);
 
@@ -39,10 +39,11 @@ export const processVideoToHLS = (videoId, rawVideoPath) => {
         .on('end', async () => {
           console.log(`HLS conversion finished for video ${videoId}, saving locally...`);
           try {
-            await prisma.video.update({
-              where: { id: videoId },
-              data: { status: 'ready', videoPath: `/uploads/hls/${videoId}/index.m3u8` }
-            });
+            await Video.findByIdAndUpdate(
+              videoId,
+              { status: 'ready', videoPath: `/uploads/hls/${videoId}/index.m3u8` },
+              { new: true }
+            ).exec();
             
             // Cleanup only local raw file
             try {
@@ -60,10 +61,11 @@ export const processVideoToHLS = (videoId, rawVideoPath) => {
         .on('error', async (err) => {
           console.error(`Error processing video ${videoId}:`, err);
           try {
-            await prisma.video.update({
-              where: { id: videoId },
-              data: { status: 'failed' }
-            });
+            await Video.findByIdAndUpdate(
+              videoId,
+              { status: 'failed' },
+              { new: true }
+            ).exec();
           } catch(e) {}
           reject(err);
         })
