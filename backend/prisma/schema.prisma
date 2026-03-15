@@ -1,0 +1,85 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+}
+
+model Student {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  name              String
+  email             String   @unique
+  password          String
+  enrolledPlaylists String[]
+  createdAt         DateTime @default(now())
+  watchProgress     WatchProgress[]
+}
+
+model Category {
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  name      String     @unique
+  createdAt DateTime   @default(now())
+  playlists Playlist[]
+}
+
+model Playlist {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  description String?
+  thumbnail   String?
+  categoryId  String?  @db.ObjectId
+  category    Category? @relation(fields: [categoryId], references: [id])
+  createdAt   DateTime @default(now())
+  videos      Video[]
+}
+
+model Video {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  description String?
+  videoPath   String   
+  thumbnail   String?
+  duration    Int?     
+  playlistId  String?  @db.ObjectId
+  playlist    Playlist? @relation(fields: [playlistId], references: [id])
+  createdAt   DateTime @default(now())
+  watchProgress WatchProgress[]
+  status      String   @default("processing") // added to track if HLS is ready
+}
+
+model PlaylistVideo {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  playlistId String   @db.ObjectId
+  videoId    String   @db.ObjectId
+  createdAt  DateTime @default(now())
+}
+
+model Blog {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  title     String
+  slug      String   @unique
+  thumbnail String?
+  content   String   
+  status    String   @default("draft") 
+  createdAt DateTime @default(now())
+}
+
+model WatchProgress {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  studentId String   @db.ObjectId
+  videoId   String   @db.ObjectId
+  progress  Float    @default(0)
+  student   Student  @relation(fields: [studentId], references: [id])
+  video     Video    @relation(fields: [videoId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
