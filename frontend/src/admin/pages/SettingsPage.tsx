@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { settingsService } from '@/admin/services'
-import { PageHeader, Spinner, Card, CardHeader, CardContent, Button, Input } from '@/admin/components/ui'
+import { PageHeader, Spinner, Card, CardHeader, CardContent, Button, Input, Badge } from '@/admin/components/ui'
 import { toast, ToastContainer } from '@/admin/components/Modals'
-import { Globe, Mail, Cloud, Shield } from 'lucide-react'
+import { Globe, Mail, Cloud, Shield, Settings2, Cpu, Database, Lock, Save, Camera, Terminal, ShieldCheck } from 'lucide-react'
+import { cn } from '@/utils'
 
 interface SettingsForm { platformName: string; emailHost: string; s3Bucket: string; s3Region: string }
 
@@ -19,8 +20,8 @@ export default function SettingsPage() {
 
   const saveMutation = useMutation({
     mutationFn: () => settingsService.update(form),
-    onSuccess: () => toast.success('Settings saved successfully!'),
-    onError: () => toast.error('Failed to save settings.'),
+    onSuccess: () => toast.success('Core parameters synchronized.'),
+    onError: () => toast.error('Security Protocol: Synchronization failure.'),
   })
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -31,26 +32,38 @@ export default function SettingsPage() {
     }
   }
 
-  if (isLoading) return <div className="flex items-center justify-center h-64"><Spinner /></div>
+  if (isLoading) return (
+    <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+      <Spinner />
+      <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] animate-pulse font-mono">Accessing Core Parameters...</p>
+    </div>
+  )
 
   const sections = [
     {
-      key: 'platform', icon: Globe, title: 'Platform Settings', description: 'General configuration for your platform.',
+      key: 'platform', icon: Globe, title: 'Platform Identity', description: 'Public-facing registry and visual identifier.',
       content: (
-        <div className="space-y-4">
-          <Input label="Platform Name" value={form.platformName} onChange={(e) => setForm(f => ({ ...f, platformName: e.target.value }))} placeholder="VideoLearn Pro" />
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Platform Logo</label>
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-700 flex items-center justify-center overflow-hidden bg-gray-50 dark:bg-gray-800">
-                {logoPreview ? <img src={logoPreview} alt="Logo" className="w-full h-full object-cover" /> : <Globe className="w-6 h-6 text-gray-400" />}
+        <div className="space-y-6">
+          <Input label="Registry Name" value={form.platformName} onChange={(e) => setForm((f: any) => ({ ...f, platformName: e.target.value }))} placeholder="VaultLearn Operational" />
+          <div className="space-y-3">
+            <label className="text-[11px] font-black uppercase tracking-widest text-muted-foreground ml-1">Visual Identifier (Logo)</label>
+            <div className="flex items-center gap-6">
+              <div className="w-24 h-24 rounded-[1.5rem] border-2 border-dashed border-border/60 flex items-center justify-center overflow-hidden bg-muted/20 group hover:border-primary/50 transition-all shadow-inner relative">
+                {logoPreview ? (
+                  <img src={logoPreview} alt="Logo" className="w-full h-full object-cover transition-transform group-hover:scale-110" />
+                ) : (
+                  <Globe className="w-8 h-8 text-muted-foreground/30 group-hover:text-primary/30 transition-colors" />
+                )}
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Camera className="w-6 h-6 text-white" />
+                </div>
               </div>
-              <div>
+              <div className="space-y-2">
                 <input type="file" accept="image/*" id="logo-upload" className="hidden" onChange={handleLogoChange} />
-                <label htmlFor="logo-upload" className="cursor-pointer inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 transition-colors">
-                  Upload Logo
+                <label htmlFor="logo-upload" className="cursor-pointer inline-flex items-center gap-2 px-6 py-2.5 text-[10px] font-black uppercase tracking-widest bg-foreground text-background rounded-xl hover:opacity-80 transition-all shadow-lg active:scale-95">
+                  Link Graphic
                 </label>
-                <p className="text-xs text-gray-400 mt-1">PNG, JPG up to 2MB</p>
+                <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-tight">System formats: PNG, JPG (MAX 2MB)</p>
               </div>
             </div>
           </div>
@@ -58,68 +71,80 @@ export default function SettingsPage() {
       )
     },
     {
-      key: 'email', icon: Mail, title: 'Email Settings', description: 'Configure SMTP for transactional emails.',
+      key: 'email', icon: Mail, title: 'Signal Relay (SMTP)', description: 'Configure outbound communication protocols.',
       content: (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Input label="SMTP Host" value={form.emailHost} onChange={(e) => setForm(f => ({ ...f, emailHost: e.target.value }))} placeholder="smtp.example.com" />
-          <Input label="SMTP Port" type="number" defaultValue="587" placeholder="587" />
-          <Input label="SMTP Username" placeholder="noreply@example.com" />
-          <Input label="SMTP Password" type="password" placeholder="••••••••" />
-          <Input label="From Name" placeholder="VideoLearn Pro" />
-          <Input label="From Email" placeholder="noreply@example.com" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <Input label="Relay Host" value={form.emailHost} onChange={(e) => setForm((f: any) => ({ ...f, emailHost: e.target.value }))} placeholder="relay.example.com" />
+          <Input label="Access Port" type="number" defaultValue="587" placeholder="587" />
+          <Input label="Auth Username" placeholder="system@example.com" />
+          <Input label="Auth Secret" type="password" placeholder="••••••••" />
+          <Input label="Display Identity" placeholder="VaultLearn Systems" />
+          <Input label="Return Signal (Email)" placeholder="noreply@vaultlearn.com" />
         </div>
       )
     },
     {
-      key: 's3', icon: Cloud, title: 'S3 / Storage Configuration', description: 'Configure cloud storage for videos and assets.',
+      key: 's3', icon: Cloud, title: 'Asset Storage (S3)', description: 'Cloud registry for digital educational assets.',
       content: (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Input label="S3 Bucket Name" value={form.s3Bucket} onChange={(e) => setForm(f => ({ ...f, s3Bucket: e.target.value }))} placeholder="my-video-bucket" />
-          <Input label="AWS Region" value={form.s3Region} onChange={(e) => setForm(f => ({ ...f, s3Region: e.target.value }))} placeholder="us-east-1" />
-          <Input label="AWS Access Key ID" placeholder="AKIA..." />
-          <Input label="AWS Secret Access Key" type="password" placeholder="••••••••" />
-          <Input label="CDN URL (optional)" placeholder="https://cdn.example.com" className="sm:col-span-2" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <Input label="Bucket Identifier" value={form.s3Bucket} onChange={(e) => setForm((f: any) => ({ ...f, s3Bucket: e.target.value }))} placeholder="core-asset-archive" />
+          <Input label="Strategic Region" value={form.s3Region} onChange={(e) => setForm((f: any) => ({ ...f, s3Region: e.target.value }))} placeholder="us-east-1" />
+          <Input label="Access Key ID" placeholder="AKIA..." />
+          <Input label="Private Secret" type="password" placeholder="••••••••" />
+          <Input label="Edge Distribution (CDN)" placeholder="https://cdn.vaultlearn.net" className="sm:col-span-2" />
         </div>
       )
     },
     {
-      key: 'security', icon: Shield, title: 'Security', description: 'Manage admin authentication and access.',
+      key: 'security', icon: Shield, title: 'Security Protocol', description: 'Internal access control and encryption parameters.',
       content: (
-        <div className="space-y-4 max-w-md">
-          <Input label="Current Password" type="password" placeholder="••••••••" />
-          <Input label="New Password" type="password" placeholder="••••••••" />
-          <Input label="Confirm New Password" type="password" placeholder="••••••••" />
+        <div className="space-y-6 max-w-md">
+          <Input label="Current Auth Key" type="password" placeholder="••••••••" />
+          <Input label="New Auth Key" type="password" placeholder="••••••••" />
+          <Input label="Confirm Registry Key" type="password" placeholder="••••••••" />
         </div>
       )
     },
   ]
 
   return (
-    <div>
+    <div className="space-y-8 animate-in fade-in duration-500 pb-12">
       <ToastContainer />
-      <PageHeader title="Settings" subtitle="Configure your platform settings and integrations." />
+      <PageHeader
+        title="Core Parameters"
+        subtitle="Manage secure system integrations and operational dependencies."
+        action={
+          <Badge variant="outline" className="px-4 py-1.5 border-primary/20 text-primary bg-primary/5 font-black tracking-widest flex gap-2">
+            <ShieldCheck className="w-3.5 h-3.5" />
+            ENCRYPTED TRANSIT
+          </Badge>
+        }
+      />
 
-      <div className="space-y-6 max-w-4xl">
-        {sections.map(({ key, icon: Icon, title, description, content }) => (
-          <Card key={key}>
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-                  <Icon className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+      <div className="space-y-8 max-w-5xl">
+        <div className="grid gap-8">
+          {sections.map(({ key, icon: Icon, title, description, content }) => (
+            <Card key={key} className="rounded-[2.5rem] border-border/40 shadow-xl bg-card/60 backdrop-blur-sm overflow-hidden hover:bg-card hover:border-primary/20 transition-all duration-500">
+              <CardHeader className="p-8 pb-4 border-b border-border/30 bg-muted/20">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-primary/10 border border-primary/20 rounded-2xl flex items-center justify-center text-primary shadow-sm">
+                    <Icon className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-black text-foreground tracking-tight">{title}</h2>
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{description}</p>
+                  </div>
                 </div>
-                <div>
-                  <h2 className="text-base font-semibold text-gray-900 dark:text-white">{title}</h2>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">{description}</p>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="pt-4">{content}</CardContent>
-          </Card>
-        ))}
+              </CardHeader>
+              <CardContent className="p-8">{content}</CardContent>
+            </Card>
+          ))}
+        </div>
 
-        <div className="flex justify-end">
-          <Button size="lg" loading={saveMutation.isPending} onClick={() => saveMutation.mutate()}>
-            Save All Settings
+        <div className="flex justify-end pt-4">
+          <Button size="lg" loading={saveMutation.isPending} onClick={() => saveMutation.mutate()} className="rounded-2xl px-12 py-8 shadow-2xl shadow-primary/30 font-black text-sm uppercase tracking-[0.2em] bg-primary hover:scale-[1.02] active:scale-95 transition-all">
+            <Save className="w-5 h-5 mr-3" />
+            Synchronize Core
           </Button>
         </div>
       </div>

@@ -4,16 +4,22 @@ import { Search, BookOpen, Calendar, ArrowRight } from 'lucide-react'
 import { useState } from 'react'
 import { studentBlogs } from '@/student/services/studentService'
 import type { Blog } from '@/student/services/studentService'
-import { formatDate } from '@/utils'
+import { formatDate, cn } from '@/utils'
+import { Input } from '@/components/ui/input'
+import { Card, CardContent } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Skeleton } from '@/components/ui/skeleton'
 
 const coverColors = [
-  'from-violet-600/80 to-purple-800/80',
-  'from-indigo-600/80 to-blue-800/80',
-  'from-pink-600/80 to-rose-800/80',
-  'from-emerald-600/80 to-teal-800/80',
-  'from-amber-600/80 to-orange-800/80',
-  'from-cyan-600/80 to-sky-800/80',
+  'from-violet-600/60 to-purple-800/60',
+  'from-indigo-600/60 to-blue-800/60',
+  'from-pink-600/60 to-rose-800/60',
+  'from-emerald-600/60 to-teal-800/60',
+  'from-amber-600/60 to-orange-800/60',
+  'from-cyan-600/60 to-sky-800/60',
 ]
+
+const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000'
 
 function BlogCard({ blog, index }: { blog: Blog; index: number }) {
   const color = coverColors[index % coverColors.length]
@@ -22,42 +28,42 @@ function BlogCard({ blog, index }: { blog: Blog; index: number }) {
   return (
     <Link
       to={`/student/blog/${blog.id}`}
-      className="group bg-white/5 border border-white/8 rounded-2xl overflow-hidden hover:bg-white/8 hover:border-white/15 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/30 flex flex-col"
+      className="group"
     >
-      {/* Cover */}
-      <div className={`relative h-44 bg-gradient-to-br ${color} flex items-center justify-center overflow-hidden`}>
-        <BookOpen className="w-14 h-14 text-white/20" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-        {blog.thumbnail && (
-          <img
-            src={`http://localhost:5000${blog.thumbnail}`}
-            alt={blog.title}
-            className="absolute inset-0 w-full h-full object-cover"
-          />
-        )}
-        <div className="absolute bottom-3 left-3">
-          <span className="text-xs font-semibold uppercase tracking-wider text-white/60 bg-black/30 backdrop-blur px-2 py-0.5 rounded-full">
-            Article
-          </span>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="p-5 flex-1 flex flex-col">
-        <h3 className="font-semibold text-white text-[15px] leading-snug group-hover:text-violet-300 transition-colors line-clamp-2">
-          {blog.title}
-        </h3>
-        <p className="text-sm text-gray-400 mt-2 line-clamp-3 flex-1">{excerpt}...</p>
-        <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/5">
-          <div className="flex items-center gap-1.5 text-gray-500 text-xs">
-            <Calendar className="w-3.5 h-3.5" />
-            <span>{formatDate(blog.createdAt)}</span>
+      <Card className="bg-card border-border overflow-hidden hover:border-primary/50 transition-all duration-300 hover:translate-y-[-4px] hover:shadow-xl shadow-sm flex flex-col h-full">
+        {/* Cover */}
+        <div className={cn("relative h-48 bg-gradient-to-br flex items-center justify-center overflow-hidden", color)}>
+          <BookOpen className="w-16 h-16 text-white/20 group-hover:scale-110 transition-transform duration-500" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+          {blog.thumbnail && (
+            <img
+              src={`${API_BASE}${blog.thumbnail}`}
+              alt={blog.title}
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+            />
+          )}
+          <div className="absolute top-4 left-4">
+            <Badge className="bg-white/10 backdrop-blur-md border-white/20 text-white hover:bg-white/20">Article</Badge>
           </div>
-          <span className="flex items-center gap-1 text-xs font-medium text-violet-400 group-hover:text-violet-300 transition-colors">
-            Read more <ArrowRight className="w-3.5 h-3.5" />
-          </span>
         </div>
-      </div>
+
+        {/* Content */}
+        <CardContent className="p-6 flex-1 flex flex-col">
+          <h3 className="font-bold text-lg leading-snug group-hover:text-primary transition-colors line-clamp-2">
+            {blog.title}
+          </h3>
+          <p className="text-sm text-muted-foreground mt-3 line-clamp-3 flex-1 leading-relaxed">{excerpt}...</p>
+          <div className="flex items-center justify-between mt-6 pt-4 border-t border-border/50">
+            <div className="flex items-center gap-2 text-muted-foreground text-xs font-medium">
+              <Calendar className="w-3.5 h-3.5 text-primary" />
+              <span>{formatDate(blog.createdAt)}</span>
+            </div>
+            <div className="flex items-center gap-1.5 text-xs font-bold text-primary group-hover:translate-x-1 transition-transform">
+              EXPLORE <ArrowRight className="w-3.5 h-3.5" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </Link>
   )
 }
@@ -77,58 +83,68 @@ export default function BlogsPage() {
   )
 
   return (
-    <div className="p-4 lg:p-8 max-w-7xl mx-auto">
+    <div className="p-4 lg:p-10 max-w-7xl mx-auto min-h-full space-y-10">
       {/* Header */}
-      <div className="mb-8 flex items-start justify-between flex-wrap gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Blog & Articles</h1>
-          <p className="text-gray-400 mt-1">Tutorials, guides and learning resources</p>
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div className="space-y-2">
+          <h1 className="text-3xl lg:text-5xl font-extrabold tracking-tight">VaultLearn <span className="text-primary italic">Journal</span></h1>
+          <p className="text-muted-foreground text-lg max-w-2xl">Expert tutorials, development guides and the latest learning resources from our library.</p>
         </div>
-        <div className="relative">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-          <input
+        <div className="relative w-full md:w-80">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground z-10" />
+          <Input
             type="text"
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search articles..."
-            className="w-64 pl-10 pr-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all text-sm"
+            className="h-11 pl-10 bg-card border-border shadow-sm focus:ring-primary/20"
           />
         </div>
       </div>
 
       {/* Grid */}
       {isLoading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {Array(6).fill(0).map((_, i) => (
-            <div key={i} className="animate-pulse rounded-2xl bg-white/5 overflow-hidden">
-              <div className="h-44 bg-white/5" />
-              <div className="p-5 space-y-3">
-                <div className="h-4 bg-white/10 rounded w-3/4" />
-                <div className="h-3 bg-white/10 rounded w-full" />
-                <div className="h-3 bg-white/10 rounded w-2/3" />
-              </div>
-            </div>
+            <Card key={i} className="overflow-hidden border-border h-[400px]">
+              <Skeleton className="h-48 w-full" />
+              <CardContent className="p-6 space-y-4">
+                <Skeleton className="h-6 w-3/4" />
+                <div className="space-y-2">
+                  <Skeleton className="h-3 w-full" />
+                  <Skeleton className="h-3 w-5/6" />
+                  <Skeleton className="h-3 w-4/6" />
+                </div>
+                <div className="pt-4 flex justify-between">
+                  <Skeleton className="h-3 w-20" />
+                  <Skeleton className="h-3 w-16" />
+                </div>
+              </CardContent>
+            </Card>
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-center">
-          <BookOpen className="w-16 h-16 text-gray-600 mb-4" />
-          <h3 className="text-lg font-semibold text-gray-300">
-            {search ? 'No articles match your search' : 'No articles published yet'}
+        <Card className="flex flex-col items-center justify-center py-24 text-center bg-muted/20 border-dashed border-border">
+          <BookOpen className="w-20 h-20 text-muted-foreground/20 mb-6" />
+          <h3 className="text-2xl font-bold">
+            {search ? 'Content hidden' : 'No publications'}
           </h3>
-          <p className="text-gray-500 mt-2 text-sm">
-            {search ? 'Try a different search term' : 'Check back soon for new content'}
+          <p className="text-muted-foreground mt-2 max-w-xs mx-auto">
+            {search ? `We couldn't find any articles matching "${search}". Try refining your search.` : 'Check back later for tutorials and guides.'}
           </p>
-        </div>
+        </Card>
       ) : (
-        <>
-          <p className="text-sm text-gray-500 mb-4">{filtered.length} article{filtered.length !== 1 ? 's' : ''}</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="space-y-6">
+          <div className="flex items-center gap-4">
+            <Badge variant="secondary" className="px-3 py-1 font-bold">{filtered.length} AVAILABLE</Badge>
+            <div className="h-px flex-1 bg-border/50" />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {filtered.map((blog, i) => (
               <BlogCard key={blog.id} blog={blog} index={i} />
             ))}
           </div>
-        </>
+        </div>
       )}
     </div>
   )

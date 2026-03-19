@@ -1,26 +1,27 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Plus, Pencil, Trash2, BookOpen, ChevronDown, ChevronRight, Layers, FileVideo, FileText, Link as LinkIcon } from 'lucide-react'
-import { courseService, moduleService, lectureService, videoService } from '@/admin/services'
+import { Plus, Pencil, Trash2, BookOpen, ChevronDown, ChevronRight, Layers, FileVideo, FileText, Link as LinkIcon, GraduationCap, Layout, Boxes, Trash, Edit, PlusCircle, MonitorPlay, Zap, ShieldAlert } from 'lucide-react'
+import { courseService, moduleService, lectureService, videoService, categoryService } from '@/admin/services'
 import { PageHeader, Badge, Spinner, Card, CardContent, Button, Input, Textarea, Select } from '@/admin/components/ui'
 import { ConfirmModal, Modal } from '@/admin/components/Modals'
 import { toast, ToastContainer } from '@/admin/components/Modals'
+import { cn } from '@/utils'
 
 interface LectureItem { id: string; title: string; description: string; type: string; videoId: any; resourceUrl: string | null; resourceName: string | null; order: number }
 interface ModuleItem { id: string; title: string; description: string; order: number; lectures: LectureItem[] }
-interface Course { id: string; title: string; description: string; thumbnail: null; category: string; moduleCount: number; lectureCount: number; modules?: ModuleItem[] }
+interface Course { id: string; title: string; description: string; thumbnail: string | null; categoryId: string; category?: string; moduleCount: number; lectureCount: number; modules?: ModuleItem[] }
 interface VideoItem { id: string; title: string; duration: string }
 
-const emptyCourseForm = { title: '', description: '', category: '' }
+const emptyCourseForm = { title: '', description: '', categoryId: '' }
 const emptyModuleForm = { title: '', description: '' }
 const emptyLectureForm = { title: '', description: '', type: 'video', videoId: '', resourceUrl: '', resourceName: '' }
 
 const lectureTypeIcon = (type: string) => {
     switch (type) {
-        case 'video': return <FileVideo className="w-4 h-4 text-violet-400" />
-        case 'resource': return <LinkIcon className="w-4 h-4 text-blue-400" />
-        case 'material': return <FileText className="w-4 h-4 text-amber-400" />
-        default: return <FileVideo className="w-4 h-4 text-gray-400" />
+        case 'video': return <FileVideo className="w-4 h-4 text-primary" />
+        case 'resource': return <LinkIcon className="w-4 h-4 text-emerald-500" />
+        case 'material': return <FileText className="w-4 h-4 text-amber-500" />
+        default: return <FileVideo className="w-4 h-4 text-muted-foreground" />
     }
 }
 
@@ -32,6 +33,8 @@ export default function CoursesPage() {
     const [editCourse, setEditCourse] = useState<Course | null>(null)
     const [deleteCourseId, setDeleteCourseId] = useState<string | null>(null)
     const [courseForm, setCourseForm] = useState(emptyCourseForm)
+    const [thumbnailFile, setThumbnailFile] = useState<File | null>(null)
+    const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null)
 
     // Module state
     const [moduleModalOpen, setModuleModalOpen] = useState(false)
@@ -53,6 +56,7 @@ export default function CoursesPage() {
 
     const { data: courses = [], isLoading } = useQuery<Course[]>({ queryKey: ['courses'], queryFn: courseService.getAll })
     const { data: allVideos = [] } = useQuery<VideoItem[]>({ queryKey: ['videos'], queryFn: videoService.getAll })
+    const { data: categories = [] } = useQuery<any[]>({ queryKey: ['categories'], queryFn: categoryService.getAll })
 
     const toggleCourse = (id: string) => {
         setExpandedCourses(prev => {
@@ -70,12 +74,32 @@ export default function CoursesPage() {
     }
 
     // Course CRUD
-    const openNewCourse = () => { setEditCourse(null); setCourseForm(emptyCourseForm); setCourseModalOpen(true) }
-    const openEditCourse = (c: Course) => { setEditCourse(c); setCourseForm({ title: c.title, description: c.description, category: c.category }); setCourseModalOpen(true) }
+    const openNewCourse = () => { setEditCourse(null); setCourseForm(emptyCourseForm); setThumbnailFile(null); setThumbnailPreview(null); setCourseModalOpen(true) }
+    const openEditCourse = (c: Course) => {
+        setEditCourse(c);
+        setCourseForm({
+            title: c.title,
+            description: c.description,
+            categoryId: (c as any).categoryId || ''
+        });
+        setThumbnailFile(null);
+        setThumbnailPreview(c.thumbnail ? `${import.meta.env.VITE_API_URL?.replace('/api', '')}${c.thumbnail}` : null);
+        setCourseModalOpen(true)
+    }
 
     const saveCourseMutation = useMutation({
-        mutationFn: () => editCourse ? courseService.update(editCourse.id, courseForm) : courseService.create(courseForm),
-        onSuccess: () => { qc.invalidateQueries({ queryKey: ['courses'] }); toast.success(editCourse ? 'Course updated!' : 'Course created!'); setCourseModalOpen(false) },
+        mutationFn: () => {
+            const formData = new FormData()
+            formData.append('title', courseForm.title)
+            formData.append('description', courseForm.description)
+            formData.append('categoryId', courseForm.categoryId)
+            if (thumbnailFile) formData.append('thumbnail', thumbnailFile)
+
+            return editCourse
+                ? courseService.update(editCourse.id, formData)
+                : courseService.create(formData)
+        },
+        onSuccess: () => { qc.invalidateQueries({ queryKey: ['courses'] }); toast.success(editCourse ? 'Course updated.' : 'Course created.'); setCourseModalOpen(false) },
         onError: () => toast.error('Failed to save course.'),
     })
 
@@ -92,7 +116,7 @@ export default function CoursesPage() {
         mutationFn: () => editModule
             ? moduleService.update(editModule.id, moduleForm)
             : moduleService.create({ ...moduleForm, courseId: moduleParentCourseId }),
-        onSuccess: () => { qc.invalidateQueries({ queryKey: ['courses'] }); toast.success(editModule ? 'Module updated!' : 'Module created!'); setModuleModalOpen(false) },
+        onSuccess: () => { qc.invalidateQueries({ queryKey: ['courses'] }); toast.success(editModule ? 'Module updated.' : 'Module added.'); setModuleModalOpen(false) },
         onError: () => toast.error('Failed to save module.'),
     })
 
@@ -110,7 +134,7 @@ export default function CoursesPage() {
             title: l.title,
             description: l.description,
             type: l.type,
-            videoId: l.videoId?.id || l.videoId?._id || l.videoId || '',
+            videoId: l.videoId?.id || l.videoId?._id || (typeof l.videoId === 'string' ? l.videoId : '') || '',
             resourceUrl: l.resourceUrl || '',
             resourceName: l.resourceName || '',
         });
@@ -121,93 +145,182 @@ export default function CoursesPage() {
         mutationFn: () => editLecture
             ? lectureService.update(editLecture.id, lectureForm)
             : lectureService.create({ ...lectureForm, moduleId: lectureParentModuleId }),
-        onSuccess: () => { qc.invalidateQueries({ queryKey: ['courses'] }); toast.success(editLecture ? 'Lecture updated!' : 'Lecture created!'); setLectureModalOpen(false) },
+        onSuccess: () => { qc.invalidateQueries({ queryKey: ['courses'] }); toast.success(editLecture ? 'Lecture updated.' : 'Lecture added.'); setLectureModalOpen(false) },
         onError: () => toast.error('Failed to save lecture.'),
     })
 
     const deleteLectureMutation = useMutation({
         mutationFn: (id: string) => lectureService.delete(id),
-        onSuccess: () => { qc.invalidateQueries({ queryKey: ['courses'] }); toast.success('Lecture deleted.'); setDeleteLectureId(null) },
+        onSuccess: () => { qc.invalidateQueries({ queryKey: ['courses'] }); toast.success('Content segment erased.'); setDeleteLectureId(null) },
     })
 
-    if (isLoading) return <div className="flex items-center justify-center h-64"><Spinner /></div>
+    if (isLoading) return (
+        <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+            <Spinner />
+            <p className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-[0.2em] animate-pulse font-mono">Loading Courses...</p>
+        </div>
+    )
 
     return (
-        <div>
+        <div className="space-y-8 animate-in fade-in duration-500">
             <ToastContainer />
-            <PageHeader title="Courses" subtitle={`${courses.length} courses`} action={<Button onClick={openNewCourse}><Plus className="w-4 h-4" /> New Course</Button>} />
+            <PageHeader
+                title="Course Management"
+                subtitle={`${courses.length} courses available in the system.`}
+                action={
+                    <Button onClick={openNewCourse} className="rounded-xl shadow-lg shadow-primary/20 font-bold text-xs px-6 py-6 border-none bg-primary hover:scale-[1.02] transition-transform">
+                        <PlusCircle className="w-5 h-5 mr-3" />
+                        Init New Curriculum
+                    </Button>
+                }
+            />
 
-            <div className="space-y-4">
+            <div className="space-y-6">
                 {courses.map((course) => (
-                    <Card key={course.id} className="overflow-hidden">
+                    <Card key={course.id} className={cn(
+                        "group overflow-hidden border-border/40 transition-all duration-500 rounded-[2.5rem]",
+                        expandedCourses.has(course.id) ? "shadow-2xl ring-1 ring-primary/20 bg-card" : "shadow-lg bg-card/60 hover:bg-card hover:border-primary/20"
+                    )}>
                         {/* Course Header */}
-                        <div className="flex items-center gap-4 p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors" onClick={() => toggleCourse(course.id)}>
-                            <div className="w-12 h-12 bg-gradient-to-br from-blue-400 via-purple-500 to-indigo-600 rounded-xl flex items-center justify-center flex-shrink-0">
-                                <BookOpen className="w-6 h-6 text-white" />
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 p-6 sm:p-8 cursor-pointer relative" onClick={() => toggleCourse(course.id)}>
+                            <div className={cn(
+                                "w-20 h-20 rounded-[1.5rem] flex items-center justify-center flex-shrink-0 transition-transform duration-500 group-hover:scale-105 shadow-xl",
+                                "bg-gradient-to-br from-primary via-primary/80 to-indigo-600"
+                            )}>
+                                <GraduationCap className="w-10 h-10 text-white" />
                             </div>
-                            <div className="flex-1 min-w-0">
-                                <h3 className="font-semibold text-gray-900 dark:text-white">{course.title}</h3>
-                                <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-1">{course.description}</p>
+                            <div className="flex-1 min-w-0 space-y-1">
+                                <div className="flex items-center gap-3">
+                                    <h3 className="text-xl font-black text-foreground tracking-tight">{course.title}</h3>
+                                    <Badge variant="outline" className="text-[9px] font-black uppercase tracking-widest bg-primary/5 text-primary border-primary/20 px-2">
+                                        {course.category}
+                                    </Badge>
+                                </div>
+                                <p className="text-sm font-medium text-muted-foreground line-clamp-2 pr-12">{course.description}</p>
                             </div>
-                            <div className="flex items-center gap-2 flex-shrink-0">
-                                <Badge variant="info">{course.moduleCount || 0} modules</Badge>
-                                <Badge variant="default">{course.lectureCount || 0} lectures</Badge>
-                                <Badge variant="default">{course.category}</Badge>
+
+                            <div className="flex flex-wrap items-center gap-3 mt-4 sm:mt-0">
+                                <div className="flex flex-col items-center px-4 py-2 bg-muted/50 rounded-2xl border border-border/30">
+                                    <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Structures</span>
+                                    <span className="text-sm font-black text-foreground">{course.moduleCount || 0}</span>
+                                </div>
+                                <div className="flex flex-col items-center px-4 py-2 bg-muted/50 rounded-2xl border border-border/30">
+                                    <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Segments</span>
+                                    <span className="text-sm font-black text-foreground">{course.lectureCount || 0}</span>
+                                </div>
                             </div>
-                            <div className="flex items-center gap-1 flex-shrink-0">
-                                <button onClick={(e) => { e.stopPropagation(); openEditCourse(course) }} className="p-1.5 rounded-lg text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20"><Pencil className="w-4 h-4" /></button>
-                                <button onClick={(e) => { e.stopPropagation(); setDeleteCourseId(course.id) }} className="p-1.5 rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"><Trash2 className="w-4 h-4" /></button>
-                                {expandedCourses.has(course.id) ? <ChevronDown className="w-5 h-5 text-gray-400" /> : <ChevronRight className="w-5 h-5 text-gray-400" />}
+
+                            <div className="flex items-center gap-2 absolute top-6 right-8">
+                                <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); openEditCourse(course) }} className="h-9 w-9 rounded-xl hover:bg-primary/10 hover:text-primary transition-all">
+                                    <Edit className="w-4 h-4" />
+                                </Button>
+                                <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); setDeleteCourseId(course.id) }} className="h-9 w-9 rounded-xl hover:bg-destructive/10 hover:text-destructive transition-all">
+                                    <Trash className="w-4 h-4" />
+                                </Button>
+                                <div className={cn(
+                                    "h-9 w-9 rounded-xl bg-muted/50 flex items-center justify-center transition-transform duration-500 ml-2",
+                                    expandedCourses.has(course.id) ? "rotate-180 bg-primary/10 text-primary" : ""
+                                )}>
+                                    <ChevronDown className="w-5 h-5" />
+                                </div>
                             </div>
                         </div>
 
                         {/* Modules (expanded) */}
                         {expandedCourses.has(course.id) && (
-                            <div className="border-t border-gray-100 dark:border-gray-800">
-                                <div className="p-3 pl-8 bg-gray-50/50 dark:bg-gray-900/30 flex items-center justify-between">
-                                    <span className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Modules</span>
-                                    <Button size="sm" variant="outline" onClick={() => openNewModule(course.id)}><Plus className="w-3 h-3" /> Add Module</Button>
+                            <div className="animate-in slide-in-from-top-4 duration-500 border-t border-border/50">
+                                <div className="p-4 px-8 bg-muted/30 flex items-center justify-between border-b border-border/30">
+                                    <div className="flex items-center gap-3">
+                                        <Boxes className="w-4 h-4 text-primary" />
+                                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Architectural Modules</span>
+                                    </div>
+                                    <Button size="sm" variant="outline" className="rounded-xl h-8 text-[10px] font-black uppercase px-4 border-primary/30 text-primary hover:bg-primary hover:text-white" onClick={() => openNewModule(course.id)}>
+                                        <Plus className="w-3.5 h-3.5 mr-2" />
+                                        Extend Structure
+                                    </Button>
                                 </div>
 
                                 {(course.modules || []).length === 0 ? (
-                                    <p className="text-sm text-gray-400 text-center py-6">No modules yet. Add your first module.</p>
+                                    <div className="flex flex-col items-center justify-center py-16 px-4 space-y-4 opacity-40">
+                                        <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center">
+                                            <Layers className="w-8 h-8" />
+                                        </div>
+                                        <p className="text-[11px] font-black uppercase tracking-widest">No Active Modules Initialized</p>
+                                    </div>
                                 ) : (
-                                    <div className="divide-y divide-gray-100 dark:divide-gray-800">
-                                        {(course.modules || []).map((mod) => (
-                                            <div key={mod.id}>
+                                    <div className="divide-y divide-border/30">
+                                        {(course.modules || []).map((mod, idx) => (
+                                            <div key={mod.id} className="group/module shadow-inner bg-background/20">
                                                 {/* Module Header */}
-                                                <div className="flex items-center gap-3 px-4 pl-10 py-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors" onClick={() => toggleModule(mod.id)}>
-                                                    <Layers className="w-4 h-4 text-indigo-400 flex-shrink-0" />
-                                                    <div className="flex-1 min-w-0">
-                                                        <span className="text-sm font-medium text-gray-800 dark:text-gray-200">{mod.title}</span>
-                                                        {mod.description && <p className="text-xs text-gray-500 line-clamp-1">{mod.description}</p>}
+                                                <div className="flex items-center gap-5 p-6 pl-10 cursor-pointer hover:bg-muted/40 transition-colors" onClick={() => toggleModule(mod.id)}>
+                                                    <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-500 border border-indigo-500/20 font-black text-xs">
+                                                        {(idx + 1).toString().padStart(2, '0')}
                                                     </div>
-                                                    <Badge variant="default" className="text-[10px]">{(mod.lectures || []).length} lectures</Badge>
-                                                    <button onClick={(e) => { e.stopPropagation(); openEditModule(mod, course.id) }} className="p-1 rounded text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20"><Pencil className="w-3.5 h-3.5" /></button>
-                                                    <button onClick={(e) => { e.stopPropagation(); setDeleteModuleId(mod.id) }} className="p-1 rounded text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"><Trash2 className="w-3.5 h-3.5" /></button>
-                                                    {expandedModules.has(mod.id) ? <ChevronDown className="w-4 h-4 text-gray-400" /> : <ChevronRight className="w-4 h-4 text-gray-400" />}
+                                                    <div className="flex-1 min-w-0">
+                                                        <span className="text-md font-extrabold text-foreground/90 group-hover/module:text-foreground transition-colors">{mod.title}</span>
+                                                        {mod.description && <p className="text-xs font-medium text-muted-foreground line-clamp-1 mt-0.5">{mod.description}</p>}
+                                                    </div>
+
+                                                    <div className="flex items-center gap-4">
+                                                        <Badge variant="secondary" className="text-[9px] font-extrabold px-3 py-1 bg-muted border-none">
+                                                            {(mod.lectures || []).length} SEGMENTS
+                                                        </Badge>
+                                                        <div className="flex items-center gap-1 opacity-0 group-hover/module:opacity-100 transition-opacity">
+                                                            <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); openEditModule(mod, course.id) }} className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary">
+                                                                <Edit className="w-3.5 h-3.5" />
+                                                            </Button>
+                                                            <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); setDeleteModuleId(mod.id) }} className="h-8 w-8 rounded-lg hover:bg-destructive/10 hover:text-destructive">
+                                                                <Trash className="w-3.5 h-3.5" />
+                                                            </Button>
+                                                        </div>
+                                                        <ChevronRight className={cn(
+                                                            "w-5 h-5 text-muted-foreground/50 transition-transform duration-500",
+                                                            expandedModules.has(mod.id) ? "rotate-90 text-primary" : ""
+                                                        )} />
+                                                    </div>
                                                 </div>
 
                                                 {/* Lectures (expanded) */}
                                                 {expandedModules.has(mod.id) && (
-                                                    <div className="bg-gray-50/50 dark:bg-gray-900/20">
-                                                        <div className="px-4 pl-16 py-2 flex items-center justify-between">
-                                                            <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-400">Lectures</span>
-                                                            <Button size="sm" variant="outline" onClick={() => openNewLecture(mod.id)} className="text-xs py-0.5 px-2"><Plus className="w-3 h-3" /> Add Lecture</Button>
+                                                    <div className="bg-muted/10 pb-4 animate-in fade-in slide-in-from-left-2 duration-300">
+                                                        <div className="px-10 pl-24 py-3 flex items-center justify-between border-t border-border/20">
+                                                            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">Lectures</span>
+                                                            <Button size="sm" variant="ghost" onClick={() => openNewLecture(mod.id)} className="text-[10px] font-black uppercase h-7 px-3 bg-primary/5 text-primary hover:bg-primary hover:text-white rounded-lg">
+                                                                <Plus className="w-3 h-3 mr-1.5" /> Attach Video
+                                                            </Button>
                                                         </div>
                                                         {(mod.lectures || []).length === 0 ? (
-                                                            <p className="text-xs text-gray-400 text-center py-4">No lectures yet.</p>
+                                                            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/30 text-center py-6">Empty Buffer</p>
                                                         ) : (
-                                                            <div className="space-y-1 px-4 pl-16 pb-3">
+                                                            <div className="space-y-2 px-10 pl-24 pr-16">
                                                                 {(mod.lectures || []).map((lec) => (
-                                                                    <div key={lec.id} className="flex items-center gap-3 p-2.5 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-                                                                        {lectureTypeIcon(lec.type)}
-                                                                        <div className="flex-1 min-w-0">
-                                                                            <span className="text-sm font-medium text-gray-800 dark:text-gray-200 block truncate">{lec.title}</span>
-                                                                            <span className="text-[10px] text-gray-400 capitalize">{lec.type}{lec.videoId?.title ? ` · ${lec.videoId.title}` : ''}</span>
+                                                                    <div key={lec.id} className="flex items-center gap-4 p-4 bg-card/40 rounded-2xl border border-border/30 hover:border-primary/30 hover:bg-card/80 transition-all group/lec shadow-sm">
+                                                                        <div className="w-10 h-10 rounded-xl bg-muted/50 flex items-center justify-center group-hover/lec:bg-primary/10 transition-colors">
+                                                                            {lectureTypeIcon(lec.type)}
                                                                         </div>
-                                                                        <button onClick={() => openEditLecture(lec, mod.id)} className="p-1 rounded text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20"><Pencil className="w-3.5 h-3.5" /></button>
-                                                                        <button onClick={() => setDeleteLectureId(lec.id)} className="p-1 rounded text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"><Trash2 className="w-3.5 h-3.5" /></button>
+                                                                        <div className="flex-1 min-w-0">
+                                                                            <span className="text-sm font-bold text-foreground/80 group-hover/lec:text-foreground block truncate">{lec.title}</span>
+                                                                            <div className="flex items-center gap-2 mt-0.5">
+                                                                                <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">{lec.type}</span>
+                                                                                {lec.videoId?.title && (
+                                                                                    <>
+                                                                                        <span className="text-muted-foreground/30">|</span>
+                                                                                        <span className="text-[9px] font-black text-primary/70 uppercase tracking-widest truncate max-w-[150px]">
+                                                                                            <MonitorPlay className="w-2.5 h-2.5 inline mr-1" />
+                                                                                            {lec.videoId.title}
+                                                                                        </span>
+                                                                                    </>
+                                                                                )}
+                                                                            </div>
+                                                                        </div>
+                                                                        <div className="flex items-center gap-1 opacity-0 group-hover/lec:opacity-100 transition-opacity">
+                                                                            <Button variant="ghost" size="icon" onClick={() => openEditLecture(lec, mod.id)} className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary">
+                                                                                <Edit className="w-3.5 h-3.5" />
+                                                                            </Button>
+                                                                            <Button variant="ghost" size="icon" onClick={() => setDeleteLectureId(lec.id)} className="h-8 w-8 rounded-lg hover:bg-destructive/10 hover:text-destructive">
+                                                                                <Trash className="w-3.5 h-3.5" />
+                                                                            </Button>
+                                                                        </div>
                                                                     </div>
                                                                 ))}
                                                             </div>
@@ -225,78 +338,125 @@ export default function CoursesPage() {
             </div>
 
             {/* Course Modal */}
-            <Modal isOpen={courseModalOpen} title={editCourse ? 'Edit Course' : 'New Course'} onClose={() => setCourseModalOpen(false)}>
-                <div className="space-y-4">
-                    <Input label="Course Title" value={courseForm.title} onChange={(e) => setCourseForm(f => ({ ...f, title: e.target.value }))} placeholder="e.g. React Mastery" />
-                    <Textarea label="Description" value={courseForm.description} onChange={(e) => setCourseForm(f => ({ ...f, description: e.target.value }))} placeholder="Describe the course..." />
-                    <Input label="Category" value={courseForm.category} onChange={(e) => setCourseForm(f => ({ ...f, category: e.target.value }))} placeholder="e.g. Web Development" />
-                    <div className="flex flex-col gap-1">
-                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Thumbnail</label>
-                        <input type="file" accept="image/*" className="text-sm text-gray-600 dark:text-gray-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:bg-blue-50 file:text-blue-600 dark:file:bg-blue-900/30 dark:file:text-blue-400" />
+            <Modal isOpen={courseModalOpen} title={editCourse ? 'Recalibrate Curriculum Entry' : 'Register New Curriculum'} onClose={() => setCourseModalOpen(false)} size="lg">
+                <div className="space-y-6 pt-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <Input label="Tactical Title" value={courseForm.title} onChange={(e) => setCourseForm(f => ({ ...f, title: e.target.value }))} placeholder="Record course title..." />
+                        <Select label="Sector Category" value={courseForm.categoryId} onChange={(val) => setCourseForm(f => ({ ...f, categoryId: val }))}
+                            options={categories.map(c => ({ value: c.id, label: c.name }))} placeholder="Select Sector..." />
                     </div>
-                    <div className="flex justify-end gap-3 pt-2">
-                        <Button variant="outline" onClick={() => setCourseModalOpen(false)}>Cancel</Button>
-                        <Button loading={saveCourseMutation.isPending} onClick={() => saveCourseMutation.mutate()}>{editCourse ? 'Update' : 'Create'}</Button>
+                    <Textarea label="Strategic Description" value={courseForm.description} onChange={(e) => setCourseForm(f => ({ ...f, description: e.target.value }))} placeholder="Explain the primary objective..." />
+
+                    <div className="space-y-3">
+                        <label className="text-[11px] font-extrabold uppercase tracking-widest text-muted-foreground ml-1">Visualization (Cover Image)</label>
+                        <div className="p-10 border-2 border-dashed border-border rounded-2xl flex flex-col items-center justify-center gap-4 bg-muted/20 group hover:border-primary/50 transition-colors">
+                            {thumbnailPreview ? (
+                                <img src={thumbnailPreview} alt="Preview" className="w-48 h-24 object-cover rounded-xl shadow-lg border border-border" />
+                            ) : (
+                                <BookOpen className="w-8 h-8 text-muted-foreground/30 group-hover:text-primary/50 transition-colors" />
+                            )}
+                            <input type="file" accept="image/*" className="hidden" id="course-thumb" onChange={(e) => {
+                                const file = e.target.files?.[0]
+                                if (file) {
+                                    setThumbnailFile(file)
+                                    setThumbnailPreview(URL.createObjectURL(file))
+                                }
+                            }} />
+                            <label htmlFor="course-thumb" className="text-[10px] font-black uppercase tracking-widest bg-foreground text-background px-5 py-2.5 rounded-xl cursor-pointer hover:opacity-80 transition-all shadow-lg active:scale-95">Link Digital Graphic</label>
+                        </div>
+                    </div>
+
+                    <div className="flex justify-end gap-3 pt-6 border-t border-border/50">
+                        <Button variant="ghost" onClick={() => setCourseModalOpen(false)}>Cancel</Button>
+                        <Button loading={saveCourseMutation.isPending} onClick={() => saveCourseMutation.mutate()}>{editCourse ? 'Update Course' : 'Create Course'}</Button>
                     </div>
                 </div>
             </Modal>
 
             {/* Module Modal */}
-            <Modal isOpen={moduleModalOpen} title={editModule ? 'Edit Module' : 'New Module'} onClose={() => setModuleModalOpen(false)}>
-                <div className="space-y-4">
-                    <Input label="Module Title" value={moduleForm.title} onChange={(e) => setModuleForm(f => ({ ...f, title: e.target.value }))} placeholder="e.g. Getting Started" />
-                    <Textarea label="Description" value={moduleForm.description} onChange={(e) => setModuleForm(f => ({ ...f, description: e.target.value }))} placeholder="Describe this module..." />
-                    <div className="flex justify-end gap-3 pt-2">
-                        <Button variant="outline" onClick={() => setModuleModalOpen(false)}>Cancel</Button>
-                        <Button loading={saveModuleMutation.isPending} onClick={() => saveModuleMutation.mutate()}>{editModule ? 'Update' : 'Create'}</Button>
+            <Modal isOpen={moduleModalOpen} title={editModule ? 'Edit Module' : 'Add Module'} onClose={() => setModuleModalOpen(false)}>
+                <div className="space-y-6 pt-4">
+                    <Input label="Module Identifier" value={moduleForm.title} onChange={(e) => setModuleForm(f => ({ ...f, title: e.target.value }))} placeholder="e.g. PHASE 01: ORIGIN" />
+                    <Textarea label="Segment Rationale" value={moduleForm.description} onChange={(e) => setModuleForm(f => ({ ...f, description: e.target.value }))} placeholder="Segment logic overview..." />
+                    <div className="flex justify-end gap-3 pt-6 border-t border-border/50">
+                        <Button variant="ghost" onClick={() => setModuleModalOpen(false)} className="rounded-xl px-6 font-bold text-xs">DISCARD</Button>
+                        <Button loading={saveModuleMutation.isPending} onClick={() => saveModuleMutation.mutate()} className="rounded-xl px-8 shadow-lg shadow-primary/20 font-bold text-xs uppercase tracking-widest">{editModule ? 'Update Module' : 'Add Module'}</Button>
                     </div>
                 </div>
             </Modal>
 
             {/* Lecture Modal */}
-            <Modal isOpen={lectureModalOpen} title={editLecture ? 'Edit Lecture' : 'New Lecture'} onClose={() => setLectureModalOpen(false)}>
-                <div className="space-y-4">
-                    <Input label="Lecture Title" value={lectureForm.title} onChange={(e) => setLectureForm(f => ({ ...f, title: e.target.value }))} placeholder="e.g. Introduction" />
-                    <Textarea label="Description" value={lectureForm.description} onChange={(e) => setLectureForm(f => ({ ...f, description: e.target.value }))} placeholder="Describe this lecture..." />
-                    <Select
-                        label="Lecture Type"
-                        value={lectureForm.type}
-                        onChange={(val) => setLectureForm(f => ({ ...f, type: val }))}
-                        options={[
-                            { value: 'video', label: 'Video' },
-                            { value: 'resource', label: 'Resource (Link)' },
-                            { value: 'material', label: 'Material (Document)' },
-                        ]}
-                    />
-                    {lectureForm.type === 'video' && (
+            <Modal isOpen={lectureModalOpen} title={editLecture ? 'Edit Lecture' : 'Add Lecture'} onClose={() => setLectureModalOpen(false)}>
+                <div className="space-y-6 pt-4">
+                    <Input label="Lecture Title" value={lectureForm.title} onChange={(e) => setLectureForm(f => ({ ...f, title: e.target.value }))} placeholder="e.g. Introduction to React" />
+                    <Textarea label="Lecture Description" value={lectureForm.description} onChange={(e) => setLectureForm(f => ({ ...f, description: e.target.value }))} placeholder="Lecture details..." />
+                    <div className="grid grid-cols-2 gap-4">
                         <Select
-                            label="Select Video"
-                            value={lectureForm.videoId}
-                            onChange={(val) => setLectureForm(f => ({ ...f, videoId: val }))}
-                            options={allVideos.map(v => ({ value: v.id, label: `${v.title} (${v.duration})` }))}
-                            placeholder="Select a video"
+                            label="Content Type"
+                            value={lectureForm.type}
+                            onChange={(val) => setLectureForm(f => ({ ...f, type: val }))}
+                            options={[
+                                { value: 'video', label: 'Video' },
+                                { value: 'resource', label: 'Resource Link' },
+                                { value: 'material', label: 'Reading Material' },
+                            ]}
                         />
+                        {lectureForm.type === 'video' ? (
+                            <Select
+                                label="Select Video"
+                                value={lectureForm.videoId || ''}
+                                onChange={(val) => setLectureForm(f => ({ ...f, videoId: val }))}
+                                options={(allVideos || []).map(v => ({ value: (v as any)._id || v.id || '', label: v.title }))}
+                                placeholder={allVideos.length > 0 ? "Select a video from archive..." : "Loading available videos..."}
+                            />
+                        ) : (
+                            <Input label="Link Text" value={lectureForm.resourceName} onChange={(e) => setLectureForm(f => ({ ...f, resourceName: e.target.value }))} placeholder="e.g. TECHNICAL PDF" />
+                        )}
+                    </div>
+
+                    {lectureForm.type !== 'video' && (
+                        <Input label="Resource URL" value={lectureForm.resourceUrl} onChange={(e) => setLectureForm(f => ({ ...f, resourceUrl: e.target.value }))} placeholder="https://..." />
                     )}
-                    {(lectureForm.type === 'resource' || lectureForm.type === 'material') && (
-                        <>
-                            <Input label="Resource URL" value={lectureForm.resourceUrl} onChange={(e) => setLectureForm(f => ({ ...f, resourceUrl: e.target.value }))} placeholder="https://..." />
-                            <Input label="Resource Name" value={lectureForm.resourceName} onChange={(e) => setLectureForm(f => ({ ...f, resourceName: e.target.value }))} placeholder="e.g. Cheat Sheet PDF" />
-                        </>
-                    )}
-                    <div className="flex justify-end gap-3 pt-2">
-                        <Button variant="outline" onClick={() => setLectureModalOpen(false)}>Cancel</Button>
-                        <Button loading={saveLectureMutation.isPending} onClick={() => saveLectureMutation.mutate()}>{editLecture ? 'Update' : 'Create'}</Button>
+
+                    <div className="flex justify-end gap-3 pt-6 border-t border-border/50">
+                        <Button variant="ghost" onClick={() => setLectureModalOpen(false)} className="rounded-xl px-6 font-bold text-xs">Cancel</Button>
+                        <Button loading={saveLectureMutation.isPending} onClick={() => saveLectureMutation.mutate()} className="rounded-xl px-8 shadow-lg shadow-primary/20 font-bold text-xs uppercase tracking-widest">{editLecture ? 'Update Lecture' : 'Add Lecture'}</Button>
                     </div>
                 </div>
             </Modal>
 
-            {/* Delete Confirmations */}
-            <ConfirmModal isOpen={!!deleteCourseId} title="Delete Course" message="This will permanently delete the course, all its modules, and all lectures."
-                loading={deleteCourseMutation.isPending} onConfirm={() => deleteCourseMutation.mutate(deleteCourseId!)} onCancel={() => setDeleteCourseId(null)} />
-            <ConfirmModal isOpen={!!deleteModuleId} title="Delete Module" message="This will permanently delete the module and all its lectures."
-                loading={deleteModuleMutation.isPending} onConfirm={() => deleteModuleMutation.mutate(deleteModuleId!)} onCancel={() => setDeleteModuleId(null)} />
-            <ConfirmModal isOpen={!!deleteLectureId} title="Delete Lecture" message="This will permanently delete this lecture."
-                loading={deleteLectureMutation.isPending} onConfirm={() => deleteLectureMutation.mutate(deleteLectureId!)} onCancel={() => setDeleteLectureId(null)} />
+            <ConfirmModal
+                isOpen={!!deleteCourseId}
+                title="Delete Course"
+                message="Are you sure you want to delete this course? This action will remove all modules and lectures within it."
+                confirmLabel="Delete"
+                variant="danger"
+                loading={deleteCourseMutation.isPending}
+                onConfirm={() => deleteCourseMutation.mutate(deleteCourseId!)}
+                onCancel={() => setDeleteCourseId(null)}
+            />
+
+            <ConfirmModal
+                isOpen={!!deleteModuleId}
+                title="Delete Module"
+                message="Are you sure you want to delete this module and its lectures?"
+                confirmLabel="Delete"
+                variant="danger"
+                loading={deleteModuleMutation.isPending}
+                onConfirm={() => deleteModuleMutation.mutate(deleteModuleId!)}
+                onCancel={() => setDeleteModuleId(null)}
+            />
+
+            <ConfirmModal
+                isOpen={!!deleteLectureId}
+                title="Delete Lecture"
+                message="Are you sure you want to delete this lecture? This action cannot be undone."
+                confirmLabel="Delete"
+                variant="danger"
+                loading={deleteLectureMutation.isPending}
+                onConfirm={() => deleteLectureMutation.mutate(deleteLectureId!)}
+                onCancel={() => setDeleteLectureId(null)}
+            />
         </div>
     )
 }

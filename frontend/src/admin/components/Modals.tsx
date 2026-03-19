@@ -1,5 +1,5 @@
-import { useState, useCallback } from 'react'
-import { X, AlertTriangle } from 'lucide-react'
+import { useState, useCallback, useEffect } from 'react'
+import { X, AlertTriangle, CheckCircle2, Info, AlertOctagon, Terminal, ShieldAlert, ShieldCheck } from 'lucide-react'
 import { Button } from './ui'
 import { cn } from '@/utils'
 
@@ -17,28 +17,37 @@ interface ConfirmModalProps {
 }
 
 export function ConfirmModal({
-  isOpen, title, message, confirmLabel = 'Confirm', cancelLabel = 'Cancel',
+  isOpen, title, message, confirmLabel = 'Authorize', cancelLabel = 'Abort',
   variant = 'danger', loading, onConfirm, onCancel
 }: ConfirmModalProps) {
   if (!isOpen) return null
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onCancel} />
-      <div className="relative bg-white dark:bg-gray-900 rounded-xl shadow-xl max-w-md w-full p-6 animate-in fade-in zoom-in-95 duration-200">
-        <div className="flex items-start gap-4">
-          <div className={cn('flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center',
-            variant === 'danger' ? 'bg-red-100 dark:bg-red-900/30' : 'bg-blue-100 dark:bg-blue-900/30'
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 sm:p-4 overflow-hidden">
+      <div className="absolute inset-0 bg-background/80 backdrop-blur-md animate-in fade-in duration-500" onClick={onCancel} />
+      <div className="relative bg-card/60 backdrop-blur-2xl border border-border/50 rounded-[2rem] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.3)] max-w-md w-full p-8 animate-in fade-in zoom-in-95 slide-in-from-bottom-4 duration-300">
+        <div className="flex flex-col items-center text-center gap-6">
+          <div className={cn('w-20 h-20 rounded-[1.8rem] flex items-center justify-center shadow-2xl',
+            variant === 'danger'
+              ? 'bg-destructive/10 text-destructive shadow-destructive/20 border border-destructive/20'
+              : 'bg-primary/10 text-primary shadow-primary/20 border border-primary/20'
           )}>
-            <AlertTriangle className={cn('w-5 h-5', variant === 'danger' ? 'text-red-600' : 'text-blue-600')} />
+            {variant === 'danger' ? <ShieldAlert className="w-10 h-10" /> : <ShieldCheck className="w-10 h-10" />}
           </div>
-          <div className="flex-1">
-            <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-1">{title}</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">{message}</p>
+          <div className="space-y-2">
+            <h3 className="text-xl font-black text-foreground tracking-tight">{title}</h3>
+            <p className="text-sm font-bold text-muted-foreground leading-relaxed">{message}</p>
           </div>
         </div>
-        <div className="flex gap-3 mt-6 justify-end">
-          <Button variant="outline" size="sm" onClick={onCancel} disabled={loading}>{cancelLabel}</Button>
-          <Button variant={variant === 'danger' ? 'danger' : 'primary'} size="sm" loading={loading} onClick={onConfirm}>{confirmLabel}</Button>
+        <div className="flex flex-col sm:flex-row gap-3 mt-10">
+          <Button variant="ghost" className="flex-1 rounded-2xl h-12 font-black text-[10px] uppercase tracking-widest border border-border/50" onClick={onCancel} disabled={loading}>{cancelLabel}</Button>
+          <Button
+            variant={variant === 'danger' ? 'danger' : 'primary'}
+            className="flex-1 rounded-2xl h-12 font-black text-[10px] uppercase tracking-widest shadow-xl"
+            loading={loading}
+            onClick={onConfirm}
+          >
+            {confirmLabel}
+          </Button>
         </div>
       </div>
     </div>
@@ -55,19 +64,36 @@ interface ModalProps {
 }
 
 export function Modal({ isOpen, title, onClose, children, size = 'md' }: ModalProps) {
+  useEffect(() => {
+    if (isOpen) document.body.style.overflow = 'hidden'
+    else document.body.style.overflow = 'unset'
+    return () => { document.body.style.overflow = 'unset' }
+  }, [isOpen])
+
   if (!isOpen) return null
-  const sizes = { sm: 'max-w-sm', md: 'max-w-lg', lg: 'max-w-2xl', xl: 'max-w-4xl' }
+  const sizes = {
+    sm: 'max-w-md',
+    md: 'max-w-2xl',
+    lg: 'max-w-4xl',
+    xl: 'max-w-6xl'
+  }
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      <div className={cn('relative bg-white dark:bg-gray-900 rounded-xl shadow-xl w-full my-4', sizes[size])}>
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-800">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h2>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400 transition-colors">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 sm:p-4 overflow-y-auto overflow-x-hidden transition-all">
+      <div className="fixed inset-0 bg-background/60 backdrop-blur-xl animate-in fade-in duration-500" onClick={onClose} />
+      <div className={cn('relative bg-card/60 backdrop-blur-3xl border border-white/10 dark:border-white/5 rounded-[2.5rem] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.5)] w-full my-8 animate-in fade-in zoom-in-95 slide-in-from-bottom-8 duration-500', sizes[size])}>
+        <div className="flex items-center justify-between px-8 py-6 border-b border-border/30">
+          <div className="space-y-1">
+            <h2 className="text-xl font-black text-foreground tracking-tight flex items-center gap-3">
+              <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+              {title}
+            </h2>
+          </div>
+          <button onClick={onClose} className="w-10 h-10 flex items-center justify-center rounded-xl bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground transition-all active:scale-95 border border-border/30">
             <X className="w-5 h-5" />
           </button>
         </div>
-        <div className="px-6 py-4">{children}</div>
+        <div className="p-8 max-h-[calc(100vh-12rem)] overflow-y-auto custom-scrollbar">{children}</div>
       </div>
     </div>
   )
@@ -85,55 +111,60 @@ export const toast = {
     const id = Date.now().toString()
     toastQueue = [...toastQueue, { id, message, type: 'success' }]
     notify()
-    setTimeout(() => { toastQueue = toastQueue.filter(t => t.id !== id); notify() }, 3500)
+    setTimeout(() => { toastQueue = toastQueue.filter(t => t.id !== id); notify() }, 4000)
   },
   error: (message: string) => {
     const id = Date.now().toString()
     toastQueue = [...toastQueue, { id, message, type: 'error' }]
     notify()
-    setTimeout(() => { toastQueue = toastQueue.filter(t => t.id !== id); notify() }, 3500)
+    setTimeout(() => { toastQueue = toastQueue.filter(t => t.id !== id); notify() }, 5000)
   },
   info: (message: string) => {
     const id = Date.now().toString()
     toastQueue = [...toastQueue, { id, message, type: 'info' }]
     notify()
-    setTimeout(() => { toastQueue = toastQueue.filter(t => t.id !== id); notify() }, 3500)
+    setTimeout(() => { toastQueue = toastQueue.filter(t => t.id !== id); notify() }, 4000)
   },
 }
 
 export function ToastContainer() {
   const [toasts, setToasts] = useState<Toast[]>([])
 
-  useCallback(() => {
+  useEffect(() => {
     const update = () => setToasts([...toastQueue])
     listeners.push(update)
+    update() // initial
     return () => { listeners = listeners.filter(l => l !== update) }
-  }, [])()
-
-  // Simple re-render trigger
-  useCallback(() => {
-    const update = () => setToasts([...toastQueue])
-    listeners = [update]
   }, [])
 
-  useState(() => {
-    const update = () => setToasts([...toastQueue])
-    listeners.push(update)
-  })
+  const iconMap = {
+    success: <CheckCircle2 className="w-5 h-5 text-emerald-500" />,
+    error: <AlertOctagon className="w-5 h-5 text-destructive" />,
+    info: <Info className="w-5 h-5 text-primary" />,
+  }
 
-  const typeStyles: Record<string, string> = {
-    success: 'bg-green-600',
-    error: 'bg-red-600',
-    info: 'bg-blue-600',
+  const borderMap = {
+    success: 'border-emerald-500/20 shadow-emerald-500/10',
+    error: 'border-destructive/20 shadow-destructive/10',
+    info: 'border-primary/20 shadow-primary/10',
   }
 
   return (
-    <div className="fixed bottom-4 right-4 z-[100] flex flex-col gap-2">
+    <div className="fixed top-6 right-6 z-[200] flex flex-col gap-3 pointer-events-none sm:max-w-md w-full">
       {toasts.map((t) => (
-        <div key={t.id} className={cn('flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg text-white min-w-64 max-w-sm animate-in slide-in-from-bottom-4 duration-300', typeStyles[t.type])}>
-          <span className="text-sm font-medium">{t.message}</span>
-          <button onClick={() => { toastQueue = toastQueue.filter(x => x.id !== t.id); setToasts([...toastQueue]) }} className="ml-auto hover:opacity-75">
-            <X className="w-4 h-4" />
+        <div key={t.id} className={cn(
+          'pointer-events-auto flex items-center gap-4 px-6 py-4 rounded-2xl shadow-2xl border backdrop-blur-2xl bg-card/80 animate-in slide-in-from-right-8 fade-in h-auto min-w-[320px] ring-1 ring-white/10 transition-all duration-300',
+          borderMap[t.type]
+        )}>
+          <div className="flex-shrink-0">{iconMap[t.type]}</div>
+          <div className="flex-1">
+            <div className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 mb-0.5 font-mono">
+              {t.type === 'error' ? 'Security Protocol' : 'Core Response'}
+            </div>
+            <p className="text-xs font-bold text-foreground leading-tight tracking-tight">{t.message}</p>
+          </div>
+          <button onClick={() => { toastQueue = toastQueue.filter(x => x.id !== t.id); notify() }} className="w-6 h-6 flex items-center justify-center rounded-lg hover:bg-muted text-muted-foreground/40 hover:text-foreground transition-all">
+            <X className="w-3.5 h-3.5" />
           </button>
         </div>
       ))}

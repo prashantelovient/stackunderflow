@@ -9,6 +9,8 @@ import videojs from 'video.js'
 import 'video.js/dist/video-js.css'
 import { studentVideos, courses, watchProgress } from '@/student/services/studentService'
 import type { Video } from '@/student/services/studentService'
+import { Button } from '@/components/ui/button'
+import { Switch } from '@/components/ui/switch'
 import { cn } from '@/utils'
 
 const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000'
@@ -145,8 +147,8 @@ function SidebarVideoItem({
       className={cn(
         'w-full flex items-center gap-3 p-3 rounded-xl text-left transition-all',
         isActive
-          ? 'bg-violet-600/20 border border-violet-500/30'
-          : 'hover:bg-white/5 border border-transparent'
+          ? 'bg-primary/20 border border-primary/30'
+          : 'hover:bg-muted/80 border border-transparent'
       )}
     >
       <div className="relative flex-shrink-0 w-16 h-11 rounded-lg bg-gray-800 overflow-hidden">
@@ -175,13 +177,13 @@ function SidebarVideoItem({
       <div className="flex-1 min-w-0">
         <p className={cn(
           'text-xs font-medium line-clamp-2 leading-snug',
-          isActive ? 'text-violet-300' : isCompleted ? 'text-gray-500 line-through' : 'text-gray-200'
+          isActive ? 'text-primary font-semibold' : isCompleted ? 'text-muted-foreground/60 line-through' : 'text-foreground/90'
         )}>
           {video.title}
         </p>
         <div className="flex items-center gap-1 mt-1">
-          <Clock className="w-3 h-3 text-gray-600" />
-          <span className="text-[10px] text-gray-500">{video.duration}</span>
+          <Clock className="w-3 h-3 text-muted-foreground/60" />
+          <span className="text-[10px] text-muted-foreground/60">{video.duration}</span>
         </div>
       </div>
     </button>
@@ -315,28 +317,30 @@ export default function WatchPage() {
       {/* Main */}
       <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
         {/* Back nav */}
-        <div className="px-4 lg:px-6 py-3 flex items-center gap-3 border-b border-white/5">
+        <div className="px-4 lg:px-6 py-3 flex items-center gap-3 border-b border-border">
           <Link
             to={courseId ? `/student/courses/${courseId}` : '/student/courses'}
-            className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors"
+            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             {course?.title || 'Back'}
           </Link>
           {course && (
             <>
-              <ChevronRight className="w-3.5 h-3.5 text-gray-600" />
-              <span className="text-sm text-gray-300 line-clamp-1">{video.title}</span>
+              <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/50" />
+              <span className="text-sm text-foreground/80 font-medium line-clamp-1">{video.title}</span>
             </>
           )}
           <div className="ml-auto flex items-center gap-2">
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => setShowSidebar(!showSidebar)}
-              className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white transition-colors px-3 py-1.5 rounded-lg hover:bg-white/5 lg:hidden"
+              className="lg:hidden text-xs gap-1.5"
             >
               <List className="w-4 h-4" />
               Course
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -356,17 +360,17 @@ export default function WatchPage() {
           <div className="mt-5 max-w-5xl">
             <div className="flex items-start justify-between gap-4 flex-wrap">
               <div>
-                <h1 className="text-xl font-bold text-white">{video.title}</h1>
+                <h1 className="text-xl font-bold">{video.title}</h1>
                 <div className="flex items-center gap-3 mt-2 flex-wrap">
-                  <span className="flex items-center gap-1 text-sm text-gray-400">
+                  <span className="flex items-center gap-1 text-sm text-muted-foreground">
                     <Clock className="w-3.5 h-3.5" />
                     {video.duration}
                   </span>
                   {video.courseTitle && (
-                    <span className="text-sm text-gray-500">• {video.courseTitle}</span>
+                    <span className="text-sm text-muted-foreground/70">• {video.courseTitle}</span>
                   )}
                   {isCompleted && (
-                    <span className="inline-flex items-center gap-1 text-xs text-emerald-400 bg-emerald-400/10 px-2.5 py-1 rounded-full">
+                    <span className="inline-flex items-center gap-1 text-xs text-emerald-600 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
                       <CheckCircle2 className="w-3.5 h-3.5" />
                       Completed
                     </span>
@@ -374,54 +378,52 @@ export default function WatchPage() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 {/* Autoplay toggle */}
-                <button
-                  onClick={() => setAutoplay(!autoplay)}
-                  className={cn(
-                    'text-xs px-3 py-1.5 rounded-lg font-medium transition-colors border',
-                    autoplay
-                      ? 'bg-violet-600/20 text-violet-400 border-violet-500/30'
-                      : 'bg-white/5 text-gray-400 border-white/10'
-                  )}
-                >
-                  {autoplay ? '✓ Autoplay' : 'Autoplay off'}
-                </button>
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border bg-card shadow-sm">
+                  <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-tight">Autoplay</span>
+                  <Switch
+                    checked={autoplay}
+                    onCheckedChange={setAutoplay}
+                  />
+                </div>
 
                 {/* Next video */}
                 {nextVideo && (
-                  <button
+                  <Button
+                    variant="secondary"
+                    size="sm"
                     onClick={() => navigate(`/student/watch/${nextVideo.id}?course=${courseId}`)}
-                    className="flex items-center gap-1.5 text-xs text-gray-300 hover:text-white px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 transition-colors"
+                    className="gap-1.5"
                   >
                     Next <SkipForward className="w-3.5 h-3.5" />
-                  </button>
+                  </Button>
                 )}
               </div>
             </div>
 
             {/* Description */}
             {video.description && (
-              <div className="mt-5 p-5 bg-white/5 rounded-xl border border-white/8">
-                <h3 className="text-sm font-semibold text-gray-200 mb-2">About this lesson</h3>
-                <p className="text-sm text-gray-400 leading-relaxed">{video.description}</p>
+              <div className="mt-5 p-5 bg-card rounded-xl border border-border shadow-sm">
+                <h3 className="text-sm font-semibold mb-2">About this lesson</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{video.description}</p>
               </div>
             )}
 
             {/* Next video preview */}
             {nextVideo && (
               <div
-                className="mt-5 flex items-center gap-4 p-4 bg-white/5 rounded-xl border border-white/8 cursor-pointer hover:bg-white/8 transition-colors group"
+                className="mt-5 flex items-center gap-4 p-4 bg-primary/5 rounded-xl border border-primary/20 cursor-pointer hover:bg-primary/10 transition-colors group"
                 onClick={() => navigate(`/student/watch/${nextVideo.id}?course=${courseId}`)}
               >
-                <SkipForward className="w-5 h-5 text-gray-500 flex-shrink-0" />
+                <SkipForward className="w-5 h-5 text-primary/50 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs text-gray-500 mb-0.5">Up next</p>
-                  <p className="text-sm font-medium text-gray-200 group-hover:text-violet-300 transition-colors line-clamp-1">
+                  <p className="text-xs text-muted-foreground mb-0.5">Up next</p>
+                  <p className="text-sm font-medium group-hover:text-primary transition-colors line-clamp-1">
                     {nextVideo.title}
                   </p>
                 </div>
-                <ChevronRight className="w-4 h-4 text-gray-500" />
+                <ChevronRight className="w-4 h-4 text-primary/50" />
               </div>
             )}
           </div>
@@ -432,27 +434,29 @@ export default function WatchPage() {
       {courseVideos.length > 0 && (
         <aside
           className={cn(
-            'hidden lg:flex flex-col bg-[#0f0f23] border-l border-white/5 transition-all duration-300',
+            'hidden lg:flex flex-col bg-sidebar border-l border-sidebar-border transition-all duration-300 shadow-xl',
             showSidebar ? 'w-80' : 'w-0 overflow-hidden'
           )}
         >
           {showSidebar && (
             <>
-              <div className="flex items-center justify-between px-4 py-3.5 border-b border-white/5">
+              <div className="flex items-center justify-between px-4 py-3.5 border-b border-sidebar-border h-[60px]">
                 <div>
-                  <h3 className="text-sm font-semibold text-white">Course Content</h3>
+                  <h3 className="text-sm font-semibold">Course Content</h3>
                   {course && (
-                    <p className="text-xs text-gray-400 mt-0.5 line-clamp-1">{course.title}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{course.title}</p>
                   )}
                 </div>
-                <button
+                <Button
+                  variant="ghost"
+                  size="icon"
                   onClick={() => setShowSidebar(false)}
-                  className="p-1.5 rounded-lg hover:bg-white/5 text-gray-500 hover:text-gray-300 transition-colors"
+                  className="h-8 w-8"
                 >
                   <X className="w-4 h-4" />
-                </button>
+                </Button>
               </div>
-              <div className="flex-1 overflow-y-auto p-3 space-y-1">
+              <div className="flex-1 overflow-y-auto p-3 space-y-1 scrollbar-thin">
                 {courseVideos.map((v) => (
                   <SidebarVideoItem
                     key={v.id}
@@ -472,7 +476,7 @@ export default function WatchPage() {
       {!showSidebar && courseVideos.length > 0 && (
         <button
           onClick={() => setShowSidebar(true)}
-          className="hidden lg:flex absolute right-0 top-1/2 -translate-y-1/2 w-8 h-16 bg-[#0f0f23] border border-white/10 rounded-l-xl items-center justify-center text-gray-500 hover:text-gray-300 transition-colors z-10"
+          className="hidden lg:flex absolute right-0 top-1/2 -translate-y-1/2 w-8 h-16 bg-sidebar border border-sidebar-border rounded-l-xl items-center justify-center text-muted-foreground hover:text-foreground transition-colors z-10 shadow-lg"
         >
           <List className="w-4 h-4" />
         </button>
