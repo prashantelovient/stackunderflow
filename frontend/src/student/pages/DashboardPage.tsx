@@ -5,8 +5,8 @@ import {
   ChevronRight, Flame, ArrowRight, ListVideo
 } from 'lucide-react'
 import { useStudentAuthStore } from '@/student/store/studentAuthStore'
-import { playlists, studentVideos, watchProgress } from '@/student/services/studentService'
-import type { Playlist, Video, WatchProgress } from '@/student/services/studentService'
+import { courses, studentVideos, watchProgress } from '@/student/services/studentService'
+import type { Course, Video, WatchProgress } from '@/student/services/studentService'
 import { cn } from '@/utils'
 
 function SkeletonCard({ className }: { className?: string }) {
@@ -48,8 +48,8 @@ function StatCard({
   )
 }
 
-function PlaylistCard({ playlist }: { playlist: Playlist }) {
-  const initial = playlist.title.charAt(0).toUpperCase()
+function CourseCard({ course }: { course: Course }) {
+  const initial = course.title.charAt(0).toUpperCase()
   const colors = [
     'from-violet-600 to-purple-600',
     'from-indigo-600 to-blue-600',
@@ -57,11 +57,11 @@ function PlaylistCard({ playlist }: { playlist: Playlist }) {
     'from-emerald-600 to-teal-600',
     'from-amber-600 to-orange-600',
   ]
-  const colorClass = colors[playlist.title.charCodeAt(0) % colors.length]
+  const colorClass = colors[course.title.charCodeAt(0) % colors.length]
 
   return (
     <Link
-      to={`/student/courses/${playlist.id}`}
+      to={`/student/courses/${course.id}`}
       className="group bg-white/5 border border-white/8 rounded-2xl overflow-hidden hover:bg-white/8 hover:border-white/15 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-black/20"
     >
       <div className={cn('relative h-36 bg-gradient-to-br', colorClass, 'flex items-center justify-center')}>
@@ -74,9 +74,9 @@ function PlaylistCard({ playlist }: { playlist: Playlist }) {
       </div>
       <div className="p-4">
         <h3 className="font-semibold text-white text-sm leading-snug group-hover:text-violet-300 transition-colors line-clamp-1">
-          {playlist.title}
+          {course.title}
         </h3>
-        <p className="text-xs text-gray-400 mt-1 line-clamp-2">{playlist.description || 'No description'}</p>
+        <p className="text-xs text-gray-400 mt-1 line-clamp-2">{course.description || 'No description'}</p>
         <div className="flex items-center gap-1.5 mt-3">
           <span className="text-[11px] text-gray-500 font-medium bg-white/5 px-2 py-0.5 rounded-full">View Course</span>
         </div>
@@ -109,7 +109,7 @@ function VideoCard({ video, progress }: { video: Video; progress?: number }) {
         <h4 className="text-sm font-medium text-white line-clamp-1 group-hover:text-violet-300 transition-colors">
           {video.title}
         </h4>
-        <p className="text-xs text-gray-500 mt-0.5">{video.playlistTitle}</p>
+        <p className="text-xs text-gray-500 mt-0.5">{video.courseTitle}</p>
         {percent > 0 && (
           <div className="mt-2">
             <div className="h-1 bg-white/10 rounded-full overflow-hidden">
@@ -133,12 +133,12 @@ function VideoCard({ video, progress }: { video: Video; progress?: number }) {
 export default function StudentDashboardPage() {
   const { student } = useStudentAuthStore()
 
-  const { data: allPlaylists, isLoading: loadingPlaylists } = useQuery({
-    queryKey: ['student-playlists'],
-    queryFn: playlists.getAll,
+  const { data: allCourses, isLoading: loadingCourses } = useQuery({
+    queryKey: ['student-courses'],
+    queryFn: courses.getAll,
   })
 
-  const { data: allVideos, isLoading: loadingVideos } = useQuery({
+  const { data: allVideos } = useQuery({
     queryKey: ['student-videos'],
     queryFn: studentVideos.getAll,
   })
@@ -160,8 +160,7 @@ export default function StudentDashboardPage() {
     return vid === v.id && p.completed
   })).slice(0, 5) ?? []
 
-  const recentVideos = allVideos?.slice(0, 8) ?? []
-  const recentPlaylists = allPlaylists?.slice(0, 6) ?? []
+  const recentCourses = allCourses?.slice(0, 6) ?? []
 
   const hour = new Date().getHours()
   const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'
@@ -201,7 +200,7 @@ export default function StudentDashboardPage() {
         <StatCard
           icon={ListVideo}
           label="Available Courses"
-          value={allPlaylists?.length || 0}
+          value={allCourses?.length || 0}
           color="bg-violet-600"
         />
         <StatCard
@@ -261,49 +260,22 @@ export default function StudentDashboardPage() {
             View all <ChevronRight className="w-4 h-4" />
           </Link>
         </div>
-        {loadingPlaylists ? (
+        {loadingCourses ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-6 gap-4">
             {Array(6).fill(0).map((_, i) => <SkeletonCard key={i} />)}
           </div>
-        ) : recentPlaylists.length === 0 ? (
+        ) : recentCourses.length === 0 ? (
           <div className="text-center py-12 text-gray-500">
             <ListVideo className="w-10 h-10 mx-auto mb-3 opacity-40" />
             <p>No courses available yet</p>
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-            {recentPlaylists.map((p) => <PlaylistCard key={p.id} playlist={p} />)}
+            {recentCourses.map((c) => <CourseCard key={c.id} course={c} />)}
           </div>
         )}
       </section>
 
-      {/* Recent Videos */}
-      <section>
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h2 className="text-lg font-semibold text-white">Recently Added</h2>
-            <p className="text-sm text-gray-400">Latest videos from all courses</p>
-          </div>
-        </div>
-        {loadingVideos ? (
-          <div className="space-y-2">
-            {Array(4).fill(0).map((_, i) => (
-              <div key={i} className="h-20 animate-pulse bg-white/5 rounded-xl" />
-            ))}
-          </div>
-        ) : recentVideos.length === 0 ? (
-          <div className="text-center py-12 text-gray-500">
-            <PlayCircle className="w-10 h-10 mx-auto mb-3 opacity-40" />
-            <p>No videos available yet</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            {recentVideos.map((v) => (
-              <VideoCard key={v.id} video={v} progress={progressMap[v.id]} />
-            ))}
-          </div>
-        )}
-      </section>
 
       {/* Blogs CTA */}
       <section>
@@ -327,4 +299,3 @@ export default function StudentDashboardPage() {
     </div>
   )
 }
-

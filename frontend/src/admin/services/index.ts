@@ -2,14 +2,14 @@ import apiClient from './apiClient'
 
 // ---- MOCK DATA (used when no backend available) ----
 export const MOCK_STUDENTS = [
-  { id: '1', name: 'Alice Johnson', email: 'alice@example.com', enrolledPlaylist: 'React Mastery', joinDate: '2024-01-15', status: 'active' },
-  { id: '2', name: 'Bob Smith', email: 'bob@example.com', enrolledPlaylist: 'Node.js Pro', joinDate: '2024-02-20', status: 'active' },
-  { id: '3', name: 'Carol White', email: 'carol@example.com', enrolledPlaylist: 'Python Basics', joinDate: '2024-03-05', status: 'suspended' },
-  { id: '4', name: 'David Brown', email: 'david@example.com', enrolledPlaylist: 'React Mastery', joinDate: '2024-03-10', status: 'active' },
-  { id: '5', name: 'Eve Davis', email: 'eve@example.com', enrolledPlaylist: 'Vue.js Essentials', joinDate: '2024-04-01', status: 'active' },
-  { id: '6', name: 'Frank Miller', email: 'frank@example.com', enrolledPlaylist: 'Node.js Pro', joinDate: '2024-04-15', status: 'suspended' },
-  { id: '7', name: 'Grace Lee', email: 'grace@example.com', enrolledPlaylist: 'Python Basics', joinDate: '2024-05-02', status: 'active' },
-  { id: '8', name: 'Henry Wilson', email: 'henry@example.com', enrolledPlaylist: 'React Mastery', joinDate: '2024-05-18', status: 'active' },
+  { id: '1', name: 'Alice Johnson', email: 'alice@example.com', enrolledCourse: 'React Mastery', joinDate: '2024-01-15', status: 'active' },
+  { id: '2', name: 'Bob Smith', email: 'bob@example.com', enrolledCourse: 'Node.js Pro', joinDate: '2024-02-20', status: 'active' },
+  { id: '3', name: 'Carol White', email: 'carol@example.com', enrolledCourse: 'Python Basics', joinDate: '2024-03-05', status: 'suspended' },
+  { id: '4', name: 'David Brown', email: 'david@example.com', enrolledCourse: 'React Mastery', joinDate: '2024-03-10', status: 'active' },
+  { id: '5', name: 'Eve Davis', email: 'eve@example.com', enrolledCourse: 'Vue.js Essentials', joinDate: '2024-04-01', status: 'active' },
+  { id: '6', name: 'Frank Miller', email: 'frank@example.com', enrolledCourse: 'Node.js Pro', joinDate: '2024-04-15', status: 'suspended' },
+  { id: '7', name: 'Grace Lee', email: 'grace@example.com', enrolledCourse: 'Python Basics', joinDate: '2024-05-02', status: 'active' },
+  { id: '8', name: 'Henry Wilson', email: 'henry@example.com', enrolledCourse: 'React Mastery', joinDate: '2024-05-18', status: 'active' },
 ]
 
 export const MOCK_CATEGORIES = [
@@ -19,19 +19,19 @@ export const MOCK_CATEGORIES = [
   { id: '4', name: 'DevOps', slug: 'devops', videoCount: 9 },
 ]
 
-export const MOCK_PLAYLISTS = [
-  { id: '1', title: 'React Mastery', description: 'Complete React from zero to hero', thumbnail: null, category: 'Web Development', videoCount: 12 },
-  { id: '2', title: 'Node.js Pro', description: 'Backend with Node.js and Express', thumbnail: null, category: 'Web Development', videoCount: 8 },
-  { id: '3', title: 'Python Basics', description: 'Learn Python programming fundamentals', thumbnail: null, category: 'Data Science', videoCount: 10 },
-  { id: '4', title: 'Vue.js Essentials', description: 'Master Vue.js 3 composition API', thumbnail: null, category: 'Web Development', videoCount: 7 },
+export const MOCK_COURSES = [
+  { id: '1', title: 'React Mastery', description: 'Complete React from zero to hero', thumbnail: null, category: 'Web Development', moduleCount: 4, lectureCount: 12 },
+  { id: '2', title: 'Node.js Pro', description: 'Backend with Node.js and Express', thumbnail: null, category: 'Web Development', moduleCount: 3, lectureCount: 8 },
+  { id: '3', title: 'Python Basics', description: 'Learn Python programming fundamentals', thumbnail: null, category: 'Data Science', moduleCount: 5, lectureCount: 10 },
+  { id: '4', title: 'Vue.js Essentials', description: 'Master Vue.js 3 composition API', thumbnail: null, category: 'Web Development', moduleCount: 3, lectureCount: 7 },
 ]
 
 export const MOCK_VIDEOS = [
-  { id: '1', title: 'React Hooks Deep Dive', description: 'Mastering useState, useEffect and custom hooks', thumbnail: null, playlistId: '1', playlistTitle: 'React Mastery', duration: '45:30', uploadDate: '2024-01-10' },
-  { id: '2', title: 'Redux Toolkit Tutorial', description: 'State management with Redux Toolkit', thumbnail: null, playlistId: '1', playlistTitle: 'React Mastery', duration: '38:15', uploadDate: '2024-01-17' },
-  { id: '3', title: 'Node.js REST API', description: 'Building RESTful APIs with Express', thumbnail: null, playlistId: '2', playlistTitle: 'Node.js Pro', duration: '52:00', uploadDate: '2024-02-05' },
-  { id: '4', title: 'Python Lists & Dicts', description: 'Data structures in Python', thumbnail: null, playlistId: '3', playlistTitle: 'Python Basics', duration: '29:45', uploadDate: '2024-02-12' },
-  { id: '5', title: 'Async/Await in JS', description: 'Mastering asynchronous JavaScript', thumbnail: null, playlistId: '1', playlistTitle: 'React Mastery', duration: '33:20', uploadDate: '2024-03-01' },
+  { id: '1', title: 'React Hooks Deep Dive', description: 'Mastering useState, useEffect and custom hooks', thumbnail: null, courseId: '1', courseTitle: 'React Mastery', duration: '45:30', uploadDate: '2024-01-10' },
+  { id: '2', title: 'Redux Toolkit Tutorial', description: 'State management with Redux Toolkit', thumbnail: null, courseId: '1', courseTitle: 'React Mastery', duration: '38:15', uploadDate: '2024-01-17' },
+  { id: '3', title: 'Node.js REST API', description: 'Building RESTful APIs with Express', thumbnail: null, courseId: '2', courseTitle: 'Node.js Pro', duration: '52:00', uploadDate: '2024-02-05' },
+  { id: '4', title: 'Python Lists & Dicts', description: 'Data structures in Python', thumbnail: null, courseId: '3', courseTitle: 'Python Basics', duration: '29:45', uploadDate: '2024-02-12' },
+  { id: '5', title: 'Async/Await in JS', description: 'Mastering asynchronous JavaScript', thumbnail: null, courseId: '1', courseTitle: 'React Mastery', duration: '33:20', uploadDate: '2024-03-01' },
 ]
 
 export const MOCK_BLOGS = [
@@ -43,14 +43,16 @@ export const MOCK_BLOGS = [
 export * as authService from './authService'
 export * as studentService from '@/student/services/studentService'
 export * as videoService from './videoService'
-export * as playlistService from './playlistService'
+export * as courseService from './courseService'
+export * as moduleService from './moduleService'
+export * as lectureService from './lectureService'
 export * as blogService from './blogService'
 export * as categoryService from './categoryService'
 
 export const MOCK_ANALYTICS = {
   totalStudents: 1284,
   totalVideos: 47,
-  totalPlaylists: 8,
+  totalCourses: 8,
   totalBlogs: 23,
   studentsByMonth: [
     { month: 'Jan', count: 65 }, { month: 'Feb', count: 89 }, { month: 'Mar', count: 120 },

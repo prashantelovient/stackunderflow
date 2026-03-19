@@ -27,7 +27,7 @@ export default function DashboardPage() {
   const stats = [
     { label: 'Total Students', value: (data?.totalStudents ?? 0).toLocaleString(), icon: Users, color: 'amber', change: '+12%' },
     { label: 'Total Videos', value: (data?.totalVideos ?? 0).toLocaleString(), icon: Video, color: 'amber', change: '+5%' },
-    { label: 'Total Playlists', value: (data?.totalPlaylists ?? 0).toLocaleString(), icon: ListVideo, color: 'amber', change: '+2%' },
+    { label: 'Total Courses', value: (data?.totalCourses ?? 0).toLocaleString(), icon: ListVideo, color: 'amber', change: '+2%' },
     { label: 'Total Blogs', value: (data?.totalBlogs ?? 0).toLocaleString(), icon: BookOpen, color: 'amber', change: '+8%' },
   ]
 

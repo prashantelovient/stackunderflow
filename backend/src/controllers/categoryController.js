@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { Category, Playlist, Video } from '../models/index.js';
+import { Category, Course, Video } from '../models/index.js';
 
 export const createCategory = async (req, res, next) => {
   try {
@@ -18,27 +18,27 @@ export const getCategories = async (req, res, next) => {
     const categories = await Category.find().exec();
     const categoryIds = categories.map(c => c._id);
 
-    const playlists = await Playlist.find({ categoryId: { $in: categoryIds } })
+    const courses = await Course.find({ categoryId: { $in: categoryIds } })
       .select('_id categoryId')
       .exec();
 
-    const playlistIds = playlists.map(p => p._id);
+    const courseIds = courses.map(c => c._id);
 
-    const videos = await Video.find({ playlistId: { $in: playlistIds } })
-      .select('playlistId')
+    const videos = await Video.find({ courseId: { $in: courseIds } })
+      .select('courseId')
       .exec();
 
-    const playlistToCategory = new Map();
-    playlists.forEach(p => {
-      if (p.categoryId) {
-        playlistToCategory.set(p._id.toString(), p.categoryId.toString());
+    const courseToCategory = new Map();
+    courses.forEach(c => {
+      if (c.categoryId) {
+        courseToCategory.set(c._id.toString(), c.categoryId.toString());
       }
     });
 
     const categoryVideoCount = new Map();
     videos.forEach(v => {
-      const playlistId = v.playlistId ? v.playlistId.toString() : null;
-      const categoryId = playlistId ? playlistToCategory.get(playlistId) : null;
+      const cId = v.courseId ? v.courseId.toString() : null;
+      const categoryId = cId ? courseToCategory.get(cId) : null;
       if (categoryId) {
         categoryVideoCount.set(categoryId, (categoryVideoCount.get(categoryId) || 0) + 1);
       }
@@ -49,7 +49,7 @@ export const getCategories = async (req, res, next) => {
       slug: c.name.toLowerCase().replace(/ /g, '-'),
       videoCount: categoryVideoCount.get(c.id) || 0,
     }));
-    
+
     res.json(formatted);
   } catch (error) {
     next(error);
@@ -59,7 +59,7 @@ export const getCategories = async (req, res, next) => {
 export const updateCategory = async (req, res, next) => {
   try {
     const { name } = req.body;
-    
+
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       return res.status(404).json({ message: 'Category not found' });
     }
@@ -68,7 +68,7 @@ export const updateCategory = async (req, res, next) => {
       { name },
       { new: true }
     ).exec();
-    
+
     res.json(category);
   } catch (error) {
     next(error);

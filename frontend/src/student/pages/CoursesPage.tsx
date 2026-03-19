@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
-import { Search, ListVideo, PlayCircle, ChevronRight, Clock } from 'lucide-react'
-import { useState } from 'react'
-import { playlists, studentVideos } from '@/student/services/studentService'
-import type { Playlist, Video } from '@/student/services/studentService'
+import { Clock, PlayCircle, BookOpen, Layers, ArrowRight, Search } from 'lucide-react'
+import { courses } from '@/student/services/studentService'
+import type { Course as CourseType } from '@/student/services/studentService'
 import { cn } from '@/utils'
+import { useState } from 'react'
 
 const gradients = [
   'from-violet-600 to-purple-700',
@@ -15,50 +15,51 @@ const gradients = [
   'from-cyan-600 to-sky-700',
 ]
 
-function PlaylistCard({ playlist, videos }: { playlist: Playlist; videos: Video[] }) {
-  const videoCount = videos.filter(v => v.playlistId === playlist.id).length
-  const gradientClass = gradients[playlist.title.charCodeAt(0) % gradients.length]
-  const initial = playlist.title.charAt(0).toUpperCase()
+function CourseCard({ course, index }: { course: CourseType; index: number }) {
+  const gradient = gradients[index % gradients.length]
 
   return (
     <Link
-      to={`/student/courses/${playlist.id}`}
-      className="group bg-white/5 border border-white/8 rounded-2xl overflow-hidden hover:bg-white/8 hover:border-white/15 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/30 flex flex-col"
+      to={`/student/courses/${course.id}`}
+      className="group relative rounded-2xl overflow-hidden bg-gray-900 border border-white/5 hover:border-white/15 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-purple-500/10"
     >
-      {/* Cover */}
-      <div className={cn('relative h-44 bg-gradient-to-br flex items-center justify-center overflow-hidden', gradientClass)}>
-        <span className="text-7xl font-black text-white/20 select-none">{initial}</span>
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-        <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
-          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-white bg-black/30 backdrop-blur px-2.5 py-1 rounded-full">
-            <PlayCircle className="w-3.5 h-3.5" />
-            {videoCount} videos
+      {/* Thumbnail / gradient */}
+      <div className={cn('h-40 bg-gradient-to-br flex items-center justify-center relative', gradient)}>
+        {course.thumbnail ? (
+          <img
+            src={`http://localhost:5000${course.thumbnail}`}
+            alt={course.title}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
+            <BookOpen className="w-12 h-12 text-white/30" />
+          </>
+        )}
+        <div className="absolute top-3 left-3 flex gap-1.5">
+          <span className="bg-black/40 backdrop-blur-sm text-white/80 text-[10px] font-semibold px-2 py-0.5 rounded-full flex items-center gap-1">
+            <Layers className="w-3 h-3" />
+            {course.moduleCount || 0} modules
           </span>
-          <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-            <div className="w-10 h-10 bg-white/20 backdrop-blur rounded-full flex items-center justify-center">
-              <PlayCircle className="w-5 h-5 text-white" />
-            </div>
-          </div>
+          <span className="bg-black/40 backdrop-blur-sm text-white/80 text-[10px] font-semibold px-2 py-0.5 rounded-full flex items-center gap-1">
+            <PlayCircle className="w-3 h-3" />
+            {course.lectureCount || 0} lectures
+          </span>
+        </div>
+        <div className="absolute bottom-3 right-3 w-8 h-8 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center group-hover:bg-white/20 transition-colors">
+          <ArrowRight className="w-4 h-4 text-white" />
         </div>
       </div>
 
       {/* Content */}
-      <div className="p-5 flex-1 flex flex-col">
-        <h3 className="font-semibold text-white text-base leading-snug group-hover:text-violet-300 transition-colors line-clamp-2">
-          {playlist.title}
+      <div className="p-4">
+        <h3 className="font-semibold text-white text-sm line-clamp-2 group-hover:text-violet-300 transition-colors">
+          {course.title}
         </h3>
-        <p className="text-sm text-gray-400 mt-1.5 line-clamp-2 flex-1">
-          {playlist.description || 'No description provided'}
-        </p>
-        <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/5">
-          <div className="flex items-center gap-1.5 text-gray-400 text-xs">
-            <Clock className="w-3.5 h-3.5" />
-            <span>{videoCount} video{videoCount !== 1 ? 's' : ''}</span>
-          </div>
-          <span className="flex items-center gap-1 text-xs font-medium text-violet-400 group-hover:text-violet-300 transition-colors">
-            Start learning <ChevronRight className="w-3.5 h-3.5" />
-          </span>
-        </div>
+        {course.description && (
+          <p className="text-xs text-gray-400 mt-1.5 line-clamp-2">{course.description}</p>
+        )}
       </div>
     </Link>
   )
@@ -66,77 +67,57 @@ function PlaylistCard({ playlist, videos }: { playlist: Playlist; videos: Video[
 
 export default function CoursesPage() {
   const [search, setSearch] = useState('')
-
-  const { data: allPlaylists, isLoading: loadingPlaylists } = useQuery({
-    queryKey: ['student-playlists'],
-    queryFn: playlists.getAll,
+  const { data: allCourses = [], isLoading } = useQuery<CourseType[]>({
+    queryKey: ['student-courses'],
+    queryFn: courses.getAll,
   })
 
-  const { data: allVideos } = useQuery({
-    queryKey: ['student-videos'],
-    queryFn: studentVideos.getAll,
-  })
-
-  const filtered = allPlaylists?.filter(p =>
-    p.title.toLowerCase().includes(search.toLowerCase()) ||
-    (p.description || '').toLowerCase().includes(search.toLowerCase())
-  ) ?? []
+  const filtered = search
+    ? allCourses.filter(c => c.title.toLowerCase().includes(search.toLowerCase()))
+    : allCourses
 
   return (
-    <div className="p-4 lg:p-8 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-white">My Courses</h1>
-        <p className="text-gray-400 mt-1">Browse all available learning paths</p>
+    <div className="p-4 lg:p-8 max-w-6xl mx-auto">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-xl lg:text-2xl font-bold text-white">Browse Courses</h1>
+          <p className="text-sm text-gray-400 mt-1">{allCourses.length} courses available</p>
+        </div>
+        <div className="relative">
+          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search courses..."
+            className="pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-violet-500/50 transition-colors"
+          />
+        </div>
       </div>
 
-      {/* Search */}
-      <div className="relative mb-8 max-w-md">
-        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-        <input
-          type="text"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          placeholder="Search courses..."
-          className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500/50 transition-all text-sm"
-        />
-      </div>
-
-      {/* Grid */}
-      {loadingPlaylists ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      {isLoading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {Array(8).fill(0).map((_, i) => (
-            <div key={i} className="animate-pulse rounded-2xl bg-white/5 overflow-hidden">
-              <div className="h-44 bg-white/5" />
-              <div className="p-5 space-y-3">
-                <div className="h-4 bg-white/10 rounded w-3/4" />
-                <div className="h-3 bg-white/10 rounded w-full" />
-                <div className="h-3 bg-white/10 rounded w-2/3" />
+            <div key={i} className="animate-pulse">
+              <div className="h-40 bg-white/5 rounded-t-2xl" />
+              <div className="p-4 bg-white/3 rounded-b-2xl space-y-2">
+                <div className="h-4 bg-white/10 rounded" />
+                <div className="h-3 bg-white/5 rounded w-2/3" />
               </div>
             </div>
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-center">
-          <ListVideo className="w-16 h-16 text-gray-600 mb-4" />
-          <h3 className="text-lg font-semibold text-gray-300">
-            {search ? 'No courses match your search' : 'No courses available'}
-          </h3>
-          <p className="text-gray-500 mt-2 text-sm">
-            {search ? 'Try a different search term' : 'Check back soon for new courses'}
-          </p>
+        <div className="text-center py-16">
+          <BookOpen className="w-10 h-10 mx-auto mb-3 text-gray-600" />
+          <p className="text-gray-400">{search ? 'No courses match your search' : 'No courses available yet'}</p>
         </div>
       ) : (
-        <>
-          <p className="text-sm text-gray-500 mb-4">{filtered.length} course{filtered.length !== 1 ? 's' : ''} found</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filtered.map(p => (
-              <PlaylistCard key={p.id} playlist={p} videos={allVideos || []} />
-            ))}
-          </div>
-        </>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {filtered.map((course, index) => (
+            <CourseCard key={course.id} course={course} index={index} />
+          ))}
+        </div>
       )}
     </div>
   )
 }
-

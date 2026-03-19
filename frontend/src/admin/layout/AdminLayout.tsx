@@ -12,7 +12,7 @@ const navItems = [
   { to: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/admin/students', icon: Users, label: 'Students' },
   { to: '/admin/videos', icon: Video, label: 'Videos' },
-  { to: '/admin/playlists', icon: ListVideo, label: 'Playlists' },
+  { to: '/admin/courses', icon: ListVideo, label: 'Courses' },
   { to: '/admin/blogs', icon: BookOpen, label: 'Blogs' },
   { to: '/admin/categories', icon: Tag, label: 'Categories' },
   { to: '/admin/settings', icon: Settings, label: 'Settings' },

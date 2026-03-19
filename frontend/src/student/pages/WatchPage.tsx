@@ -7,7 +7,7 @@ import {
 } from 'lucide-react'
 import videojs from 'video.js'
 import 'video.js/dist/video-js.css'
-import { studentVideos, playlists, watchProgress } from '@/student/services/studentService'
+import { studentVideos, courses, watchProgress } from '@/student/services/studentService'
 import type { Video } from '@/student/services/studentService'
 import { cn } from '@/utils'
 
@@ -155,7 +155,7 @@ function SidebarVideoItem({
 export default function WatchPage() {
   const { videoId } = useParams<{ videoId: string }>()
   const [searchParams] = useSearchParams()
-  const playlistId = searchParams.get('playlist')
+  const courseId = searchParams.get('course')
   const navigate = useNavigate()
   const qc = useQueryClient()
 
@@ -178,10 +178,10 @@ export default function WatchPage() {
     queryFn: studentVideos.getAll,
   })
 
-  const { data: playlist } = useQuery({
-    queryKey: ['student-playlist', playlistId],
-    queryFn: () => playlists.getById(playlistId!),
-    enabled: !!playlistId,
+  const { data: course } = useQuery({
+    queryKey: ['student-course', courseId],
+    queryFn: () => courses.getById(courseId!),
+    enabled: !!courseId,
   })
 
   const { data: savedProgress } = useQuery({
@@ -210,14 +210,17 @@ export default function WatchPage() {
     },
   })
 
-  // Playlist videos
-  const playlistVideos = (playlistId && allVideos)
-    ? allVideos.filter(v => v.playlistId === playlistId)
-    : []
+  // Course videos (flat list from all modules/lectures for sidebar)
+  const courseVideos: Video[] = []
+  if (courseId && allVideos) {
+    // Get videos that belong to this course
+    const courseVids = allVideos.filter(v => v.courseId === courseId)
+    courseVideos.push(...courseVids)
+  }
 
-  const currentIndex = playlistVideos.findIndex(v => v.id === videoId)
-  const nextVideo = currentIndex >= 0 && currentIndex < playlistVideos.length - 1
-    ? playlistVideos[currentIndex + 1]
+  const currentIndex = courseVideos.findIndex(v => v.id === videoId)
+  const nextVideo = currentIndex >= 0 && currentIndex < courseVideos.length - 1
+    ? courseVideos[currentIndex + 1]
     : null
 
   // Start saving progress every 10 seconds
@@ -244,10 +247,10 @@ export default function WatchPage() {
     // Autoplay next
     if (autoplay && nextVideo) {
       setTimeout(() => {
-        navigate(`/student/watch/${nextVideo.id}?playlist=${playlistId}`)
+        navigate(`/student/watch/${nextVideo.id}?course=${courseId}`)
       }, 1500)
     }
-  }, [autoplay, nextVideo, playlistId, navigate])
+  }, [autoplay, nextVideo, courseId, navigate])
 
   if (loadingVideo) {
     return (
@@ -278,13 +281,13 @@ export default function WatchPage() {
         {/* Back nav */}
         <div className="px-4 lg:px-6 py-3 flex items-center gap-3 border-b border-white/5">
           <Link
-            to={playlistId ? `/student/courses/${playlistId}` : '/student/courses'}
+            to={courseId ? `/student/courses/${courseId}` : '/student/courses'}
             className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            {playlist?.title || 'Back'}
+            {course?.title || 'Back'}
           </Link>
-          {playlist && (
+          {course && (
             <>
               <ChevronRight className="w-3.5 h-3.5 text-gray-600" />
               <span className="text-sm text-gray-300 line-clamp-1">{video.title}</span>
@@ -296,7 +299,7 @@ export default function WatchPage() {
               className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white transition-colors px-3 py-1.5 rounded-lg hover:bg-white/5 lg:hidden"
             >
               <List className="w-4 h-4" />
-              Playlist
+              Course
             </button>
           </div>
         </div>
@@ -323,8 +326,8 @@ export default function WatchPage() {
                     <Clock className="w-3.5 h-3.5" />
                     {video.duration}
                   </span>
-                  {video.playlistTitle && (
-                    <span className="text-sm text-gray-500">• {video.playlistTitle}</span>
+                  {video.courseTitle && (
+                    <span className="text-sm text-gray-500">• {video.courseTitle}</span>
                   )}
                   {isCompleted && (
                     <span className="inline-flex items-center gap-1 text-xs text-emerald-400 bg-emerald-400/10 px-2.5 py-1 rounded-full">
@@ -352,7 +355,7 @@ export default function WatchPage() {
                 {/* Next video */}
                 {nextVideo && (
                   <button
-                    onClick={() => navigate(`/student/watch/${nextVideo.id}?playlist=${playlistId}`)}
+                    onClick={() => navigate(`/student/watch/${nextVideo.id}?course=${courseId}`)}
                     className="flex items-center gap-1.5 text-xs text-gray-300 hover:text-white px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 transition-colors"
                   >
                     Next <SkipForward className="w-3.5 h-3.5" />
@@ -373,7 +376,7 @@ export default function WatchPage() {
             {nextVideo && (
               <div
                 className="mt-5 flex items-center gap-4 p-4 bg-white/5 rounded-xl border border-white/8 cursor-pointer hover:bg-white/8 transition-colors group"
-                onClick={() => navigate(`/student/watch/${nextVideo.id}?playlist=${playlistId}`)}
+                onClick={() => navigate(`/student/watch/${nextVideo.id}?course=${courseId}`)}
               >
                 <SkipForward className="w-5 h-5 text-gray-500 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
@@ -389,8 +392,8 @@ export default function WatchPage() {
         </div>
       </div>
 
-      {/* Sidebar (playlist) */}
-      {playlistVideos.length > 0 && (
+      {/* Sidebar (course content) */}
+      {courseVideos.length > 0 && (
         <aside
           className={cn(
             'hidden lg:flex flex-col bg-[#0f0f23] border-l border-white/5 transition-all duration-300',
@@ -402,8 +405,8 @@ export default function WatchPage() {
               <div className="flex items-center justify-between px-4 py-3.5 border-b border-white/5">
                 <div>
                   <h3 className="text-sm font-semibold text-white">Course Content</h3>
-                  {playlist && (
-                    <p className="text-xs text-gray-400 mt-0.5 line-clamp-1">{playlist.title}</p>
+                  {course && (
+                    <p className="text-xs text-gray-400 mt-0.5 line-clamp-1">{course.title}</p>
                   )}
                 </div>
                 <button
@@ -414,13 +417,13 @@ export default function WatchPage() {
                 </button>
               </div>
               <div className="flex-1 overflow-y-auto p-3 space-y-1">
-                {playlistVideos.map((v) => (
+                {courseVideos.map((v) => (
                   <SidebarVideoItem
                     key={v.id}
                     video={v}
                     isActive={v.id === videoId}
                     isCompleted={progressMap[v.id]?.completed || false}
-                    onClick={() => navigate(`/student/watch/${v.id}?playlist=${playlistId}`)}
+                    onClick={() => navigate(`/student/watch/${v.id}?course=${courseId}`)}
                   />
                 ))}
               </div>
@@ -430,7 +433,7 @@ export default function WatchPage() {
       )}
 
       {/* Toggle sidebar button when closed (desktop) */}
-      {!showSidebar && playlistVideos.length > 0 && (
+      {!showSidebar && courseVideos.length > 0 && (
         <button
           onClick={() => setShowSidebar(true)}
           className="hidden lg:flex absolute right-0 top-1/2 -translate-y-1/2 w-8 h-16 bg-[#0f0f23] border border-white/10 rounded-l-xl items-center justify-center text-gray-500 hover:text-gray-300 transition-colors z-10"
@@ -441,4 +444,3 @@ export default function WatchPage() {
     </div>
   )
 }
-

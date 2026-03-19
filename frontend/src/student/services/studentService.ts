@@ -55,18 +55,40 @@ export interface Video {
   videoPath: string
   thumbnail: string | null
   duration: string
-  playlistId: string | null
-  playlistTitle: string
+  courseId: string | null
+  courseTitle: string
   status: string
   uploadDate: string
 }
 
-export interface Playlist {
+export interface LectureItem {
+  id: string
+  title: string
+  description: string
+  type: string
+  videoId: Video | string | null
+  resourceUrl: string | null
+  resourceName: string | null
+  order: number
+}
+
+export interface ModuleItem {
+  id: string
+  title: string
+  description: string
+  order: number
+  lectures: LectureItem[]
+}
+
+export interface Course {
   id: string
   title: string
   description: string
   thumbnail: string | null
   categoryId: string | null
+  moduleCount: number
+  lectureCount: number
+  modules?: ModuleItem[]
   createdAt: string
 }
 
@@ -88,13 +110,13 @@ export interface WatchProgress {
   updatedAt: string
 }
 
-export const playlists = {
-  getAll: async (): Promise<Playlist[]> => {
-    const res = await studentApiClient.get('/playlists')
+export const courses = {
+  getAll: async (): Promise<Course[]> => {
+    const res = await studentApiClient.get('/courses')
     return res.data
   },
-  getById: async (id: string): Promise<Playlist & { videos?: Video[] }> => {
-    const res = await studentApiClient.get(`/playlists/${id}`)
+  getById: async (id: string): Promise<Course> => {
+    const res = await studentApiClient.get(`/courses/${id}`)
     return res.data
   },
 }
@@ -108,9 +130,9 @@ export const studentVideos = {
     const res = await studentApiClient.get(`/videos/${id}`)
     return res.data
   },
-  getByPlaylist: async (playlistId: string): Promise<Video[]> => {
+  getByCourse: async (courseId: string): Promise<Video[]> => {
     const res = await studentApiClient.get('/videos')
-    return res.data.filter((v: Video) => v.playlistId === playlistId)
+    return res.data.filter((v: Video) => v.courseId === courseId)
   },
 }
 

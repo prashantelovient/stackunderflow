@@ -62,7 +62,7 @@ export const getAllProgress = async (req, res, next) => {
   try {
     const studentId = req.student.id;
     const progressList = await WatchProgress.find({ studentId })
-      .populate('videoId', 'title thumbnail duration playlistId')
+      .populate('videoId', 'title thumbnail duration courseId')
       .exec();
 
     res.json(progressList);

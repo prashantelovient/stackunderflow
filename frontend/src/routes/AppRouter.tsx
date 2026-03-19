@@ -8,7 +8,7 @@ import AdminLoginPage from '@/admin/pages/LoginPage'
 import DashboardPage from '@/admin/pages/DashboardPage'
 import StudentsPage from '@/admin/pages/StudentsPage'
 import VideosPage from '@/admin/pages/VideosPage'
-import PlaylistsPage from '@/admin/pages/PlaylistsPage'
+import AdminCoursesPage from '@/admin/pages/CoursesPage'
 import AdminBlogsPage from '@/admin/pages/BlogsPage'
 import CategoriesPage from '@/admin/pages/CategoriesPage'
 import SettingsPage from '@/admin/pages/SettingsPage'
@@ -19,7 +19,7 @@ import StudentLoginPage from '@/student/pages/LoginPage'
 import StudentRegisterPage from '@/student/pages/RegisterPage'
 import StudentDashboardPage from '@/student/pages/DashboardPage'
 import CoursesPage from '@/student/pages/CoursesPage'
-import PlaylistDetailPage from '@/student/pages/PlaylistDetailPage'
+import CourseDetailPage from '@/student/pages/CourseDetailPage'
 import WatchPage from '@/student/pages/WatchPage'
 import StudentBlogsPage from '@/student/pages/BlogsPage'
 import BlogDetailPage from '@/student/pages/BlogDetailPage'
@@ -45,7 +45,7 @@ export default function AppRouter() {
         <Route path="/" element={<Navigate to="/login" replace />} />
 
         {/* ── Student public ──────────────────────────────── */}
-        <Route path="/login"    element={<StudentLoginPage />} />
+        <Route path="/login" element={<StudentLoginPage />} />
         <Route path="/register" element={<StudentRegisterPage />} />
 
         {/* ── Student protected ───────────────────────────── */}
@@ -57,14 +57,14 @@ export default function AppRouter() {
             </StudentRoute>
           }
         >
-          <Route index                  element={<Navigate to="/student/dashboard" replace />} />
-          <Route path="dashboard"       element={<StudentDashboardPage />} />
-          <Route path="courses"         element={<CoursesPage />} />
-          <Route path="courses/:id"     element={<PlaylistDetailPage />} />
-          <Route path="watch/:videoId"  element={<WatchPage />} />
-          <Route path="blogs"           element={<StudentBlogsPage />} />
-          <Route path="blog/:id"        element={<BlogDetailPage />} />
-          <Route path="profile"         element={<ProfilePage />} />
+          <Route index element={<Navigate to="/student/dashboard" replace />} />
+          <Route path="dashboard" element={<StudentDashboardPage />} />
+          <Route path="courses" element={<CoursesPage />} />
+          <Route path="courses/:id" element={<CourseDetailPage />} />
+          <Route path="watch/:videoId" element={<WatchPage />} />
+          <Route path="blogs" element={<StudentBlogsPage />} />
+          <Route path="blog/:id" element={<BlogDetailPage />} />
+          <Route path="profile" element={<ProfilePage />} />
         </Route>
 
         {/* ── Admin public ────────────────────────────────── */}
@@ -79,14 +79,14 @@ export default function AppRouter() {
             </AdminRoute>
           }
         >
-          <Route index               element={<Navigate to="/admin/dashboard" replace />} />
-          <Route path="dashboard"    element={<DashboardPage />} />
-          <Route path="students"     element={<StudentsPage />} />
-          <Route path="videos"       element={<VideosPage />} />
-          <Route path="playlists"    element={<PlaylistsPage />} />
-          <Route path="blogs"        element={<AdminBlogsPage />} />
-          <Route path="categories"   element={<CategoriesPage />} />
-          <Route path="settings"     element={<SettingsPage />} />
+          <Route index element={<Navigate to="/admin/dashboard" replace />} />
+          <Route path="dashboard" element={<DashboardPage />} />
+          <Route path="students" element={<StudentsPage />} />
+          <Route path="videos" element={<VideosPage />} />
+          <Route path="courses" element={<AdminCoursesPage />} />
+          <Route path="blogs" element={<AdminBlogsPage />} />
+          <Route path="categories" element={<CategoriesPage />} />
+          <Route path="settings" element={<SettingsPage />} />
         </Route>
 
         {/* Catch-all */}

@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { Admin, Student, Video, Playlist, Blog } from '../models/index.js';
+import { Admin, Student, Video, Course, Blog } from '../models/index.js';
 
 export const register = async (req, res, next) => {
   try {
@@ -99,14 +99,14 @@ export const getAnalytics = async (req, res, next) => {
     const [
       totalStudents,
       totalVideos,
-      totalPlaylists,
+      totalCourses,
       totalBlogs,
       studentAgg,
       videoAgg,
     ] = await Promise.all([
       Student.countDocuments(),
       Video.countDocuments(),
-      Playlist.countDocuments(),
+      Course.countDocuments(),
       Blog.countDocuments(),
       Student.aggregate([
         { $match: { createdAt: { $gte: twelveMonthsAgo } } },
@@ -135,7 +135,7 @@ export const getAnalytics = async (req, res, next) => {
     res.json({
       totalStudents,
       totalVideos,
-      totalPlaylists,
+      totalCourses,
       totalBlogs,
       studentsByMonth: buildMonthlyData(studentAgg),
       videosByMonth: buildMonthlyData(videoAgg),

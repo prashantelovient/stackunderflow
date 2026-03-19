@@ -10,7 +10,7 @@ import { toast, ToastContainer } from '@/admin/components/Modals'
 import { formatDate } from '@/utils'
 
 interface Student {
-  id: string; name: string; email: string; enrolledPlaylist: string; joinDate: string; status: string
+  id: string; name: string; email: string; enrolledCourse: string; joinDate: string; status: string
 }
 
 export default function StudentsPage() {
@@ -38,7 +38,7 @@ export default function StudentsPage() {
   const columns = useMemo<ColumnDef<Student, unknown>[]>(() => [
     { accessorKey: 'name', header: 'Name', cell: ({ row }) => <div className="font-medium text-gray-900 dark:text-white">{row.original.name}</div> },
     { accessorKey: 'email', header: 'Email', cell: ({ row }) => <span className="text-gray-600 dark:text-gray-400">{row.original.email}</span> },
-    { accessorKey: 'enrolledPlaylist', header: 'Enrolled Playlist' },
+    { accessorKey: 'enrolledCourse', header: 'Enrolled Course' },
     { accessorKey: 'joinDate', header: 'Join Date', cell: ({ row }) => formatDate(row.original.joinDate) },
     {
       accessorKey: 'status', header: 'Status',

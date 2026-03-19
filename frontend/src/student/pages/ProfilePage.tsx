@@ -5,7 +5,7 @@ import {
   TrendingUp, Clock, BookOpen, ChevronRight
 } from 'lucide-react'
 import { useStudentAuthStore } from '@/student/store/studentAuthStore'
-import { playlists, studentVideos, watchProgress } from '@/student/services/studentService'
+import { courses, studentVideos, watchProgress } from '@/student/services/studentService'
 import { formatDate } from '@/utils'
 
 function StatItem({ icon: Icon, label, value, color }: {
@@ -32,9 +32,9 @@ export default function ProfilePage() {
   const displayName = student?.name || 'Student'
   const avatarInitial = displayName.charAt(0).toUpperCase()
 
-  const { data: allPlaylists } = useQuery({
-    queryKey: ['student-playlists'],
-    queryFn: playlists.getAll,
+  const { data: allCourses } = useQuery({
+    queryKey: ['student-courses'],
+    queryFn: courses.getAll,
   })
 
   const { data: allVideos } = useQuery({
@@ -54,16 +54,16 @@ export default function ProfilePage() {
   const completedCount = completedVideos.length
   const overallPercent = videoTotal > 0 ? Math.round((completedCount / videoTotal) * 100) : 0
 
-  // Find which playlists have been touched
+  // Find which courses have been touched
   const progressVideoIds = new Set(progressList?.map(p => {
     const vid = typeof p.videoId === 'string' ? p.videoId : (p.videoId as any)?.id
     return vid
   }))
 
-  const touchedPlaylistIds = new Set(
-    allVideos?.filter(v => progressVideoIds.has(v.id) && v.playlistId).map(v => v.playlistId!) ?? []
+  const touchedCourseIds = new Set(
+    allVideos?.filter(v => progressVideoIds.has(v.id) && v.courseId).map(v => v.courseId!) ?? []
   )
-  const enrolledPlaylists = allPlaylists?.filter(p => touchedPlaylistIds.has(p.id)) ?? []
+  const enrolledCourses = allCourses?.filter(c => touchedCourseIds.has(c.id)) ?? []
 
   return (
     <div className="p-4 lg:p-8 max-w-4xl mx-auto space-y-8">
@@ -116,7 +116,7 @@ export default function ProfilePage() {
         <StatItem icon={PlayCircle} label="Total Videos" value={videoTotal} color="bg-indigo-600" />
         <StatItem icon={CheckCircle2} label="Completed" value={completedCount} color="bg-emerald-600" />
         <StatItem icon={TrendingUp} label="In Progress" value={inProgressVideos.length} color="bg-pink-600" />
-        <StatItem icon={Trophy} label="Courses" value={enrolledPlaylists.length} color="bg-amber-600" />
+        <StatItem icon={Trophy} label="Courses" value={enrolledCourses.length} color="bg-amber-600" />
       </div>
 
       {/* Enrolled courses */}
@@ -124,7 +124,7 @@ export default function ProfilePage() {
         <h2 className="text-lg font-semibold text-white mb-4">
           Active Courses
           <span className="ml-2 text-sm font-normal text-gray-400">
-            {enrolledPlaylists.length}
+            {enrolledCourses.length}
           </span>
         </h2>
 
@@ -134,7 +134,7 @@ export default function ProfilePage() {
               <div key={i} className="h-16 animate-pulse bg-white/5 rounded-xl" />
             ))}
           </div>
-        ) : enrolledPlaylists.length === 0 ? (
+        ) : enrolledCourses.length === 0 ? (
           <div className="text-center py-12 bg-white/3 rounded-xl border border-white/5">
             <BookOpen className="w-10 h-10 mx-auto mb-3 text-gray-600" />
             <h3 className="text-gray-300 font-medium text-sm">No courses started yet</h3>
@@ -148,28 +148,28 @@ export default function ProfilePage() {
           </div>
         ) : (
           <div className="space-y-3">
-            {enrolledPlaylists.map(playlist => {
-              const playlistVideos = allVideos?.filter(v => v.playlistId === playlist.id) ?? []
-              const completedInPlaylist = completedVideos.filter(p => {
+            {enrolledCourses.map(course => {
+              const courseVideos = allVideos?.filter(v => v.courseId === course.id) ?? []
+              const completedInCourse = completedVideos.filter(p => {
                 const vid = typeof p.videoId === 'string' ? p.videoId : (p.videoId as any)?.id
-                return playlistVideos.some(v => v.id === vid)
+                return courseVideos.some(v => v.id === vid)
               }).length
-              const pct = playlistVideos.length > 0
-                ? Math.round((completedInPlaylist / playlistVideos.length) * 100)
+              const pct = courseVideos.length > 0
+                ? Math.round((completedInCourse / courseVideos.length) * 100)
                 : 0
 
               return (
                 <Link
-                  key={playlist.id}
-                  to={`/student/courses/${playlist.id}`}
+                  key={course.id}
+                  to={`/student/courses/${course.id}`}
                   className="flex items-center gap-4 p-4 bg-white/5 border border-white/8 rounded-xl hover:bg-white/8 hover:border-white/15 transition-all group"
                 >
                   <div className="w-10 h-10 bg-gradient-to-br from-violet-600 to-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-                    {playlist.title.charAt(0)}
+                    {course.title.charAt(0)}
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="text-sm font-medium text-white group-hover:text-violet-300 transition-colors line-clamp-1">
-                      {playlist.title}
+                      {course.title}
                     </h3>
                     <div className="flex items-center gap-3 mt-1.5">
                       <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
@@ -181,7 +181,7 @@ export default function ProfilePage() {
                       <span className="text-xs text-gray-400 flex-shrink-0">{pct}%</span>
                     </div>
                     <p className="text-xs text-gray-500 mt-0.5">
-                      {completedInPlaylist}/{playlistVideos.length} videos
+                      {completedInCourse}/{courseVideos.length} videos
                     </p>
                   </div>
                   <ChevronRight className="w-4 h-4 text-gray-600 group-hover:text-violet-400 transition-colors flex-shrink-0" />
@@ -207,7 +207,7 @@ export default function ProfilePage() {
               return (
                 <Link
                   key={p.id}
-                  to={`/student/watch/${videoObj.id}${videoObj.playlistId ? `?playlist=${videoObj.playlistId}` : ''}`}
+                  to={`/student/watch/${videoObj.id}${videoObj.courseId ? `?course=${videoObj.courseId}` : ''}`}
                   className="flex items-center gap-3 p-3 bg-white/5 border border-white/5 rounded-xl hover:bg-white/8 transition-colors group"
                 >
                   <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0" />
@@ -215,7 +215,7 @@ export default function ProfilePage() {
                     <p className="text-sm text-gray-300 group-hover:text-violet-300 transition-colors line-clamp-1">
                       {videoObj.title}
                     </p>
-                    <p className="text-xs text-gray-500">{videoObj.playlistTitle}</p>
+                    <p className="text-xs text-gray-500">{videoObj.courseTitle}</p>
                   </div>
                   <div className="flex items-center gap-1 text-gray-500">
                     <Clock className="w-3.5 h-3.5" />
@@ -230,4 +230,3 @@ export default function ProfilePage() {
     </div>
   )
 }
-

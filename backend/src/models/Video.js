@@ -7,7 +7,7 @@ const VideoSchema = new mongoose.Schema({
   videoPath: { type: String, default: '' },
   thumbnail: { type: String, default: null },
   duration: { type: Number, default: null },
-  playlistId: { type: mongoose.Schema.Types.ObjectId, ref: 'Playlist', default: null },
+  courseId: { type: mongoose.Schema.Types.ObjectId, ref: 'Course', default: null },
   status: { type: String, default: 'processing' },
   createdAt: { type: Date, default: Date.now },
 });

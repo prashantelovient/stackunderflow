@@ -7,7 +7,7 @@ export const registerStudent = async (req, res, next) => {
   try {
     const { name, email, password } = req.body;
     const normalizedEmail = email?.toLowerCase();
-    
+
     const existing = await Student.findOne({ email: normalizedEmail });
     if (existing) {
       return res.status(400).json({ message: 'Student already exists' });
@@ -26,7 +26,7 @@ export const loginStudent = async (req, res, next) => {
   try {
     const { email, password } = req.body;
     const normalizedEmail = email?.toLowerCase();
-    
+
     const student = await Student.findOne({ email: normalizedEmail });
     if (!student) {
       return res.status(401).json({ message: 'Invalid credentials' });
@@ -51,11 +51,11 @@ export const loginStudent = async (req, res, next) => {
 
 export const getStudents = async (req, res, next) => {
   try {
-    const students = await Student.find({}, 'name email createdAt enrolledPlaylists status').exec();
+    const students = await Student.find({}, 'name email createdAt enrolledCourses status').exec();
     const formatted = students.map(s => ({
       ...s.toObject(),
       joinDate: s.createdAt,
-      enrolledPlaylist: s.enrolledPlaylists.length > 0 ? s.enrolledPlaylists[0] : 'None',
+      enrolledCourse: s.enrolledCourses.length > 0 ? s.enrolledCourses[0] : 'None',
       status: s.status || 'active',
     }));
     res.json(formatted);
@@ -70,16 +70,16 @@ export const getStudentById = async (req, res, next) => {
       return res.status(404).json({ message: 'Student not found' });
     }
 
-    const student = await Student.findById(req.params.id, 'name email createdAt enrolledPlaylists status').exec();
-    
+    const student = await Student.findById(req.params.id, 'name email createdAt enrolledCourses status').exec();
+
     if (!student) {
       return res.status(404).json({ message: 'Student not found' });
     }
-    
+
     res.json({
       ...student.toObject(),
       joinDate: student.createdAt,
-      enrolledPlaylist: student.enrolledPlaylists.length > 0 ? student.enrolledPlaylists[0] : 'None',
+      enrolledCourse: student.enrolledCourses.length > 0 ? student.enrolledCourses[0] : 'None',
       status: student.status || 'active',
     });
   } catch (error) {

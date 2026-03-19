@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { type ColumnDef } from '@tanstack/react-table'
 import { Plus, Pencil, Trash2, Video, Play } from 'lucide-react'
-import { videoService, playlistService } from '@/admin/services'
+import { videoService, courseService } from '@/admin/services'
 import { DataTable } from '@/admin/components/DataTable'
 import VideoPlayer from '@/admin/components/VideoPlayer'
 import { PageHeader, Badge, Spinner, Card, CardContent, Button, Input, Textarea, Select } from '@/admin/components/ui'
@@ -10,10 +10,10 @@ import { ConfirmModal, Modal } from '@/admin/components/Modals'
 import { toast, ToastContainer } from '@/admin/components/Modals'
 import { formatDate } from '@/utils'
 
-interface VideoItem { id: string; title: string; description: string; thumbnail: null; playlistId: string; playlistTitle: string; duration: string; uploadDate: string }
-interface Playlist { id: string; title: string }
+interface VideoItem { id: string; title: string; description: string; thumbnail: null; courseId: string; courseTitle: string; duration: string; uploadDate: string }
+interface CourseItem { id: string; title: string }
 
-const emptyForm = { title: '', description: '', duration: '', playlistId: '' }
+const emptyForm = { title: '', description: '', duration: '', courseId: '' }
 
 export default function VideosPage() {
   const qc = useQueryClient()
@@ -27,19 +27,19 @@ export default function VideosPage() {
   const [viewVideo, setViewVideo] = useState<VideoItem | null>(null)
 
   const { data: videos = [], isLoading } = useQuery<VideoItem[]>({ queryKey: ['videos'], queryFn: videoService.getAll })
-  const { data: playlists = [] } = useQuery<Playlist[]>({ queryKey: ['playlists'], queryFn: playlistService.getAll })
+  const { data: courses = [] } = useQuery<CourseItem[]>({ queryKey: ['courses'], queryFn: courseService.getAll })
 
-  const openNew = () => { 
-    setEditItem(null); 
-    setForm(emptyForm); 
+  const openNew = () => {
+    setEditItem(null);
+    setForm(emptyForm);
     setThumbnailFile(null);
     setVideoFile(null);
     setThumbnailPreview(null);
     setModalOpen(true);
   }
-  const openEdit = (v: VideoItem) => { 
-    setEditItem(v); 
-    setForm({ title: v.title, description: v.description, duration: v.duration, playlistId: v.playlistId }); 
+  const openEdit = (v: VideoItem) => {
+    setEditItem(v);
+    setForm({ title: v.title, description: v.description, duration: v.duration, courseId: v.courseId });
     setThumbnailFile(null);
     setVideoFile(null);
     setThumbnailPreview(null);
@@ -73,7 +73,7 @@ export default function VideosPage() {
       )
     },
     { accessorKey: 'title', header: 'Title', cell: ({ row }) => <span className="font-medium text-gray-900 dark:text-white">{row.original.title}</span> },
-    { accessorKey: 'playlistTitle', header: 'Playlist', cell: ({ row }) => <Badge variant="info">{row.original.playlistTitle}</Badge> },
+    { accessorKey: 'courseTitle', header: 'Course', cell: ({ row }) => <Badge variant="info">{row.original.courseTitle}</Badge> },
     { accessorKey: 'duration', header: 'Duration', cell: ({ row }) => <span className="font-mono text-sm">{row.original.duration}</span> },
     { accessorKey: 'uploadDate', header: 'Upload Date', cell: ({ row }) => formatDate(row.original.uploadDate) },
     {
@@ -86,7 +86,7 @@ export default function VideosPage() {
         </div>
       )
     },
-  ], [playlists])
+  ], [courses])
 
   if (isLoading) return <div className="flex items-center justify-center h-64"><Spinner /></div>
 
@@ -106,8 +106,8 @@ export default function VideosPage() {
           <Input label="Title" value={form.title} onChange={(e) => setForm(f => ({ ...f, title: e.target.value }))} placeholder="Video title" />
           <Textarea label="Description" value={form.description} onChange={(e) => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Video description" />
           <Input label="Duration" value={form.duration} onChange={(e) => setForm(f => ({ ...f, duration: e.target.value }))} placeholder="e.g. 45:30" />
-          <Select label="Assign to Playlist" value={form.playlistId} onChange={(e) => setForm(f => ({ ...f, playlistId: e.target.value }))}
-            options={playlists.map((p) => ({ value: p.id, label: p.title }))} placeholder="Select playlist" />
+          <Select label="Assign to Course" value={form.courseId} onChange={(e) => setForm(f => ({ ...f, courseId: e.target.value }))}
+            options={courses.map((c) => ({ value: c.id, label: c.title }))} placeholder="Select course" />
           <div className="flex flex-col gap-1">
             <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Thumbnail</label>
             <div className="flex items-center gap-4">
@@ -135,7 +135,7 @@ export default function VideosPage() {
                 setVideoFile(file)
               }
             }} className="text-sm text-gray-600 dark:text-gray-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:bg-blue-50 file:text-blue-600 dark:file:bg-blue-900/30 dark:file:text-blue-400 hover:file:bg-blue-100 cursor-pointer" />
-            {videoFile && <p className="text-xs text-green-600 dark:text-green-400">{videoFile.name} ({(videoFile.size / (1024*1024)).toFixed(2)} MB)</p>}
+            {videoFile && <p className="text-xs text-green-600 dark:text-green-400">{videoFile.name} ({(videoFile.size / (1024 * 1024)).toFixed(2)} MB)</p>}
           </div>
           <div className="flex justify-end gap-3 pt-2">
             <Button variant="outline" onClick={() => setModalOpen(false)}>Cancel</Button>
@@ -151,32 +151,31 @@ export default function VideosPage() {
       <Modal isOpen={!!viewVideo} title={viewVideo?.title || 'View Video'} onClose={() => setViewVideo(null)} size="lg">
         <div className="space-y-4">
           <div className="aspect-video bg-black rounded-lg flex items-center justify-center overflow-hidden">
-             {viewVideo ? (
-               <VideoPlayer 
-                 options={{
-                   autoplay: true,
-                   controls: true,
-                   sources: [{
-                     src: `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/stream/${viewVideo.id}?token=${localStorage.getItem('token')}`,
-                     type: 'application/x-mpegURL'
-                   }]
-                 }} 
-               />
-             ) : (
-               <div className="text-white">Loading...</div>
-             )}
+            {viewVideo ? (
+              <VideoPlayer
+                options={{
+                  autoplay: true,
+                  controls: true,
+                  sources: [{
+                    src: `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/stream/${viewVideo.id}?token=${localStorage.getItem('token')}`,
+                    type: 'application/x-mpegURL'
+                  }]
+                }}
+              />
+            ) : (
+              <div className="text-white">Loading...</div>
+            )}
           </div>
           <div className="flex flex-col gap-1">
             <h3 className="font-semibold text-gray-900 dark:text-white">{viewVideo?.title}</h3>
             <p className="text-sm text-gray-600 dark:text-gray-400">{viewVideo?.description}</p>
           </div>
           <div className="flex gap-2 text-sm text-gray-500 mt-2">
-             <Badge variant="info">{viewVideo?.playlistTitle}</Badge>
-             <span className="flex items-center gap-1 font-mono bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-full"><Video className="w-3 h-3"/> {viewVideo?.duration}</span>
+            <Badge variant="info">{viewVideo?.courseTitle}</Badge>
+            <span className="flex items-center gap-1 font-mono bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-full"><Video className="w-3 h-3" /> {viewVideo?.duration}</span>
           </div>
         </div>
       </Modal>
     </div>
   )
 }
-
