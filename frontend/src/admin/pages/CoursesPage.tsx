@@ -261,7 +261,7 @@ export default function CoursesPage() {
                     <Select
                         label="Lecture Type"
                         value={lectureForm.type}
-                        onChange={(e) => setLectureForm(f => ({ ...f, type: e.target.value }))}
+                        onChange={(val) => setLectureForm(f => ({ ...f, type: val }))}
                         options={[
                             { value: 'video', label: 'Video' },
                             { value: 'resource', label: 'Resource (Link)' },
@@ -272,7 +272,7 @@ export default function CoursesPage() {
                         <Select
                             label="Select Video"
                             value={lectureForm.videoId}
-                            onChange={(e) => setLectureForm(f => ({ ...f, videoId: e.target.value }))}
+                            onChange={(val) => setLectureForm(f => ({ ...f, videoId: val }))}
                             options={allVideos.map(v => ({ value: v.id, label: `${v.title} (${v.duration})` }))}
                             placeholder="Select a video"
                         />

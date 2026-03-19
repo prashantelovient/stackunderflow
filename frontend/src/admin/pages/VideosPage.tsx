@@ -106,7 +106,7 @@ export default function VideosPage() {
           <Input label="Title" value={form.title} onChange={(e) => setForm(f => ({ ...f, title: e.target.value }))} placeholder="Video title" />
           <Textarea label="Description" value={form.description} onChange={(e) => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Video description" />
           <Input label="Duration" value={form.duration} onChange={(e) => setForm(f => ({ ...f, duration: e.target.value }))} placeholder="e.g. 45:30" />
-          <Select label="Assign to Course" value={form.courseId} onChange={(e) => setForm(f => ({ ...f, courseId: e.target.value }))}
+          <Select label="Assign to Course" value={form.courseId} onChange={(val) => setForm(f => ({ ...f, courseId: val }))}
             options={courses.map((c) => ({ value: c.id, label: c.title }))} placeholder="Select course" />
           <div className="flex flex-col gap-1">
             <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Thumbnail</label>

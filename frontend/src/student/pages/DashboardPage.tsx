@@ -6,18 +6,22 @@ import {
 } from 'lucide-react'
 import { useStudentAuthStore } from '@/student/store/studentAuthStore'
 import { courses, studentVideos, watchProgress } from '@/student/services/studentService'
-import type { Course, Video, WatchProgress } from '@/student/services/studentService'
-import { cn } from '@/utils'
+import type { Course, Video } from '@/student/services/studentService'
+import { cn } from '@/lib/utils'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 
-function SkeletonCard({ className }: { className?: string }) {
+function SkeletonCard() {
   return (
-    <div className={cn('animate-pulse rounded-2xl bg-white/5 overflow-hidden', className)}>
-      <div className="bg-white/5 h-36" />
-      <div className="p-4 space-y-2">
-        <div className="h-3 bg-white/10 rounded w-3/4" />
-        <div className="h-3 bg-white/10 rounded w-1/2" />
-      </div>
-    </div>
+    <Card className="overflow-hidden border-white/10 bg-white/5">
+      <Skeleton className="h-36 w-full opacity-10" />
+      <CardContent className="p-4 space-y-2">
+        <Skeleton className="h-4 w-3/4 opacity-10" />
+        <Skeleton className="h-3 w-1/2 opacity-10" />
+      </CardContent>
+    </Card>
   )
 }
 
@@ -31,20 +35,22 @@ function StatCard({
   color: string
 }) {
   return (
-    <div className="bg-white/5 backdrop-blur border border-white/8 rounded-2xl p-5 hover:bg-white/8 transition-colors">
-      <div className="flex items-start justify-between mb-4">
-        <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center', color)}>
-          <Icon className="w-5 h-5 text-white" />
+    <Card className="bg-white/5 backdrop-blur border-white/10 hover:bg-white/8 transition-colors">
+      <CardContent className="p-5 pt-5">
+        <div className="flex items-start justify-between mb-4">
+          <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center shadow-lg shadow-black/20', color)}>
+            <Icon className="w-5 h-5 text-white" />
+          </div>
+          {trend && (
+            <Badge variant="secondary" className="text-[10px] bg-emerald-500/10 text-emerald-400 border-none">
+              {trend}
+            </Badge>
+          )}
         </div>
-        {trend && (
-          <span className="text-xs font-medium text-emerald-400 bg-emerald-400/10 px-2 py-1 rounded-full">
-            {trend}
-          </span>
-        )}
-      </div>
-      <p className="text-2xl font-bold text-white">{value}</p>
-      <p className="text-sm text-gray-400 mt-0.5">{label}</p>
-    </div>
+        <p className="text-2xl font-bold text-white">{value}</p>
+        <p className="text-sm text-gray-400 mt-0.5">{label}</p>
+      </CardContent>
+    </Card>
   )
 }
 
@@ -60,27 +66,26 @@ function CourseCard({ course }: { course: Course }) {
   const colorClass = colors[course.title.charCodeAt(0) % colors.length]
 
   return (
-    <Link
-      to={`/student/courses/${course.id}`}
-      className="group bg-white/5 border border-white/8 rounded-2xl overflow-hidden hover:bg-white/8 hover:border-white/15 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-black/20"
-    >
-      <div className={cn('relative h-36 bg-gradient-to-br', colorClass, 'flex items-center justify-center')}>
-        <span className="text-5xl font-bold text-white/30">{initial}</span>
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20">
-          <div className="w-12 h-12 bg-white/20 backdrop-blur rounded-full flex items-center justify-center">
-            <PlayCircle className="w-7 h-7 text-white" />
+    <Link to={`/student/courses/${course.id}`} className="group">
+      <Card className="h-full bg-white/5 border-white/10 overflow-hidden hover:bg-white/8 hover:border-white/20 transition-all duration-300 hover:-translate-y-0.5 shadow-sm hover:shadow-xl hover:shadow-black/30">
+        <div className={cn('relative h-36 bg-gradient-to-br', colorClass, 'flex items-center justify-center')}>
+          <span className="text-5xl font-bold text-white/30">{initial}</span>
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20">
+            <div className="w-12 h-12 bg-white/20 backdrop-blur rounded-full flex items-center justify-center">
+              <PlayCircle className="w-7 h-7 text-white" />
+            </div>
           </div>
         </div>
-      </div>
-      <div className="p-4">
-        <h3 className="font-semibold text-white text-sm leading-snug group-hover:text-violet-300 transition-colors line-clamp-1">
-          {course.title}
-        </h3>
-        <p className="text-xs text-gray-400 mt-1 line-clamp-2">{course.description || 'No description'}</p>
-        <div className="flex items-center gap-1.5 mt-3">
-          <span className="text-[11px] text-gray-500 font-medium bg-white/5 px-2 py-0.5 rounded-full">View Course</span>
-        </div>
-      </div>
+        <CardContent className="p-4">
+          <h3 className="font-semibold text-white text-sm leading-snug group-hover:text-violet-300 transition-colors line-clamp-1">
+            {course.title}
+          </h3>
+          <p className="text-xs text-gray-400 mt-1 line-clamp-2">{course.description || 'No description'}</p>
+          <div className="mt-3">
+            <Badge variant="secondary" className="text-[10px] font-medium bg-white/5 text-gray-400">View Course</Badge>
+          </div>
+        </CardContent>
+      </Card>
     </Link>
   )
 }
@@ -89,43 +94,44 @@ function VideoCard({ video, progress }: { video: Video; progress?: number }) {
   const percent = progress ? Math.min(100, Math.round((progress / (parseInt(video.duration) || 1)) * 100)) : 0
 
   return (
-    <Link
-      to={`/student/watch/${video.id}`}
-      className="group flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/8 hover:bg-white/8 hover:border-white/15 transition-all"
-    >
-      <div className="relative flex-shrink-0 w-20 h-14 bg-gradient-to-br from-gray-700 to-gray-800 rounded-lg overflow-hidden">
-        {video.thumbnail ? (
-          <img src={`http://localhost:5000${video.thumbnail}`} alt={video.title} className="w-full h-full object-cover" />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <PlayCircle className="w-6 h-6 text-gray-500" />
-          </div>
-        )}
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/30">
-          <PlayCircle className="w-5 h-5 text-white" />
-        </div>
-      </div>
-      <div className="flex-1 min-w-0">
-        <h4 className="text-sm font-medium text-white line-clamp-1 group-hover:text-violet-300 transition-colors">
-          {video.title}
-        </h4>
-        <p className="text-xs text-gray-500 mt-0.5">{video.courseTitle}</p>
-        {percent > 0 && (
-          <div className="mt-2">
-            <div className="h-1 bg-white/10 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-violet-500 to-indigo-500 rounded-full transition-all"
-                style={{ width: `${percent}%` }}
-              />
+    <Link to={`/student/watch/${video.id}`} className="group block">
+      <Card className="p-3 bg-white/5 border-white/10 hover:bg-white/8 hover:border-white/20 transition-all">
+        <div className="flex items-center gap-3">
+          <div className="relative flex-shrink-0 w-20 h-14 bg-gradient-to-br from-gray-800 to-gray-950 rounded-lg overflow-hidden border border-white/5">
+            {video.thumbnail ? (
+              <img src={`http://localhost:5000${video.thumbnail}`} alt={video.title} className="w-full h-full object-cover" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
+                <PlayCircle className="w-6 h-6 text-gray-600" />
+              </div>
+            )}
+            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/30">
+              <PlayCircle className="w-5 h-5 text-white" />
             </div>
-            <p className="text-[10px] text-gray-500 mt-0.5">{percent}% complete</p>
           </div>
-        )}
-      </div>
-      <div className="flex-shrink-0 flex items-center gap-1 text-gray-500">
-        <Clock className="w-3.5 h-3.5" />
-        <span className="text-xs">{video.duration}</span>
-      </div>
+          <div className="flex-1 min-w-0">
+            <h4 className="text-sm font-medium text-white line-clamp-1 group-hover:text-violet-300 transition-colors">
+              {video.title}
+            </h4>
+            <p className="text-xs text-gray-500 mt-0.5">{video.courseTitle}</p>
+            {percent > 0 && (
+              <div className="mt-2">
+                <div className="h-1 bg-white/10 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-violet-500 to-indigo-500 rounded-full transition-all"
+                    style={{ width: `${percent}%` }}
+                  />
+                </div>
+                <p className="text-[10px] text-gray-500 mt-0.5">{percent}% complete</p>
+              </div>
+            )}
+          </div>
+          <div className="flex-shrink-0 flex items-center gap-1 text-gray-500">
+            <Clock className="w-3.5 h-3.5" />
+            <span className="text-xs">{video.duration}</span>
+          </div>
+        </div>
+      </Card>
     </Link>
   )
 }
@@ -168,10 +174,10 @@ export default function StudentDashboardPage() {
   return (
     <div className="p-4 lg:p-8 space-y-8 max-w-7xl mx-auto">
       {/* Hero greeting */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-900/60 via-indigo-900/40 to-purple-900/30 border border-violet-500/20 p-6 lg:p-8">
+      <Card className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-950/80 via-indigo-950/60 to-purple-950/40 border-violet-500/30 p-6 lg:p-8">
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-20 -right-20 w-56 h-56 bg-violet-600/20 rounded-full blur-3xl" />
-          <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-indigo-600/15 rounded-full blur-2xl" />
+          <div className="absolute -top-20 -right-20 w-56 h-56 bg-violet-600/20 rounded-full blur-3xl opacity-50" />
+          <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-indigo-600/15 rounded-full blur-2xl opacity-50" />
         </div>
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-2">
@@ -186,14 +192,13 @@ export default function StudentDashboardPage() {
               ? `You've completed ${completedCount} video${completedCount !== 1 ? 's' : ''}. Keep it up!`
               : "You haven't started watching yet. Pick a course and begin!"}
           </p>
-          <Link
-            to="/student/courses"
-            className="inline-flex items-center gap-2 mt-4 px-5 py-2.5 bg-violet-600 hover:bg-violet-500 text-white rounded-xl font-medium text-sm transition-colors shadow-lg shadow-violet-500/20"
-          >
-            Browse Courses <ArrowRight className="w-4 h-4" />
-          </Link>
+          <Button asChild className="mt-4 bg-violet-600 hover:bg-violet-500 shadow-lg shadow-violet-500/20">
+            <Link to="/student/courses">
+              Browse Courses <ArrowRight className="w-4 h-4 ml-1" />
+            </Link>
+          </Button>
         </div>
-      </div>
+      </Card>
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -261,40 +266,40 @@ export default function StudentDashboardPage() {
           </Link>
         </div>
         {loadingCourses ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {Array(6).fill(0).map((_, i) => <SkeletonCard key={i} />)}
           </div>
         ) : recentCourses.length === 0 ? (
-          <div className="text-center py-12 text-gray-500">
+          <Card className="bg-white/5 border-white/10 text-center py-12 text-gray-500">
             <ListVideo className="w-10 h-10 mx-auto mb-3 opacity-40" />
             <p>No courses available yet</p>
-          </div>
+          </Card>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {recentCourses.map((c) => <CourseCard key={c.id} course={c} />)}
           </div>
         )}
       </section>
 
-
       {/* Blogs CTA */}
       <section>
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-900/50 to-violet-900/30 border border-indigo-500/20 p-6 flex items-center justify-between">
+        <Card className="relative overflow-hidden bg-gradient-to-r from-indigo-950/80 to-violet-950/60 border-indigo-500/30 p-6">
           <div className="absolute inset-0 overflow-hidden">
-            <div className="absolute top-0 right-0 w-40 h-40 bg-indigo-600/10 rounded-full blur-3xl" />
+            <div className="absolute top-0 right-0 w-40 h-40 bg-indigo-600/10 rounded-full blur-3xl opacity-50" />
           </div>
-          <div className="relative z-10">
-            <h3 className="text-base font-semibold text-white">Explore Our Blog</h3>
-            <p className="text-sm text-gray-400 mt-1">Tutorials, deep-dives and learning resources</p>
+          <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <h3 className="text-base font-semibold text-white">Explore Our Blog</h3>
+              <p className="text-sm text-gray-400 mt-1">Tutorials, deep-dives and learning resources</p>
+            </div>
+            <Button asChild className="bg-indigo-600 hover:bg-indigo-500 shadow-lg shadow-indigo-500/20">
+              <Link to="/student/blogs">
+                <BookOpen className="w-4 h-4 mr-2" />
+                Read Blogs
+              </Link>
+            </Button>
           </div>
-          <Link
-            to="/student/blogs"
-            className="relative z-10 flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-medium text-sm transition-colors flex-shrink-0 ml-4"
-          >
-            <BookOpen className="w-4 h-4" />
-            Read Blogs
-          </Link>
-        </div>
+        </Card>
       </section>
     </div>
   )

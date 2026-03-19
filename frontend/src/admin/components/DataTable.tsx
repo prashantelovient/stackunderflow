@@ -4,7 +4,17 @@ import {
 } from '@tanstack/react-table'
 import { useState } from 'react'
 import { ChevronLeft, ChevronRight, Search } from 'lucide-react'
-import { cn } from '@/utils'
+import { cn } from '@/lib/utils'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
+} from '@/components/ui/table'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
 
 interface DataTableProps<T> {
   data: T[]
@@ -33,95 +43,93 @@ export function DataTable<T>({ data, columns, searchPlaceholder = 'Search...', s
       {/* Search */}
       {searchKey !== undefined && (
         <div className="relative max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
             value={globalFilter}
             onChange={(e) => setGlobalFilter(e.target.value)}
             placeholder={searchPlaceholder}
-            className="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="pl-9"
           />
         </div>
       )}
 
       {/* Table */}
-      <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-800">
-        <table className="w-full text-sm">
-          <thead>
+      <div className="rounded-xl border bg-card">
+        <Table>
+          <TableHeader>
             {table.getHeaderGroups().map((hg) => (
-              <tr key={hg.id} className="border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
+              <TableRow key={hg.id}>
                 {hg.headers.map((h) => (
-                  <th key={h.id} className="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-400 text-xs uppercase tracking-wide whitespace-nowrap">
+                  <TableHead key={h.id} className="font-semibold text-xs uppercase tracking-wide">
                     {flexRender(h.column.columnDef.header, h.getContext())}
-                  </th>
+                  </TableHead>
                 ))}
-              </tr>
+              </TableRow>
             ))}
-          </thead>
-          <tbody>
+          </TableHeader>
+          <TableBody>
             {table.getRowModel().rows.length === 0 ? (
-              <tr>
-                <td colSpan={columns.length} className="px-4 py-12 text-center text-gray-500 dark:text-gray-400">
+              <TableRow>
+                <TableCell colSpan={columns.length} className="h-24 text-center text-muted-foreground">
                   No records found.
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ) : (
-              table.getRowModel().rows.map((row, i) => (
-                <tr
-                  key={row.id}
-                  className={cn(
-                    'border-b border-gray-100 dark:border-gray-800/50 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/30',
-                    i % 2 === 0 ? 'bg-white dark:bg-gray-900' : 'bg-gray-50/30 dark:bg-gray-900/50'
-                  )}
-                >
+              table.getRowModel().rows.map((row) => (
+                <TableRow key={row.id}>
                   {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className="px-4 py-3 text-gray-700 dark:text-gray-300">
+                    <TableCell key={cell.id}>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </td>
+                    </TableCell>
                   ))}
-                </tr>
+                </TableRow>
               ))
             )}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
 
       {/* Pagination */}
       <div className="flex items-center justify-between text-sm">
-        <p className="text-gray-500 dark:text-gray-400">
+        <p className="text-muted-foreground">
           Showing {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1}–{Math.min((table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize, data.length)} of {data.length}
         </p>
         <div className="flex items-center gap-2">
-          <button
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-8 w-8"
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
-            className="p-1.5 rounded-lg border border-gray-300 dark:border-gray-700 disabled:opacity-40 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400 transition-colors"
           >
             <ChevronLeft className="w-4 h-4" />
-          </button>
-          {Array.from({ length: table.getPageCount() }, (_, i) => i).slice(
-            Math.max(0, table.getState().pagination.pageIndex - 2),
-            Math.min(table.getPageCount(), table.getState().pagination.pageIndex + 3)
-          ).map((page) => (
-            <button
-              key={page}
-              onClick={() => table.setPageIndex(page)}
-              className={cn(
-                'w-8 h-8 text-xs rounded-lg border transition-colors',
-                table.getState().pagination.pageIndex === page
-                  ? 'bg-blue-600 text-white border-blue-600'
-                  : 'border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
-              )}
-            >
-              {page + 1}
-            </button>
-          ))}
-          <button
+          </Button>
+
+          <div className="flex items-center gap-1">
+            {Array.from({ length: table.getPageCount() }, (_, i) => i).slice(
+              Math.max(0, table.getState().pagination.pageIndex - 2),
+              Math.min(table.getPageCount(), table.getState().pagination.pageIndex + 3)
+            ).map((page) => (
+              <Button
+                key={page}
+                variant={table.getState().pagination.pageIndex === page ? 'default' : 'outline'}
+                className="h-8 w-8 text-xs px-0"
+                onClick={() => table.setPageIndex(page)}
+              >
+                {page + 1}
+              </Button>
+            ))}
+          </div>
+
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-8 w-8"
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
-            className="p-1.5 rounded-lg border border-gray-300 dark:border-gray-700 disabled:opacity-40 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400 transition-colors"
           >
             <ChevronRight className="w-4 h-4" />
-          </button>
+          </Button>
         </div>
       </div>
     </div>

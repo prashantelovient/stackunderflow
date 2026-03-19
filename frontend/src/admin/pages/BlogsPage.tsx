@@ -119,7 +119,7 @@ export default function BlogsPage() {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <Input label="Publish Date" type="date" value={form.publishDate} onChange={(e) => setForm(f => ({ ...f, publishDate: e.target.value }))} />
-            <Select label="Status" value={form.status} onChange={(e) => setForm(f => ({ ...f, status: e.target.value }))}
+            <Select label="Status" value={form.status} onChange={(val) => setForm(f => ({ ...f, status: val }))}
               options={[{ value: 'draft', label: 'Draft' }, { value: 'published', label: 'Published' }]} />
           </div>
           <div className="flex justify-end gap-3 pt-2">
