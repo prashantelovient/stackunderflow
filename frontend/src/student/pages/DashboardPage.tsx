@@ -13,6 +13,8 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 
+const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000'
+
 function SkeletonCard() {
   return (
     <Card className="overflow-hidden border-white/10 bg-white/5">
@@ -99,7 +101,7 @@ function VideoCard({ video, progress }: { video: Video; progress?: number }) {
         <div className="flex items-center gap-3">
           <div className="relative flex-shrink-0 w-20 h-14 bg-gradient-to-br from-gray-800 to-gray-950 rounded-lg overflow-hidden border border-white/5">
             {video.thumbnail ? (
-              <img src={`http://localhost:5000${video.thumbnail}`} alt={video.title} className="w-full h-full object-cover" />
+              <img src={`${API_BASE}${video.thumbnail}`} alt={video.title} className="w-full h-full object-cover" />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
                 <PlayCircle className="w-6 h-6 text-gray-600" />
@@ -192,11 +194,11 @@ export default function StudentDashboardPage() {
               ? `You've completed ${completedCount} video${completedCount !== 1 ? 's' : ''}. Keep it up!`
               : "You haven't started watching yet. Pick a course and begin!"}
           </p>
-          <Button asChild className="mt-4 bg-violet-600 hover:bg-violet-500 shadow-lg shadow-violet-500/20">
-            <Link to="/student/courses">
+          <Link to="/student/courses">
+            <Button className="mt-4 bg-violet-600 hover:bg-violet-500 shadow-lg shadow-violet-500/20">
               Browse Courses <ArrowRight className="w-4 h-4 ml-1" />
-            </Link>
-          </Button>
+            </Button>
+          </Link>
         </div>
       </Card>
 
@@ -292,12 +294,12 @@ export default function StudentDashboardPage() {
               <h3 className="text-base font-semibold text-white">Explore Our Blog</h3>
               <p className="text-sm text-gray-400 mt-1">Tutorials, deep-dives and learning resources</p>
             </div>
-            <Button asChild className="bg-indigo-600 hover:bg-indigo-500 shadow-lg shadow-indigo-500/20">
-              <Link to="/student/blogs">
+            <Link to="/student/blogs">
+              <Button className="bg-indigo-600 hover:bg-indigo-500 shadow-lg shadow-indigo-500/20">
                 <BookOpen className="w-4 h-4 mr-2" />
                 Read Blogs
-              </Link>
-            </Button>
+              </Button>
+            </Link>
           </div>
         </Card>
       </section>

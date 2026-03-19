@@ -26,7 +26,6 @@ function HLSPlayer({
 }) {
   const containerRef = useRef<HTMLDivElement>(null)
   const playerRef = useRef<any>(null)
-  const startedRef = useRef(false)
 
   useEffect(() => {
     if (!containerRef.current) return
@@ -36,21 +35,34 @@ function HLSPlayer({
       playerRef.current.dispose()
       playerRef.current = null
     }
-    startedRef.current = false
 
     const videoEl = document.createElement('video-js')
-    videoEl.className = 'vjs-big-play-centered vjs-fluid'
+    videoEl.className = 'vjs-big-play-centered vjs-fill' // Use vjs-fill
     videoEl.setAttribute('controls', '')
     videoEl.setAttribute('preload', 'auto')
     containerRef.current.innerHTML = ''
     containerRef.current.appendChild(videoEl)
 
-    const player = videojs(videoEl, {
-      fluid: true,
+    const player = playerRef.current = videojs(videoEl, {
+      fluid: false, // Turn off fluid
+      fill: true,   // Use fill
       responsive: true,
       controls: true,
       autoplay: false,
       preload: 'auto',
+      playbackRates: [0.5, 1, 1.25, 1.5, 2],
+      controlBar: {
+        children: [
+          'playToggle',
+          'volumePanel',
+          'currentTimeDisplay',
+          'timeDivider',
+          'durationDisplay',
+          'progressControl',
+          'playbackRateMenuButton',
+          'fullscreenToggle',
+        ],
+      },
       sources: [
         {
           src: `${API_BASE}/api/stream/${videoId}`,
@@ -71,8 +83,6 @@ function HLSPlayer({
       player.on('contextmenu', (e: Event) => e.preventDefault())
     })
 
-    playerRef.current = player
-
     return () => {
       if (playerRef.current && !playerRef.current.isDisposed()) {
         playerRef.current.dispose()
@@ -85,10 +95,36 @@ function HLSPlayer({
   return (
     <div
       data-vjs-player
-      ref={containerRef}
-      className="w-full bg-black rounded-xl overflow-hidden shadow-2xl"
+      className="w-full bg-black rounded-2xl overflow-hidden shadow-2xl border border-white/5 ring-1 ring-white/10 relative group"
       onContextMenu={e => e.preventDefault()}
-    />
+    >
+      <style>{`
+        .video-js.vjs-fill {
+          display: block;
+        }
+        .video-js video {
+          object-fit: contain !important;
+        }
+        .video-js .vjs-big-play-button {
+          background-color: rgba(124, 58, 237, 0.5);
+          border: 1px solid rgba(139, 92, 246, 0.6);
+          border-radius: 100px;
+          line-height: 2.5em;
+          height: 2.5em;
+          width: 2.5em;
+          top: 50% !important;
+          left: 50% !important;
+          margin-top: -1.25em !important;
+          margin-left: -1.25em !important;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .video-js:hover .vjs-big-play-button {
+          background-color: rgb(139, 92, 246);
+          transform: scale(1.1);
+        }
+      `}</style>
+      <div ref={containerRef} className="w-full aspect-video" />
+    </div>
   )
 }
 
@@ -277,7 +313,7 @@ export default function WatchPage() {
   return (
     <div className="flex h-[calc(100vh-60px)] overflow-hidden">
       {/* Main */}
-      <div className="flex-1 flex flex-col overflow-y-auto">
+      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
         {/* Back nav */}
         <div className="px-4 lg:px-6 py-3 flex items-center gap-3 border-b border-white/5">
           <Link
@@ -304,9 +340,9 @@ export default function WatchPage() {
           </div>
         </div>
 
-        <div className="p-4 lg:p-6 flex-1">
+        <div className="p-4 lg:p-6 flex-1 min-w-0">
           {/* Player */}
-          <div className="max-w-5xl">
+          <div className="max-w-5xl w-full mx-auto">
             <HLSPlayer
               key={videoId}
               videoId={videoId!}

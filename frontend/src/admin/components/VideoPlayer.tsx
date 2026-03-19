@@ -13,24 +13,29 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady }) => {
 
   useEffect(() => {
     // Check if player is not yet instantiated
-    if (!playerRef.current) {
+    if (!playerRef.current && videoRef.current) {
       const videoElement = document.createElement("video-js");
-      videoElement.classList.add('vjs-big-play-centered');
-      videoRef.current?.appendChild(videoElement);
+      videoElement.classList.add('vjs-big-play-centered', 'vjs-fill'); // Added vjs-fill
+      videoRef.current.appendChild(videoElement);
 
       // Initialize player
-      const player = playerRef.current = videojs(videoElement, options, () => {
+      const player = playerRef.current = videojs(videoElement, {
+        ...options,
+        fluid: false, // Changed to false
+        fill: true,   // Set to true
+        responsive: true,
+      }, () => {
         if (onReady) {
           onReady(player);
         }
       });
-      
+
       // Prevent right-click context menu (to disable simple downloading)
       player.on('contextmenu', (e: Event) => {
         e.preventDefault();
       });
 
-    } else {
+    } else if (playerRef.current) {
       // If player exists, update the sources dynamically
       const player = playerRef.current;
       player.autoplay(options.autoplay);
@@ -38,9 +43,10 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady }) => {
     }
   }, [options, onReady]);
 
+  // Dispose the player on unmount
   useEffect(() => {
-    const player = playerRef.current;
     return () => {
+      const player = playerRef.current;
       if (player && !player.isDisposed()) {
         player.dispose();
         playerRef.current = null;
@@ -49,12 +55,20 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ options, onReady }) => {
   }, []);
 
   return (
-    <div 
-      data-vjs-player 
-      className="w-full relative shadow-lg rounded-xl overflow-hidden bg-black"
-      onContextMenu={(e) => e.preventDefault()} // Block wrapper context menu too
+    <div
+      data-vjs-player
+      className="w-full h-full relative overflow-hidden rounded-xl bg-black"
+      onContextMenu={(e) => e.preventDefault()}
     >
-      <div ref={videoRef} className="w-full object-cover" />
+      <style>{`
+        .video-js.vjs-fill {
+          display: block;
+        }
+        .video-js video {
+          object-fit: contain !important;
+        }
+      `}</style>
+      <div ref={videoRef} className="w-full h-full aspect-video" />
     </div>
   );
 };
