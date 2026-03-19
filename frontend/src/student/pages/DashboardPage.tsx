@@ -13,7 +13,12 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 
-const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000'
+const getThumbnailUrl = (path: string | null) => {
+  if (!path) return null
+  if (path.startsWith('http')) return path
+  const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace('/api', '')
+  return `${baseUrl}${path}`
+}
 
 function SkeletonCard() {
   return (
@@ -70,8 +75,17 @@ function CourseCard({ course }: { course: Course }) {
   return (
     <Link to={`/student/courses/${course.id}`} className="group">
       <Card className="h-full bg-card border-border overflow-hidden hover:bg-muted transition-all duration-300 hover:-translate-y-0.5 shadow-sm hover:shadow-lg">
-        <div className={cn('relative h-36 bg-gradient-to-br', colorClass, 'flex items-center justify-center')}>
-          <span className="text-5xl font-bold text-white/30">{initial}</span>
+        <div className={cn('relative h-36 bg-gradient-to-br', colorClass, 'flex items-center justify-center overflow-hidden')}>
+          {course.thumbnail ? (
+            <img
+              src={getThumbnailUrl(course.thumbnail)!}
+              alt={course.title}
+              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+            />
+          ) : (
+            <span className="text-5xl font-bold text-white/30">{initial}</span>
+          )}
           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20">
             <div className="w-12 h-12 bg-white/20 backdrop-blur rounded-full flex items-center justify-center">
               <PlayCircle className="w-7 h-7 text-white" />
@@ -101,7 +115,7 @@ function VideoCard({ video, progress }: { video: Video; progress?: number }) {
         <div className="flex items-center gap-3">
           <div className="relative flex-shrink-0 w-20 h-14 bg-muted rounded-lg overflow-hidden border border-border">
             {video.thumbnail ? (
-              <img src={`${API_BASE}${video.thumbnail}`} alt={video.title} className="w-full h-full object-cover" />
+              <img src={getThumbnailUrl(video.thumbnail)!} alt={video.title} className="w-full h-full object-cover" />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
                 <PlayCircle className="w-6 h-6 text-muted-foreground opacity-30" />

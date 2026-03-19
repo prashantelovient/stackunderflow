@@ -13,7 +13,14 @@ import StarterKit from '@tiptap/starter-kit'
 
 interface Blog { id: string; title: string; slug: string; thumbnail: string | null; content: string; publishDate: string; status: string }
 
-const emptyForm = { title: '', slug: '', content: '', publishDate: '', status: 'draft' }
+const emptyForm = { title: '', slug: '', content: '', publishDate: '', status: 'draft', thumbnail: '' }
+
+const getThumbnailUrl = (path: string | null) => {
+  if (!path) return null
+  if (path.startsWith('http')) return path
+  const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace('/api', '')
+  return `${baseUrl}${path}`
+}
 
 function RichEditor({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const editor = useEditor({
@@ -68,14 +75,31 @@ export default function BlogsPage() {
   const [editItem, setEditItem] = useState<Blog | null>(null)
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [form, setForm] = useState(emptyForm)
+  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null)
+  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null)
 
   const { data: blogs = [], isLoading } = useQuery<Blog[]>({ queryKey: ['blogs'], queryFn: blogService.getAll })
 
-  const openNew = () => { setEditItem(null); setForm(emptyForm); setModalOpen(true) }
-  const openEdit = (b: Blog) => { setEditItem(b); setForm({ title: b.title, slug: b.slug, content: b.content, publishDate: b.publishDate, status: b.status }); setModalOpen(true) }
+  const openNew = () => { setEditItem(null); setForm(emptyForm); setThumbnailFile(null); setThumbnailPreview(null); setModalOpen(true) }
+  const openEdit = (b: Blog) => {
+    setEditItem(b);
+    setForm({ title: b.title, slug: b.slug, content: b.content, publishDate: b.publishDate, status: b.status, thumbnail: b.thumbnail || '' });
+    setThumbnailFile(null);
+    setThumbnailPreview(getThumbnailUrl(b.thumbnail));
+    setModalOpen(true);
+  }
 
   const saveMutation = useMutation({
-    mutationFn: () => editItem ? blogService.update(editItem.id, form) : blogService.create(form),
+    mutationFn: () => {
+      const fd = new FormData()
+      Object.entries(form).forEach(([k, v]) => fd.append(k, v))
+      if (thumbnailFile) {
+        fd.append('thumbnail', thumbnailFile)
+      } else if (form.thumbnail) {
+        fd.append('thumbnail', form.thumbnail)
+      }
+      return editItem ? blogService.update(editItem.id, fd) : blogService.create(fd)
+    },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['blogs'] }); toast.success(editItem ? 'Intel publication updated.' : 'New transmission broadcasted.'); setModalOpen(false) },
     onError: () => toast.error('Security Protocol: Publication rejected by core.'),
   })
@@ -176,12 +200,38 @@ export default function BlogsPage() {
             <Input label="Access Slug (URL Identifier)" value={form.slug} onChange={(e) => setForm((f: typeof emptyForm) => ({ ...f, slug: e.target.value }))} placeholder="auto-generated-id" />
           </div>
 
-          <div className="space-y-3">
-            <label className="text-[11px] font-extrabold uppercase tracking-widest text-muted-foreground ml-1">Visualization (Cover)</label>
-            <div className="p-10 border-2 border-dashed border-border rounded-2xl flex flex-col items-center justify-center gap-3 bg-muted/20 group hover:border-primary/50 transition-colors">
-              <ImageIcon className="w-8 h-8 text-muted-foreground/30 group-hover:text-primary/50 transition-colors" />
-              <input type="file" accept="image/*" className="hidden" id="blog-thumb" />
-              <label htmlFor="blog-thumb" className="text-[10px] font-black uppercase tracking-widest bg-foreground text-background px-5 py-2.5 rounded-xl cursor-pointer hover:opacity-80 transition-all shadow-lg active:scale-95">Link Digital Asset</label>
+          <div className="space-y-4">
+            <label className="text-[11px] font-extrabold uppercase tracking-widest text-muted-foreground ml-1" htmlFor="blog-thumb">Visualization (Cover Image)</label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex items-center gap-4 p-4 bg-muted/20 border border-dashed border-border rounded-2xl group hover:border-primary/50 transition-colors relative">
+                <div className="relative w-20 h-12 flex-shrink-0 rounded-lg overflow-hidden bg-background shadow-inner border border-border/50">
+                  {thumbnailPreview ? (
+                    <img src={thumbnailPreview} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center opacity-30">
+                      <ImageIcon className="w-6 h-6" />
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1">
+                  <input type="file" accept="image/*" id="blog-thumb" onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    if (file) {
+                      setThumbnailFile(file)
+                      setThumbnailPreview(URL.createObjectURL(file))
+                      setForm(f => ({ ...f, thumbnail: '' }))
+                    }
+                  }} className="sr-only" />
+                  <label htmlFor="blog-thumb" className="text-[9px] font-black uppercase tracking-widest bg-primary/10 text-primary px-3 py-1.5 rounded-lg hover:bg-primary hover:text-white transition-all cursor-pointer">Link digital asset</label>
+                </div>
+              </div>
+              <div className="flex flex-col justify-center">
+                <Input label="Or External Image URL" value={form.thumbnail} onChange={(e) => {
+                  setForm(f => ({ ...f, thumbnail: e.target.value }))
+                  setThumbnailFile(null)
+                  setThumbnailPreview(e.target.value)
+                }} placeholder="https://..." className="h-10" />
+              </div>
             </div>
           </div>
 

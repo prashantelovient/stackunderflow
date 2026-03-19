@@ -13,7 +13,13 @@ import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { cn } from '@/utils'
 
-const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000'
+const API_BASE = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace('/api', '')
+
+const getThumbnailUrl = (path: string | null) => {
+  if (!path) return null
+  if (path.startsWith('http')) return path
+  return `${API_BASE}${path}`
+}
 
 function HLSPlayer({
   videoId,
@@ -154,7 +160,7 @@ function SidebarVideoItem({
       <div className="relative flex-shrink-0 w-16 h-11 rounded-lg bg-gray-800 overflow-hidden">
         {video.thumbnail ? (
           <img
-            src={`${API_BASE}${video.thumbnail}`}
+            src={getThumbnailUrl(video.thumbnail)!}
             alt={video.title}
             className="w-full h-full object-cover"
           />

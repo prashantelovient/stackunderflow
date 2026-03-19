@@ -15,7 +15,12 @@ interface CourseItem { id: string; title: string }
 
 const emptyForm = { title: '', description: '', duration: '', courseId: '' }
 
-const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000'
+const getThumbnailUrl = (path: string | null) => {
+  if (!path) return null
+  if (path.startsWith('http')) return path
+  const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace('/api', '')
+  return `${baseUrl}${path}`
+}
 
 export default function VideosPage() {
   const qc = useQueryClient()
@@ -41,10 +46,10 @@ export default function VideosPage() {
   }
   const openEdit = (v: VideoItem) => {
     setEditItem(v);
-    setForm({ title: v.title, description: v.description, duration: v.duration, courseId: v.courseId });
+    setForm({ title: v.title, description: v.description, duration: v.duration, courseId: v.courseId, thumbnail: v.thumbnail || '' } as any);
     setThumbnailFile(null);
     setVideoFile(null);
-    setThumbnailPreview(null);
+    setThumbnailPreview(getThumbnailUrl(v.thumbnail));
     setModalOpen(true);
   }
 
@@ -52,7 +57,11 @@ export default function VideosPage() {
     mutationFn: async () => {
       const fd = new FormData()
       Object.entries(form).forEach(([k, v]) => fd.append(k, v))
-      if (thumbnailFile) fd.append('thumbnail', thumbnailFile)
+      if (thumbnailFile) {
+        fd.append('thumbnail', thumbnailFile)
+      } else if ((form as any).thumbnail) {
+        fd.append('thumbnail', (form as any).thumbnail)
+      }
       if (videoFile) fd.append('video', videoFile)
       return editItem ? videoService.update(editItem.id, fd) : videoService.create(fd)
     },
@@ -78,11 +87,10 @@ export default function VideosPage() {
       id: 'preview', header: 'HLS Segment',
       cell: ({ row }) => {
         const thumb = row.original.thumbnail;
-        const API_URL = API_BASE
         return (
           <div className="relative w-24 h-14 rounded-xl overflow-hidden bg-muted/50 border border-border/50 group/thumb">
             {thumb ? (
-              <img src={`${API_URL}${thumb}`} alt="" className="w-full h-full object-cover group-hover/thumb:scale-110 transition-transform duration-500" />
+              <img src={getThumbnailUrl(thumb)!} alt="" className="w-full h-full object-cover group-hover/thumb:scale-110 transition-transform duration-500" />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
                 <Film className="w-5 h-5 text-muted-foreground/30" />
@@ -192,30 +200,37 @@ export default function VideosPage() {
               options={courses.map((c) => ({ value: c.id, label: c.title }))} placeholder="Assign node..." />
           </div>
 
-          <div className="space-y-3">
-            <label className="text-[11px] font-extrabold uppercase tracking-widest text-muted-foreground ml-1">Visualization (Thumbnail)</label>
-            <div className="flex items-center gap-6 p-4 bg-muted/30 border border-dashed border-border rounded-2xl group hover:border-primary/50 transition-colors">
-              <div className="relative w-28 h-16 rounded-xl overflow-hidden bg-background shadow-inner border border-border/50">
-                {thumbnailPreview ? (
-                  <img src={thumbnailPreview} alt="" className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center opacity-30">
-                    <Video className="w-6 h-6" />
-                  </div>
-                )}
-              </div>
-              <div className="flex-1 space-y-2">
-                <p className="text-[10px] font-bold text-muted-foreground leading-tight">Recommended: 1280x720 PNG/JPG</p>
-                <label className="inline-flex cursor-pointer">
-                  <input type="file" accept="image/*" onChange={(e) => {
+          <div className="space-y-4">
+            <label className="text-[11px] font-extrabold uppercase tracking-widest text-muted-foreground ml-1" htmlFor="video-thumb">Visualization (Thumbnail)</label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex items-center gap-4 p-4 bg-muted/30 border border-dashed border-border rounded-2xl group hover:border-primary/50 transition-colors relative">
+                <div className="relative w-20 h-12 flex-shrink-0 rounded-lg overflow-hidden bg-background shadow-inner border border-border/50">
+                  {thumbnailPreview ? (
+                    <img src={thumbnailPreview} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center opacity-30">
+                      <Video className="w-6 h-6" />
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1">
+                  <input type="file" accept="image/*" id="video-thumb" onChange={(e) => {
                     const file = e.target.files?.[0]
                     if (file) {
                       setThumbnailFile(file)
                       setThumbnailPreview(URL.createObjectURL(file))
+                      setForm(f => ({ ...f, thumbnail: '' }))
                     }
-                  }} className="hidden" />
-                  <span className="text-[10px] font-black uppercase tracking-widest bg-primary/10 text-primary px-3 py-1.5 rounded-lg hover:bg-primary hover:text-white transition-all">Select Image</span>
-                </label>
+                  }} className="sr-only" />
+                  <label htmlFor="video-thumb" className="text-[9px] font-black uppercase tracking-widest bg-primary/10 text-primary px-3 py-1.5 rounded-lg hover:bg-primary hover:text-white transition-all cursor-pointer">Select File</label>
+                </div>
+              </div>
+              <div className="flex flex-col justify-center">
+                <Input label="Or External Image URL" value={(form as any).thumbnail} onChange={(e) => {
+                  setForm(f => ({ ...f, thumbnail: e.target.value }))
+                  setThumbnailFile(null)
+                  setThumbnailPreview(e.target.value)
+                }} placeholder="https://..." className="h-10" />
               </div>
             </div>
           </div>
@@ -269,7 +284,7 @@ export default function VideosPage() {
                   autoplay: true,
                   controls: true,
                   sources: [{
-                    src: `${import.meta.env.VITE_API_URL || API_BASE + '/api'}/stream/${viewVideo.id}?token=${localStorage.getItem('token')}`,
+                    src: `${import.meta.env.VITE_API_URL || (window.location.protocol + '//' + window.location.hostname + ':5000/api')}/stream/${viewVideo.id}?token=${localStorage.getItem('token')}`,
                     type: 'application/x-mpegURL'
                   }]
                 }}

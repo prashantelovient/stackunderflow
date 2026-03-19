@@ -14,7 +14,7 @@ export const uploadVideo = async (req, res, next) => {
     }
 
     const rawVideoPath = videoFile.path;
-    const thumbnailPath = thumbnailFile ? `/thumbnails/${thumbnailFile.filename}` : null;
+    const thumbnailPath = thumbnailFile ? `/thumbnails/${thumbnailFile.filename}` : req.body.thumbnail;
 
     const courseObjectId = courseId && mongoose.Types.ObjectId.isValid(courseId) ? courseId : null;
 
@@ -89,14 +89,23 @@ export const updateVideo = async (req, res, next) => {
 
     const courseObjectId = courseId && mongoose.Types.ObjectId.isValid(courseId) ? courseId : null;
 
+    const updateData = {
+      title,
+      description,
+      duration: duration ? parseInt(duration, 10) : undefined,
+      courseId: courseObjectId,
+    };
+
+    const thumbnailFile = req.files?.['thumbnail']?.[0];
+    if (thumbnailFile) {
+      updateData.thumbnail = `/thumbnails/${thumbnailFile.filename}`;
+    } else if (req.body.thumbnail !== undefined) {
+      updateData.thumbnail = req.body.thumbnail;
+    }
+
     const video = await Video.findByIdAndUpdate(
       req.params.id,
-      {
-        title,
-        description,
-        duration: duration ? parseInt(duration, 10) : undefined,
-        courseId: courseObjectId,
-      },
+      updateData,
       { new: true }
     ).exec();
 

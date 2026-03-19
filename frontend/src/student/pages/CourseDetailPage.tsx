@@ -24,7 +24,12 @@ const gradients = [
     'from-cyan-600 to-sky-700',
 ]
 
-const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000'
+const getThumbnailUrl = (path: string | null) => {
+    if (!path) return null
+    if (path.startsWith('http')) return path
+    const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace('/api', '')
+    return `${baseUrl}${path}`
+}
 
 function LectureRow({
     lecture,
@@ -86,7 +91,7 @@ function LectureRow({
             <div className="relative flex-shrink-0 w-10 h-10 rounded-lg bg-gray-800/50 overflow-hidden flex items-center justify-center">
                 {lecture.type === 'video' && videoData?.thumbnail ? (
                     <img
-                        src={`${API_BASE}${videoData.thumbnail}`}
+                        src={getThumbnailUrl(videoData.thumbnail)!}
                         alt={lecture.title}
                         className="w-full h-full object-cover"
                     />
@@ -241,8 +246,17 @@ export default function CourseDetailPage() {
             </Link>
 
             {/* Hero card */}
-            <div className={cn('relative rounded-3xl overflow-hidden shadow-2xl mb-10', gradientClass)}>
-                <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
+            <div className={cn('relative rounded-3xl overflow-hidden shadow-2xl mb-10 group', gradientClass)}>
+                {course.thumbnail && (
+                    <div className="absolute inset-0">
+                        <img
+                            src={getThumbnailUrl(course.thumbnail)!}
+                            alt=""
+                            className="w-full h-full object-cover opacity-40 group-hover:scale-105 transition-transform duration-700"
+                        />
+                    </div>
+                )}
+                <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/40 to-black/10 backdrop-blur-[2px]" />
                 <div className="relative z-10 p-8 lg:p-12">
                     <span className="inline-block text-[10px] font-bold uppercase tracking-[0.2em] text-white/70 mb-4 bg-white/10 px-2 py-0.5 rounded backdrop-blur-md">Course</span>
                     <h1 className="text-3xl lg:text-5xl font-extrabold text-white leading-tight tracking-tight">{course.title}</h1>

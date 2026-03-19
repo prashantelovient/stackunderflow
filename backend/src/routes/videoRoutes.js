@@ -15,7 +15,11 @@ router.post(
 
 router.get('/', getVideos);
 router.get('/:id', getVideoById);
-router.put('/:id', updateVideo);
+router.put(
+  '/:id',
+  upload.fields([{ name: 'video', maxCount: 1 }, { name: 'thumbnail', maxCount: 1 }]),
+  updateVideo
+);
 router.delete('/:id', deleteVideo);
 
 export default router;

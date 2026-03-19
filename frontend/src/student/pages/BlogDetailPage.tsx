@@ -7,7 +7,12 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 
-const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000'
+const getThumbnailUrl = (path: string | null) => {
+  if (!path) return null
+  if (path.startsWith('http')) return path
+  const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace('/api', '')
+  return `${baseUrl}${path}`
+}
 
 function ReadingTime({ content }: { content: string }) {
   const words = content.replace(/<[^>]+>/g, '').split(/\s+/).length
@@ -79,7 +84,7 @@ export default function BlogDetailPage() {
         {blog.thumbnail ? (
           <div className="w-full h-64 lg:h-[450px] rounded-3xl overflow-hidden shadow-2xl border border-border">
             <img
-              src={`${API_BASE}${blog.thumbnail}`}
+              src={getThumbnailUrl(blog.thumbnail)!}
               alt={blog.title}
               className="w-full h-full object-cover"
             />

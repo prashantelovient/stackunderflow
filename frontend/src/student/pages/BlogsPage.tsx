@@ -19,7 +19,12 @@ const coverColors = [
   'from-cyan-600/60 to-sky-800/60',
 ]
 
-const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000'
+const getThumbnailUrl = (path: string | null) => {
+  if (!path) return null
+  if (path.startsWith('http')) return path
+  const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace('/api', '')
+  return `${baseUrl}${path}`
+}
 
 function BlogCard({ blog, index }: { blog: Blog; index: number }) {
   const color = coverColors[index % coverColors.length]
@@ -37,7 +42,7 @@ function BlogCard({ blog, index }: { blog: Blog; index: number }) {
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
           {blog.thumbnail && (
             <img
-              src={`${API_BASE}${blog.thumbnail}`}
+              src={getThumbnailUrl(blog.thumbnail)!}
               alt={blog.title}
               className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
             />

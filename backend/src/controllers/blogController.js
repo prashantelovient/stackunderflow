@@ -3,12 +3,14 @@ import { Blog } from '../models/index.js';
 
 export const createBlog = async (req, res, next) => {
   try {
-    const { title, slug, thumbnail, content, status } = req.body;
+    const { title, slug, content, status } = req.body;
+    const thumbnailFile = req.file;
+    const thumbnailPath = thumbnailFile ? `/thumbnails/${thumbnailFile.filename}` : req.body.thumbnail;
 
     const blog = await Blog.create({
       title,
       slug,
-      thumbnail,
+      thumbnail: thumbnailPath,
       content,
       status: status || 'draft',
     });
@@ -39,9 +41,9 @@ export const getBlogById = async (req, res, next) => {
     }
 
     const blog = await Blog.findById(req.params.id).exec();
-    
+
     if (!blog) return res.status(404).json({ message: 'Blog not found' });
-    
+
     res.json({
       ...blog.toObject(),
       publishDate: blog.createdAt,
@@ -53,24 +55,32 @@ export const getBlogById = async (req, res, next) => {
 
 export const updateBlog = async (req, res, next) => {
   try {
-    const { title, slug, thumbnail, content, status } = req.body;
-    
+    const { title, slug, content, status } = req.body;
+    const thumbnailFile = req.file;
+
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       return res.status(404).json({ message: 'Blog not found' });
     }
 
+    const updateData = {
+      title,
+      slug,
+      content,
+      status,
+    };
+
+    if (thumbnailFile) {
+      updateData.thumbnail = `/thumbnails/${thumbnailFile.filename}`;
+    } else if (req.body.thumbnail !== undefined) {
+      updateData.thumbnail = req.body.thumbnail;
+    }
+
     const blog = await Blog.findByIdAndUpdate(
       req.params.id,
-      {
-        title,
-        slug,
-        thumbnail,
-        content,
-        status,
-      },
+      updateData,
       { new: true }
     ).exec();
-    
+
     res.json(blog);
   } catch (error) {
     next(error);

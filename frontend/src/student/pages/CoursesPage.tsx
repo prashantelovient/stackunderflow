@@ -18,7 +18,12 @@ const gradients = [
   'from-cyan-600 to-sky-700',
 ]
 
-const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000'
+const getThumbnailUrl = (path: string | null) => {
+  if (!path) return null
+  if (path.startsWith('http')) return path
+  const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace('/api', '')
+  return `${baseUrl}${path}`
+}
 
 function CourseCard({ course, index }: { course: CourseType; index: number }) {
   const gradient = gradients[index % gradients.length]
@@ -32,9 +37,12 @@ function CourseCard({ course, index }: { course: CourseType; index: number }) {
       <div className={cn('h-40 bg-gradient-to-br flex items-center justify-center relative', gradient)}>
         {course.thumbnail ? (
           <img
-            src={`${API_BASE}${course.thumbnail}`}
+            src={getThumbnailUrl(course.thumbnail)!}
             alt={course.title}
             className="w-full h-full object-cover"
+            onError={(e) => {
+              (e.target as HTMLImageElement).style.display = 'none'
+            }}
           />
         ) : (
           <>

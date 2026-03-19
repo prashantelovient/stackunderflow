@@ -12,7 +12,7 @@ interface ModuleItem { id: string; title: string; description: string; order: nu
 interface Course { id: string; title: string; description: string; thumbnail: string | null; categoryId: string; category?: string; moduleCount: number; lectureCount: number; modules?: ModuleItem[] }
 interface VideoItem { id: string; title: string; duration: string }
 
-const emptyCourseForm = { title: '', description: '', categoryId: '' }
+const emptyCourseForm = { title: '', description: '', categoryId: '', thumbnail: '' }
 const emptyModuleForm = { title: '', description: '' }
 const emptyLectureForm = { title: '', description: '', type: 'video', videoId: '', resourceUrl: '', resourceName: '' }
 
@@ -23,6 +23,13 @@ const lectureTypeIcon = (type: string) => {
         case 'material': return <FileText className="w-4 h-4 text-amber-500" />
         default: return <FileVideo className="w-4 h-4 text-muted-foreground" />
     }
+}
+
+const getThumbnailUrl = (path: string | null) => {
+    if (!path) return null
+    if (path.startsWith('http')) return path
+    const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace('/api', '')
+    return `${baseUrl}${path}`
 }
 
 export default function CoursesPage() {
@@ -80,10 +87,11 @@ export default function CoursesPage() {
         setCourseForm({
             title: c.title,
             description: c.description,
-            categoryId: (c as any).categoryId || ''
+            categoryId: (c as any).categoryId || '',
+            thumbnail: c.thumbnail || ''
         });
         setThumbnailFile(null);
-        setThumbnailPreview(c.thumbnail ? `${import.meta.env.VITE_API_URL?.replace('/api', '')}${c.thumbnail}` : null);
+        setThumbnailPreview(getThumbnailUrl(c.thumbnail));
         setCourseModalOpen(true)
     }
 
@@ -93,7 +101,12 @@ export default function CoursesPage() {
             formData.append('title', courseForm.title)
             formData.append('description', courseForm.description)
             formData.append('categoryId', courseForm.categoryId)
-            if (thumbnailFile) formData.append('thumbnail', thumbnailFile)
+
+            if (thumbnailFile) {
+                formData.append('thumbnail', thumbnailFile)
+            } else if (courseForm.thumbnail) {
+                formData.append('thumbnail', courseForm.thumbnail)
+            }
 
             return editCourse
                 ? courseService.update(editCourse.id, formData)
@@ -184,10 +197,22 @@ export default function CoursesPage() {
                         {/* Course Header */}
                         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 p-6 sm:p-8 cursor-pointer relative" onClick={() => toggleCourse(course.id)}>
                             <div className={cn(
-                                "w-20 h-20 rounded-[1.5rem] flex items-center justify-center flex-shrink-0 transition-transform duration-500 group-hover:scale-105 shadow-xl",
-                                "bg-gradient-to-br from-primary via-primary/80 to-indigo-600"
+                                "w-20 h-20 rounded-[1.5rem] flex items-center justify-center flex-shrink-0 transition-transform duration-500 group-hover:scale-105 shadow-xl overflow-hidden border border-border/20",
+                                !course.thumbnail && "bg-gradient-to-br from-primary via-primary/80 to-indigo-600"
                             )}>
-                                <GraduationCap className="w-10 h-10 text-white" />
+                                {course.thumbnail ? (
+                                    <img
+                                        src={getThumbnailUrl(course.thumbnail)}
+                                        alt={course.title}
+                                        className="w-full h-full object-cover"
+                                        onError={(e) => {
+                                            (e.target as HTMLImageElement).src = ''; // Clear broken link
+                                            (e.target as HTMLImageElement).className = 'hidden';
+                                        }}
+                                    />
+                                ) : (
+                                    <GraduationCap className="w-10 h-10 text-white" />
+                                )}
                             </div>
                             <div className="flex-1 min-w-0 space-y-1">
                                 <div className="flex items-center gap-3">
@@ -347,22 +372,39 @@ export default function CoursesPage() {
                     </div>
                     <Textarea label="Strategic Description" value={courseForm.description} onChange={(e) => setCourseForm(f => ({ ...f, description: e.target.value }))} placeholder="Explain the primary objective..." />
 
-                    <div className="space-y-3">
-                        <label className="text-[11px] font-extrabold uppercase tracking-widest text-muted-foreground ml-1">Visualization (Cover Image)</label>
-                        <div className="p-10 border-2 border-dashed border-border rounded-2xl flex flex-col items-center justify-center gap-4 bg-muted/20 group hover:border-primary/50 transition-colors">
-                            {thumbnailPreview ? (
-                                <img src={thumbnailPreview} alt="Preview" className="w-48 h-24 object-cover rounded-xl shadow-lg border border-border" />
-                            ) : (
-                                <BookOpen className="w-8 h-8 text-muted-foreground/30 group-hover:text-primary/50 transition-colors" />
-                            )}
-                            <input type="file" accept="image/*" className="hidden" id="course-thumb" onChange={(e) => {
-                                const file = e.target.files?.[0]
-                                if (file) {
-                                    setThumbnailFile(file)
-                                    setThumbnailPreview(URL.createObjectURL(file))
-                                }
-                            }} />
-                            <label htmlFor="course-thumb" className="text-[10px] font-black uppercase tracking-widest bg-foreground text-background px-5 py-2.5 rounded-xl cursor-pointer hover:opacity-80 transition-all shadow-lg active:scale-95">Link Digital Graphic</label>
+                    <div className="space-y-4">
+                        <label className="text-[11px] font-extrabold uppercase tracking-widest text-muted-foreground ml-1" htmlFor="course-thumb">Visualization (Cover Image)</label>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="p-8 border-2 border-dashed border-border rounded-2xl flex flex-col items-center justify-center gap-4 bg-muted/20 group hover:border-primary/50 transition-colors relative">
+                                {thumbnailPreview ? (
+                                    <img src={thumbnailPreview} alt="Preview" className="w-full aspect-video object-cover rounded-xl shadow-lg border border-border" />
+                                ) : (
+                                    <BookOpen className="w-8 h-8 text-muted-foreground/30 group-hover:text-primary/50 transition-colors" />
+                                )}
+                                <input type="file" accept="image/*" className="sr-only" id="course-thumb" onChange={(e) => {
+                                    const file = e.target.files?.[0]
+                                    if (file) {
+                                        setThumbnailFile(file)
+                                        setThumbnailPreview(URL.createObjectURL(file))
+                                        setCourseForm(f => ({ ...f, thumbnail: '' })) // Clear URL if file selected
+                                    }
+                                }} />
+                                <label htmlFor="course-thumb" className="text-[10px] font-black uppercase tracking-widest bg-foreground text-background px-5 py-2.5 rounded-xl cursor-pointer hover:opacity-80 transition-all shadow-lg active:scale-95">Link Digital Graphic</label>
+                            </div>
+                            <div className="flex flex-col justify-center space-y-4">
+                                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest text-center">OR PASTE RESOURCE LINK</p>
+                                <Input
+                                    label="External Graphic URL"
+                                    value={courseForm.thumbnail}
+                                    onChange={(e) => {
+                                        setCourseForm(f => ({ ...f, thumbnail: e.target.value }))
+                                        setThumbnailFile(null)
+                                        setThumbnailPreview(e.target.value)
+                                    }}
+                                    placeholder="https://images.unsplash.com/..."
+                                />
+                                <p className="text-[9px] font-medium text-muted-foreground italic leading-relaxed">Accepted formats: JPG, PNG, WEBP. External links must be public.</p>
+                            </div>
                         </div>
                     </div>
 
