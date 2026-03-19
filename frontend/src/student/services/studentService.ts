@@ -1,5 +1,5 @@
 import studentApiClient from './studentApiClient'
-import apiClient from './apiClient'
+import apiClient from '@/admin/services/apiClient'
 
 // ---- Admin student management functions (used by admin StudentsPage) ----
 export const getAll = async () => {

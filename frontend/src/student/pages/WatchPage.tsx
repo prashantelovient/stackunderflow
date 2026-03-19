@@ -7,8 +7,8 @@ import {
 } from 'lucide-react'
 import videojs from 'video.js'
 import 'video.js/dist/video-js.css'
-import { studentVideos, playlists, watchProgress } from '@/services/studentService'
-import type { Video } from '@/services/studentService'
+import { studentVideos, playlists, watchProgress } from '@/student/services/studentService'
+import type { Video } from '@/student/services/studentService'
 import { cn } from '@/utils'
 
 const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000'
@@ -441,3 +441,4 @@ export default function WatchPage() {
     </div>
   )
 }
+

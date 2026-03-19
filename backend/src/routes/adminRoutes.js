@@ -1,6 +1,7 @@
 import express from 'express';
-import { login, register } from '../controllers/adminController.js';
+import { login, register, getAnalytics } from '../controllers/adminController.js';
 import { validate } from '../middleware/validator.js';
+import { authMiddleware } from '../middleware/authMiddleware.js';
 import { z } from 'zod';
 
 const router = express.Router();
@@ -17,5 +18,8 @@ const loginSchema = z.object({
 router.post('/login', validate(loginSchema), login);
 // Example route to register initial admin, might not be public in actual app
 router.post('/register', validate(loginSchema), register);
+
+// Protected analytics route for dashboard
+router.get('/analytics', authMiddleware, getAnalytics);
 
 export default router;

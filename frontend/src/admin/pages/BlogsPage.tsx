@@ -2,11 +2,11 @@ import { useState, useMemo } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { type ColumnDef } from '@tanstack/react-table'
 import { Plus, Pencil, Trash2 } from 'lucide-react'
-import { blogService } from '@/services'
-import { DataTable } from '@/components/DataTable'
-import { PageHeader, Badge, Spinner, Card, CardContent, Button, Input, Textarea, Select } from '@/components/ui'
-import { ConfirmModal, Modal } from '@/components/Modals'
-import { toast, ToastContainer } from '@/components/Modals'
+import { blogService } from '@/admin/services'
+import { DataTable } from '@/admin/components/DataTable'
+import { PageHeader, Badge, Spinner, Card, CardContent, Button, Input, Textarea, Select } from '@/admin/components/ui'
+import { ConfirmModal, Modal } from '@/admin/components/Modals'
+import { toast, ToastContainer } from '@/admin/components/Modals'
 import { formatDate, generateSlug } from '@/utils'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
@@ -134,3 +134,4 @@ export default function BlogsPage() {
     </div>
   )
 }
+

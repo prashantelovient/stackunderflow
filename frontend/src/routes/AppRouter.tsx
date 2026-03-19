@@ -1,40 +1,42 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { useAuthStore } from '@/store/authStore'
-import { useStudentAuthStore } from '@/store/studentAuthStore'
+import { useAuthStore } from '@/admin/store/authStore'
+import { useStudentAuthStore } from '@/student/store/studentAuthStore'
 
-// Admin
-import AdminLayout from '@/layouts/AdminLayout'
-import LoginPage from '@/pages/LoginPage'
-import DashboardPage from '@/pages/DashboardPage'
-import StudentsPage from '@/pages/StudentsPage'
-import VideosPage from '@/pages/VideosPage'
-import PlaylistsPage from '@/pages/PlaylistsPage'
-import BlogsPage from '@/pages/BlogsPage'
-import CategoriesPage from '@/pages/CategoriesPage'
-import SettingsPage from '@/pages/SettingsPage'
+// ── Admin ────────────────────────────────────────────────────────────────────
+import AdminLayout from '@/admin/layout/AdminLayout'
+import AdminLoginPage from '@/admin/pages/LoginPage'
+import DashboardPage from '@/admin/pages/DashboardPage'
+import StudentsPage from '@/admin/pages/StudentsPage'
+import VideosPage from '@/admin/pages/VideosPage'
+import PlaylistsPage from '@/admin/pages/PlaylistsPage'
+import AdminBlogsPage from '@/admin/pages/BlogsPage'
+import CategoriesPage from '@/admin/pages/CategoriesPage'
+import SettingsPage from '@/admin/pages/SettingsPage'
 
-// Student
-import StudentLayout from '@/layouts/StudentLayout'
-import StudentLoginPage from '@/pages/student/LoginPage'
-import StudentRegisterPage from '@/pages/student/RegisterPage'
-import StudentDashboardPage from '@/pages/student/DashboardPage'
-import CoursesPage from '@/pages/student/CoursesPage'
-import PlaylistDetailPage from '@/pages/student/PlaylistDetailPage'
-import WatchPage from '@/pages/student/WatchPage'
-import StudentBlogsPage from '@/pages/student/BlogsPage'
-import BlogDetailPage from '@/pages/student/BlogDetailPage'
-import ProfilePage from '@/pages/student/ProfilePage'
+// ── Student ───────────────────────────────────────────────────────────────────
+import StudentLayout from '@/student/layout/StudentLayout'
+import StudentLoginPage from '@/student/pages/LoginPage'
+import StudentRegisterPage from '@/student/pages/RegisterPage'
+import StudentDashboardPage from '@/student/pages/DashboardPage'
+import CoursesPage from '@/student/pages/CoursesPage'
+import PlaylistDetailPage from '@/student/pages/PlaylistDetailPage'
+import WatchPage from '@/student/pages/WatchPage'
+import StudentBlogsPage from '@/student/pages/BlogsPage'
+import BlogDetailPage from '@/student/pages/BlogDetailPage'
+import ProfilePage from '@/student/pages/ProfilePage'
 
-function AdminProtectedRoute({ children }: { children: React.ReactNode }) {
+// ── Route guards ──────────────────────────────────────────────────────────────
+function AdminRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
   return isAuthenticated ? <>{children}</> : <Navigate to="/admin/login" replace />
 }
 
-function StudentProtectedRoute({ children }: { children: React.ReactNode }) {
+function StudentRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = useStudentAuthStore((s) => s.isAuthenticated)
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />
 }
 
+// ── Router ────────────────────────────────────────────────────────────────────
 export default function AppRouter() {
   return (
     <BrowserRouter>
@@ -42,52 +44,52 @@ export default function AppRouter() {
         {/* Root → student login */}
         <Route path="/" element={<Navigate to="/login" replace />} />
 
-        {/* Student public */}
-        <Route path="/login" element={<StudentLoginPage />} />
+        {/* ── Student public ──────────────────────────────── */}
+        <Route path="/login"    element={<StudentLoginPage />} />
         <Route path="/register" element={<StudentRegisterPage />} />
 
-        {/* Student protected */}
+        {/* ── Student protected ───────────────────────────── */}
         <Route
           path="/student"
           element={
-            <StudentProtectedRoute>
+            <StudentRoute>
               <StudentLayout />
-            </StudentProtectedRoute>
+            </StudentRoute>
           }
         >
-          <Route index element={<Navigate to="/student/dashboard" replace />} />
-          <Route path="dashboard" element={<StudentDashboardPage />} />
-          <Route path="courses" element={<CoursesPage />} />
-          <Route path="courses/:id" element={<PlaylistDetailPage />} />
-          <Route path="watch/:videoId" element={<WatchPage />} />
-          <Route path="blogs" element={<StudentBlogsPage />} />
-          <Route path="blog/:id" element={<BlogDetailPage />} />
-          <Route path="profile" element={<ProfilePage />} />
+          <Route index                  element={<Navigate to="/student/dashboard" replace />} />
+          <Route path="dashboard"       element={<StudentDashboardPage />} />
+          <Route path="courses"         element={<CoursesPage />} />
+          <Route path="courses/:id"     element={<PlaylistDetailPage />} />
+          <Route path="watch/:videoId"  element={<WatchPage />} />
+          <Route path="blogs"           element={<StudentBlogsPage />} />
+          <Route path="blog/:id"        element={<BlogDetailPage />} />
+          <Route path="profile"         element={<ProfilePage />} />
         </Route>
 
-        {/* Admin public */}
-        <Route path="/admin/login" element={<LoginPage />} />
+        {/* ── Admin public ────────────────────────────────── */}
+        <Route path="/admin/login" element={<AdminLoginPage />} />
 
-        {/* Admin protected */}
+        {/* ── Admin protected ─────────────────────────────── */}
         <Route
           path="/admin"
           element={
-            <AdminProtectedRoute>
+            <AdminRoute>
               <AdminLayout />
-            </AdminProtectedRoute>
+            </AdminRoute>
           }
         >
-          <Route index element={<Navigate to="/admin/dashboard" replace />} />
-          <Route path="dashboard" element={<DashboardPage />} />
-          <Route path="students" element={<StudentsPage />} />
-          <Route path="videos" element={<VideosPage />} />
-          <Route path="playlists" element={<PlaylistsPage />} />
-          <Route path="blogs" element={<BlogsPage />} />
-          <Route path="categories" element={<CategoriesPage />} />
-          <Route path="settings" element={<SettingsPage />} />
+          <Route index               element={<Navigate to="/admin/dashboard" replace />} />
+          <Route path="dashboard"    element={<DashboardPage />} />
+          <Route path="students"     element={<StudentsPage />} />
+          <Route path="videos"       element={<VideosPage />} />
+          <Route path="playlists"    element={<PlaylistsPage />} />
+          <Route path="blogs"        element={<AdminBlogsPage />} />
+          <Route path="categories"   element={<CategoriesPage />} />
+          <Route path="settings"     element={<SettingsPage />} />
         </Route>
 
-        {/* Wildcard */}
+        {/* Catch-all */}
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>

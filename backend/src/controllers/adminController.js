@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { Admin } from '../models/index.js';
+import { Admin, Student, Video, Playlist, Blog } from '../models/index.js';
 
 export const register = async (req, res, next) => {
   try {
@@ -84,6 +84,62 @@ export const login = async (req, res, next) => {
       },
     });
 
+  } catch (error) {
+    next(error);
+  }
+};
+
+const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+export const getAnalytics = async (req, res, next) => {
+  try {
+    const now = new Date();
+    const twelveMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 11, 1);
+
+    const [
+      totalStudents,
+      totalVideos,
+      totalPlaylists,
+      totalBlogs,
+      studentAgg,
+      videoAgg,
+    ] = await Promise.all([
+      Student.countDocuments(),
+      Video.countDocuments(),
+      Playlist.countDocuments(),
+      Blog.countDocuments(),
+      Student.aggregate([
+        { $match: { createdAt: { $gte: twelveMonthsAgo } } },
+        { $group: { _id: { year: { $year: '$createdAt' }, month: { $month: '$createdAt' } }, count: { $sum: 1 } } },
+        { $sort: { '_id.year': 1, '_id.month': 1 } },
+      ]),
+      Video.aggregate([
+        { $match: { createdAt: { $gte: twelveMonthsAgo } } },
+        { $group: { _id: { year: { $year: '$createdAt' }, month: { $month: '$createdAt' } }, count: { $sum: 1 } } },
+        { $sort: { '_id.year': 1, '_id.month': 1 } },
+      ]),
+    ]);
+
+    const buildMonthlyData = (agg) => {
+      const dataMap = {};
+      agg.forEach(({ _id, count }) => {
+        dataMap[`${_id.year}-${_id.month}`] = count;
+      });
+      return Array.from({ length: 12 }, (_, i) => {
+        const d = new Date(now.getFullYear(), now.getMonth() - 11 + i, 1);
+        const key = `${d.getFullYear()}-${d.getMonth() + 1}`;
+        return { month: MONTH_NAMES[d.getMonth()], count: dataMap[key] || 0 };
+      });
+    };
+
+    res.json({
+      totalStudents,
+      totalVideos,
+      totalPlaylists,
+      totalBlogs,
+      studentsByMonth: buildMonthlyData(studentAgg),
+      videosByMonth: buildMonthlyData(videoAgg),
+    });
   } catch (error) {
     next(error);
   }

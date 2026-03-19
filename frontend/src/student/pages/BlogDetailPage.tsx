@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link, useParams } from 'react-router-dom'
 import { ArrowLeft, Calendar, BookOpen, Clock } from 'lucide-react'
-import { studentBlogs } from '@/services/studentService'
+import { studentBlogs } from '@/student/services/studentService'
 import { formatDate } from '@/utils'
 
 function ReadingTime({ content }: { content: string }) {
@@ -116,3 +116,4 @@ export default function BlogDetailPage() {
     </div>
   )
 }
+

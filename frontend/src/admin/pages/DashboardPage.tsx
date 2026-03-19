@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
-import { analyticsService } from '@/services'
-import { Card, CardContent, CardHeader, PageHeader, Spinner } from '@/components/ui'
-import { Users, Video, ListVideo, BookOpen, TrendingUp } from 'lucide-react'
+import { analyticsService } from '@/admin/services'
+import { Card, CardContent, CardHeader, PageHeader, Spinner } from '@/admin/components/ui'
+import { Users, Video, ListVideo, BookOpen, TrendingUp, AlertCircle } from 'lucide-react'
 import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, Legend
@@ -10,22 +10,29 @@ import { useThemeStore } from '@/store/themeStore'
 
 export default function DashboardPage() {
   const { isDark } = useThemeStore()
-  const { data, isLoading } = useQuery({ queryKey: ['analytics'], queryFn: analyticsService.get })
+  const { data, isLoading, isError } = useQuery({ queryKey: ['analytics'], queryFn: analyticsService.get })
 
   if (isLoading) return <div className="flex items-center justify-center h-64"><Spinner /></div>
 
+  if (isError) return (
+    <div>
+      <PageHeader title="Dashboard" subtitle="Welcome back! Here's what's happening on your platform." />
+      <div className="flex items-center gap-3 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-xl text-red-700 dark:text-red-400">
+        <AlertCircle className="w-5 h-5 shrink-0" />
+        <p className="text-sm font-medium">Could not load analytics. Make sure the backend server is running on <code>http://localhost:5000</code>.</p>
+      </div>
+    </div>
+  )
+
   const stats = [
-    { label: 'Total Students', value: data?.totalStudents.toLocaleString(), icon: Users, color: 'blue', change: '+12%' },
-    { label: 'Total Videos', value: data?.totalVideos, icon: Video, color: 'purple', change: '+5%' },
-    { label: 'Total Playlists', value: data?.totalPlaylists, icon: ListVideo, color: 'emerald', change: '+2%' },
-    { label: 'Total Blogs', value: data?.totalBlogs, icon: BookOpen, color: 'orange', change: '+8%' },
+    { label: 'Total Students', value: (data?.totalStudents ?? 0).toLocaleString(), icon: Users, color: 'amber', change: '+12%' },
+    { label: 'Total Videos', value: (data?.totalVideos ?? 0).toLocaleString(), icon: Video, color: 'amber', change: '+5%' },
+    { label: 'Total Playlists', value: (data?.totalPlaylists ?? 0).toLocaleString(), icon: ListVideo, color: 'amber', change: '+2%' },
+    { label: 'Total Blogs', value: (data?.totalBlogs ?? 0).toLocaleString(), icon: BookOpen, color: 'amber', change: '+8%' },
   ]
 
   const colorMap: Record<string, string> = {
-    blue: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
-    purple: 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400',
-    emerald: 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400',
-    orange: 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400',
+    amber: 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400',
   }
 
   const chartTheme = { textColor: isDark ? '#9ca3af' : '#6b7280', gridColor: isDark ? '#1f2937' : '#f3f4f6' }
@@ -67,15 +74,15 @@ export default function DashboardPage() {
               <AreaChart data={data?.studentsByMonth} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
                 <defs>
                   <linearGradient id="colorStudents" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                    <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#f59e0b" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.gridColor} />
                 <XAxis dataKey="month" tick={{ fill: chartTheme.textColor, fontSize: 12 }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fill: chartTheme.textColor, fontSize: 12 }} axisLine={false} tickLine={false} />
                 <Tooltip contentStyle={{ background: isDark ? '#1f2937' : '#fff', border: `1px solid ${isDark ? '#374151' : '#e5e7eb'}`, borderRadius: 8 }} labelStyle={{ color: isDark ? '#f9fafb' : '#111' }} />
-                <Area type="monotone" dataKey="count" name="Students" stroke="#3b82f6" strokeWidth={2} fill="url(#colorStudents)" />
+                <Area type="monotone" dataKey="count" name="Students" stroke="#f59e0b" strokeWidth={2} fill="url(#colorStudents)" />
               </AreaChart>
             </ResponsiveContainer>
           </CardContent>
@@ -94,7 +101,7 @@ export default function DashboardPage() {
                 <YAxis tick={{ fill: chartTheme.textColor, fontSize: 12 }} axisLine={false} tickLine={false} />
                 <Tooltip contentStyle={{ background: isDark ? '#1f2937' : '#fff', border: `1px solid ${isDark ? '#374151' : '#e5e7eb'}`, borderRadius: 8 }} labelStyle={{ color: isDark ? '#f9fafb' : '#111' }} />
                 <Legend />
-                <Bar dataKey="count" name="Videos" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="count" name="Videos" fill="#d97706" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -103,3 +110,4 @@ export default function DashboardPage() {
     </div>
   )
 }
+

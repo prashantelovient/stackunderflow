@@ -1,8 +1,8 @@
 import { useState, FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { GraduationCap, Eye, EyeOff, Loader2, Mail, Lock } from 'lucide-react'
-import { useStudentAuthStore } from '@/store/studentAuthStore'
-import { studentAuth } from '@/services/studentService'
+import { useStudentAuthStore } from '@/student/store/studentAuthStore'
+import { studentAuth } from '@/student/services/studentService'
 
 export default function StudentLoginPage() {
   const [email, setEmail] = useState('')
@@ -134,3 +134,4 @@ export default function StudentLoginPage() {
     </div>
   )
 }
+

@@ -3,8 +3,8 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import {
   ArrowLeft, PlayCircle, CheckCircle2, Clock, PlaySquare, ChevronRight, Lock
 } from 'lucide-react'
-import { playlists, studentVideos, watchProgress } from '@/services/studentService'
-import type { Video } from '@/services/studentService'
+import { playlists, studentVideos, watchProgress } from '@/student/services/studentService'
+import type { Video } from '@/student/services/studentService'
 import { cn } from '@/utils'
 
 const gradients = [
@@ -268,3 +268,4 @@ export default function PlaylistDetailPage() {
     </div>
   )
 }
+

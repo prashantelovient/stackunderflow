@@ -24,6 +24,10 @@
     --ring: 221.2 83.2% 53.3%;
     --radius: 0.5rem;
     --sidebar-width: 260px;
+
+    /* Lucide icon global color tokens */
+    --icon-color: #d97706;          /* amber-600  – yellow in light mode */
+    --icon-color-dark: #ffffff;     /* white in dark mode */
   }
 
   .dark {
@@ -60,8 +64,76 @@
   }
 }
 
+/* ─── Global Lucide Icon Colour Scheme ──────────────────────────────────────
+   All SVGs produced by lucide-react share the class `lucide`.
+   Default: amber / yellow in light mode, white in dark mode.
+   Semantic override classes (red/green) take precedence via specificity.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+/* Light mode → yellow / amber */
+svg.lucide {
+  color: #d97706;   /* amber-600 */
+  transition: color 0.15s ease;
+}
+
+/* Dark mode → white */
+.dark svg.lucide {
+  color: #ffffff;
+}
+
+/* ── Explicit utility overrides (use className="lucide-yellow" etc.) ── */
+svg.lucide-yellow  { color: #f59e0b !important; }   /* amber-400 – brighter yellow */
+svg.lucide-white   { color: #ffffff !important; }
+svg.lucide-muted   { color: #9ca3af !important; }   /* gray-400 */
+
+/* ── Semantic: red danger icons (Trash2, Ban, AlertCircle, AlertTriangle, X) ── */
+.text-red-500 svg.lucide,
+.text-red-400 svg.lucide,
+.hover\:text-red-300:hover svg.lucide,
+button.text-red-500 svg.lucide,
+[class*="text-red"] svg.lucide {
+  color: inherit;
+}
+
+/* ── Semantic: green success icons (CheckCircle) ── */
+.text-green-500 svg.lucide,
+.text-green-400 svg.lucide,
+button.text-green-500 svg.lucide,
+[class*="text-green"] svg.lucide {
+  color: inherit;
+}
+
+/* ── Semantic: blue info/action icons (Pencil, Play, ChevronLeft/Right, Search) ── */
+.text-blue-500 svg.lucide,
+.text-blue-600 svg.lucide,
+.text-blue-400 svg.lucide,
+[class*="text-blue"] svg.lucide {
+  color: inherit;
+}
+
+/* ── Semantic: emerald (Play/view action) ── */
+.text-emerald-500 svg.lucide,
+[class*="text-emerald"] svg.lucide {
+  color: inherit;
+}
+
+/* ── Semantic: violet / indigo (student sidebar) ── */
+.text-violet-400 svg.lucide,
+[class*="text-violet"] svg.lucide {
+  color: inherit;
+}
+
+/* ── Icons explicitly placed on colored backgrounds stay white ── */
+.bg-blue-600 svg.lucide,
+.bg-gradient-to-br svg.lucide,
+[class*="from-violet"] svg.lucide,
+[class*="from-blue"] svg.lucide {
+  color: #ffffff !important;
+}
+
 /* Scrollbar */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: hsl(var(--muted-foreground) / 0.3); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: hsl(var(--muted-foreground) / 0.5); }
+

@@ -2,12 +2,12 @@ import { useState, useMemo } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { type ColumnDef } from '@tanstack/react-table'
 import { Plus, Pencil, Trash2, Video, Play } from 'lucide-react'
-import { videoService, playlistService } from '@/services'
-import { DataTable } from '@/components/DataTable'
-import VideoPlayer from '@/components/VideoPlayer'
-import { PageHeader, Badge, Spinner, Card, CardContent, Button, Input, Textarea, Select } from '@/components/ui'
-import { ConfirmModal, Modal } from '@/components/Modals'
-import { toast, ToastContainer } from '@/components/Modals'
+import { videoService, playlistService } from '@/admin/services'
+import { DataTable } from '@/admin/components/DataTable'
+import VideoPlayer from '@/admin/components/VideoPlayer'
+import { PageHeader, Badge, Spinner, Card, CardContent, Button, Input, Textarea, Select } from '@/admin/components/ui'
+import { ConfirmModal, Modal } from '@/admin/components/Modals'
+import { toast, ToastContainer } from '@/admin/components/Modals'
 import { formatDate } from '@/utils'
 
 interface VideoItem { id: string; title: string; description: string; thumbnail: null; playlistId: string; playlistTitle: string; duration: string; uploadDate: string }
@@ -179,3 +179,4 @@ export default function VideosPage() {
     </div>
   )
 }
+

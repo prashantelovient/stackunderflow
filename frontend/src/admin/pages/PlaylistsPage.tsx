@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Plus, Pencil, Trash2, GripVertical, ListVideo } from 'lucide-react'
-import { playlistService, videoService } from '@/services'
-import { PageHeader, Badge, Spinner, Card, CardContent, CardHeader, Button, Input, Textarea } from '@/components/ui'
-import { ConfirmModal, Modal } from '@/components/Modals'
-import { toast, ToastContainer } from '@/components/Modals'
+import { playlistService, videoService } from '@/admin/services'
+import { PageHeader, Badge, Spinner, Card, CardContent, CardHeader, Button, Input, Textarea } from '@/admin/components/ui'
+import { ConfirmModal, Modal } from '@/admin/components/Modals'
+import { toast, ToastContainer } from '@/admin/components/Modals'
 import {
   DndContext, closestCenter, PointerSensor, useSensor, useSensors, type DragEndEvent
 } from '@dnd-kit/core'
@@ -155,3 +155,4 @@ export default function PlaylistsPage() {
     </div>
   )
 }
+

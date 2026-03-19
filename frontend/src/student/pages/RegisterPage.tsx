@@ -1,8 +1,8 @@
 import { useState, FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { GraduationCap, Eye, EyeOff, Loader2, Mail, Lock, User } from 'lucide-react'
-import { useStudentAuthStore } from '@/store/studentAuthStore'
-import { studentAuth } from '@/services/studentService'
+import { useStudentAuthStore } from '@/student/store/studentAuthStore'
+import { studentAuth } from '@/student/services/studentService'
 
 export default function StudentRegisterPage() {
   const [name, setName] = useState('')
@@ -166,3 +166,4 @@ export default function StudentRegisterPage() {
     </div>
   )
 }
+

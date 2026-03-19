@@ -2,11 +2,11 @@ import { useState, useMemo } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { type ColumnDef } from '@tanstack/react-table'
 import { Trash2, Ban, CheckCircle } from 'lucide-react'
-import { studentService } from '@/services'
-import { DataTable } from '@/components/DataTable'
-import { PageHeader, Badge, Spinner, Card, CardContent } from '@/components/ui'
-import { ConfirmModal } from '@/components/Modals'
-import { toast, ToastContainer } from '@/components/Modals'
+import { studentService } from '@/admin/services'
+import { DataTable } from '@/admin/components/DataTable'
+import { PageHeader, Badge, Spinner, Card, CardContent } from '@/admin/components/ui'
+import { ConfirmModal } from '@/admin/components/Modals'
+import { toast, ToastContainer } from '@/admin/components/Modals'
 import { formatDate } from '@/utils'
 
 interface Student {
@@ -100,3 +100,4 @@ export default function StudentsPage() {
     </div>
   )
 }
+

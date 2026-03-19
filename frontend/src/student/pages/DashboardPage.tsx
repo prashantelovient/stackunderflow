@@ -4,9 +4,9 @@ import {
   PlayCircle, BookOpen, Clock, Trophy, TrendingUp,
   ChevronRight, Flame, ArrowRight, ListVideo
 } from 'lucide-react'
-import { useStudentAuthStore } from '@/store/studentAuthStore'
-import { playlists, studentVideos, watchProgress } from '@/services/studentService'
-import type { Playlist, Video, WatchProgress } from '@/services/studentService'
+import { useStudentAuthStore } from '@/student/store/studentAuthStore'
+import { playlists, studentVideos, watchProgress } from '@/student/services/studentService'
+import type { Playlist, Video, WatchProgress } from '@/student/services/studentService'
 import { cn } from '@/utils'
 
 function SkeletonCard({ className }: { className?: string }) {
@@ -327,3 +327,4 @@ export default function StudentDashboardPage() {
     </div>
   )
 }
+

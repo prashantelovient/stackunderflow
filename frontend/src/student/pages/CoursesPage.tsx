@@ -2,8 +2,8 @@ import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { Search, ListVideo, PlayCircle, ChevronRight, Clock } from 'lucide-react'
 import { useState } from 'react'
-import { playlists, studentVideos } from '@/services/studentService'
-import type { Playlist, Video } from '@/services/studentService'
+import { playlists, studentVideos } from '@/student/services/studentService'
+import type { Playlist, Video } from '@/student/services/studentService'
 import { cn } from '@/utils'
 
 const gradients = [
@@ -139,3 +139,4 @@ export default function CoursesPage() {
     </div>
   )
 }
+

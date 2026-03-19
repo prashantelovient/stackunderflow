@@ -4,7 +4,7 @@ import {
   Tag, Settings, LogOut, Menu, X, Bell, Sun, Moon, GraduationCap
 } from 'lucide-react'
 import { useState } from 'react'
-import { useAuthStore } from '@/store/authStore'
+import { useAuthStore } from '@/admin/store/authStore'
 import { useThemeStore } from '@/store/themeStore'
 import { cn } from '@/utils'
 
@@ -62,13 +62,17 @@ export default function AdminLayout() {
               cn(
                 'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 group',
                 isActive
-                  ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                  ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400'
                   : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'
               )
             }
           >
-            <Icon className="w-5 h-5 flex-shrink-0" />
-            {(mobile || sidebarOpen) && <span>{label}</span>}
+            {({ isActive }) => (
+              <>
+                <Icon className={cn('w-5 h-5 flex-shrink-0', isActive ? 'text-amber-500 dark:text-amber-400' : '')} />
+                {(mobile || sidebarOpen) && <span>{label}</span>}
+              </>
+            )}
           </NavLink>
         ))}
       </nav>
@@ -152,3 +156,4 @@ export default function AdminLayout() {
     </div>
   )
 }
+

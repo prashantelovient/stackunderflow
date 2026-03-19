@@ -4,7 +4,7 @@ import {
   Sun, Moon, GraduationCap, PlaySquare, Bell, ChevronRight
 } from 'lucide-react'
 import { useState } from 'react'
-import { useStudentAuthStore } from '@/store/studentAuthStore'
+import { useStudentAuthStore } from '@/student/store/studentAuthStore'
 import { useThemeStore } from '@/store/themeStore'
 import { cn } from '@/utils'
 
@@ -45,13 +45,13 @@ export default function StudentLayout() {
     >
       {/* Logo */}
       <div className="flex items-center gap-3 px-5 py-5 border-b border-white/5">
-        <div className="flex-shrink-0 w-9 h-9 bg-gradient-to-br from-violet-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/20">
+        <div className="flex-shrink-0 w-9 h-9 bg-gradient-to-br from-amber-500 to-yellow-600 rounded-xl flex items-center justify-center shadow-lg shadow-amber-500/20">
           <GraduationCap className="w-5 h-5 text-white" />
         </div>
         {(mobile || sidebarOpen) && (
           <div>
             <span className="font-bold text-white text-[15px] leading-none">VideoLearn</span>
-            <span className="block text-xs text-violet-400 font-medium leading-none mt-0.5">Pro</span>
+            <span className="block text-xs text-amber-400 font-medium leading-none mt-0.5">Pro</span>
           </div>
         )}
       </div>
@@ -59,7 +59,7 @@ export default function StudentLayout() {
       {/* Student info */}
       {(mobile || sidebarOpen) && (
         <div className="mx-3 my-4 rounded-xl bg-white/5 px-4 py-3 flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-amber-500 to-yellow-500 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
             {avatarInitial}
           </div>
           <div className="overflow-hidden">
@@ -69,7 +69,7 @@ export default function StudentLayout() {
         </div>
       )}
       {!(mobile || sidebarOpen) && (
-        <div className="mx-auto my-4 w-9 h-9 rounded-full bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center text-white text-sm font-bold">
+        <div className="mx-auto my-4 w-9 h-9 rounded-full bg-gradient-to-br from-amber-500 to-yellow-500 flex items-center justify-center text-white text-sm font-bold">
           {avatarInitial}
         </div>
       )}
@@ -90,22 +90,22 @@ export default function StudentLayout() {
               cn(
                 'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group relative',
                 isActive
-                  ? 'bg-gradient-to-r from-violet-600/20 to-indigo-600/10 text-violet-400 border border-violet-500/20'
+                  ? 'bg-gradient-to-r from-amber-600/20 to-yellow-600/10 text-amber-400 border border-amber-500/20'
                   : 'text-gray-400 hover:bg-white/5 hover:text-gray-200'
               )
             }
           >
             {({ isActive }) => (
               <>
-                <Icon className={cn('w-[18px] h-[18px] flex-shrink-0', isActive ? 'text-violet-400' : '')} />
+                <Icon className={cn('w-[18px] h-[18px] flex-shrink-0', isActive ? 'text-amber-400' : '')} />
                 {(mobile || sidebarOpen) && (
                   <>
                     <span className="flex-1">{label}</span>
-                    {isActive && <ChevronRight className="w-3.5 h-3.5 text-violet-400/70" />}
+                    {isActive && <ChevronRight className="w-3.5 h-3.5 text-amber-400/70" />}
                   </>
                 )}
                 {isActive && (
-                  <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-violet-500 rounded-r-full" />
+                  <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-amber-500 rounded-r-full" />
                 )}
               </>
             )}
@@ -186,11 +186,11 @@ export default function StudentLayout() {
             {/* Notifications */}
             <button className="relative p-2 rounded-lg hover:bg-white/5 text-gray-400 hover:text-gray-200 transition-colors">
               <Bell className="w-[18px] h-[18px]" />
-              <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-violet-500 rounded-full" />
+              <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-amber-500 rounded-full" />
             </button>
             {/* Student profile */}
             <div className="flex items-center gap-2.5 pl-3 border-l border-white/10 ml-1">
-              <div className="w-8 h-8 bg-gradient-to-br from-violet-500 to-pink-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
+              <div className="w-8 h-8 bg-gradient-to-br from-amber-500 to-yellow-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
                 {avatarInitial}
               </div>
               <div className="hidden sm:block">
@@ -209,3 +209,4 @@ export default function StudentLayout() {
     </div>
   )
 }
+

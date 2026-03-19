@@ -2,8 +2,8 @@ import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { Search, BookOpen, Calendar, ArrowRight } from 'lucide-react'
 import { useState } from 'react'
-import { studentBlogs } from '@/services/studentService'
-import type { Blog } from '@/services/studentService'
+import { studentBlogs } from '@/student/services/studentService'
+import type { Blog } from '@/student/services/studentService'
 import { formatDate } from '@/utils'
 
 const coverColors = [
@@ -133,3 +133,4 @@ export default function BlogsPage() {
     </div>
   )
 }
+

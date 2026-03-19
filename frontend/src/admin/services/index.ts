@@ -41,7 +41,7 @@ export const MOCK_BLOGS = [
 ]
 
 export * as authService from './authService'
-export * as studentService from './studentService'
+export * as studentService from '@/student/services/studentService'
 export * as videoService from './videoService'
 export * as playlistService from './playlistService'
 export * as blogService from './blogService'
@@ -67,7 +67,10 @@ export const MOCK_ANALYTICS = {
 }
 
 export const analyticsService = {
-  get: async () => MOCK_ANALYTICS,
+  get: async () => {
+    const res = await apiClient.get('/admin/analytics')
+    return res.data
+  },
 }
 
 export const settingsService = {

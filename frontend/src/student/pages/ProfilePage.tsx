@@ -4,8 +4,8 @@ import {
   User, Mail, Calendar, PlayCircle, CheckCircle2, Trophy,
   TrendingUp, Clock, BookOpen, ChevronRight
 } from 'lucide-react'
-import { useStudentAuthStore } from '@/store/studentAuthStore'
-import { playlists, studentVideos, watchProgress } from '@/services/studentService'
+import { useStudentAuthStore } from '@/student/store/studentAuthStore'
+import { playlists, studentVideos, watchProgress } from '@/student/services/studentService'
 import { formatDate } from '@/utils'
 
 function StatItem({ icon: Icon, label, value, color }: {
@@ -230,3 +230,4 @@ export default function ProfilePage() {
     </div>
   )
 }
+

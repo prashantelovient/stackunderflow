@@ -2,11 +2,11 @@ import { useState, useMemo } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { type ColumnDef } from '@tanstack/react-table'
 import { Plus, Pencil, Trash2, Tag } from 'lucide-react'
-import { categoryService } from '@/services'
-import { DataTable } from '@/components/DataTable'
-import { PageHeader, Spinner, Card, CardContent, Button, Input } from '@/components/ui'
-import { ConfirmModal, Modal } from '@/components/Modals'
-import { toast, ToastContainer } from '@/components/Modals'
+import { categoryService } from '@/admin/services'
+import { DataTable } from '@/admin/components/DataTable'
+import { PageHeader, Spinner, Card, CardContent, Button, Input } from '@/admin/components/ui'
+import { ConfirmModal, Modal } from '@/admin/components/Modals'
+import { toast, ToastContainer } from '@/admin/components/Modals'
 import { generateSlug } from '@/utils'
 
 interface Category { id: string; name: string; slug: string; videoCount: number }
@@ -93,3 +93,4 @@ export default function CategoriesPage() {
     </div>
   )
 }
+

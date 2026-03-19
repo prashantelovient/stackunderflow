@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Eye, EyeOff, GraduationCap, Loader2 } from 'lucide-react'
-import { authService } from '@/services'
-import { useAuthStore } from '@/store/authStore'
+import { authService } from '@/admin/services'
+import { useAuthStore } from '@/admin/store/authStore'
 import { useThemeStore } from '@/store/themeStore'
 
 export default function LoginPage() {
@@ -106,3 +106,4 @@ export default function LoginPage() {
     </div>
   )
 }
+

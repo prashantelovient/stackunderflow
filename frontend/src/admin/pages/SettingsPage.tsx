@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
-import { settingsService } from '@/services'
-import { PageHeader, Spinner, Card, CardHeader, CardContent, Button, Input } from '@/components/ui'
-import { toast, ToastContainer } from '@/components/Modals'
+import { settingsService } from '@/admin/services'
+import { PageHeader, Spinner, Card, CardHeader, CardContent, Button, Input } from '@/admin/components/ui'
+import { toast, ToastContainer } from '@/admin/components/Modals'
 import { Globe, Mail, Cloud, Shield } from 'lucide-react'
 
 interface SettingsForm { platformName: string; emailHost: string; s3Bucket: string; s3Region: string }
@@ -126,3 +126,4 @@ export default function SettingsPage() {
     </div>
   )
 }
+
