@@ -93,21 +93,6 @@ export default function AdminLayout() {
 
       {/* Bottom Profile/Actions */}
       <div className="p-4 border-t border-sidebar-border/50 space-y-4">
-        {/* <div className={cn("flex items-center gap-3 px-2", (sidebarOpen || mobile) ? "" : "justify-center")}>
-          <Avatar className="w-10 h-10 border-2 border-primary/20 shadow-inner">
-            <AvatarImage src="" />
-            <AvatarFallback className="bg-primary/10 text-primary font-bold">{avatarInitial}</AvatarFallback>
-          </Avatar>
-          {(sidebarOpen || mobile) && (
-            <div className="flex-1 overflow-hidden">
-              <p className="text-xs font-bold text-sidebar-foreground truncate uppercase">{displayName}</p>
-              <p className="text-[10px] text-sidebar-foreground/40 font-bold truncate">SYSTEM ADMINISTRATOR</p>
-            </div>
-          )}
-        </div>
-
-        <Separator className="bg-sidebar-border/30" /> */}
-
   <button
   onClick={handleLogout}
   className={cn(
