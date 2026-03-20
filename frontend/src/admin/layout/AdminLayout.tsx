@@ -93,7 +93,7 @@ export default function AdminLayout() {
 
       {/* Bottom Profile/Actions */}
       <div className="p-4 border-t border-sidebar-border/50 space-y-4">
-        <div className={cn("flex items-center gap-3 px-2", (sidebarOpen || mobile) ? "" : "justify-center")}>
+        {/* <div className={cn("flex items-center gap-3 px-2", (sidebarOpen || mobile) ? "" : "justify-center")}>
           <Avatar className="w-10 h-10 border-2 border-primary/20 shadow-inner">
             <AvatarImage src="" />
             <AvatarFallback className="bg-primary/10 text-primary font-bold">{avatarInitial}</AvatarFallback>
@@ -106,18 +106,49 @@ export default function AdminLayout() {
           )}
         </div>
 
-        <Separator className="bg-sidebar-border/30" />
+        <Separator className="bg-sidebar-border/30" /> */}
 
-        <button
-          onClick={handleLogout}
-          className={cn(
-            "flex items-center gap-3 w-full px-4 py-3 rounded-2xl text-[11px] font-extrabold uppercase tracking-widest text-destructive hover:bg-destructive/10 transition-all group",
-            (sidebarOpen || mobile) ? "" : "justify-center"
-          )}
-        >
-          <LogOut className="w-5 h-5 flex-shrink-0 group-hover:-translate-x-1 transition-transform" />
-          {(mobile || sidebarOpen) && <span>Sign Out Portal</span>}
-        </button>
+  <button
+  onClick={handleLogout}
+  className={cn(
+    `
+    group relative overflow-hidden
+    flex items-center gap-3 w-full px-4 py-3
+
+    rounded-2xl
+    text-[11px] font-extrabold uppercase tracking-widest
+
+    text-red-500
+    border border-red-500/20
+
+    bg-red-500/5
+    hover:bg-red-500/10
+
+    shadow-sm hover:shadow-lg hover:shadow-red-500/20
+
+    transition-all duration-300 ease-out
+    active:scale-[0.97]
+    `,
+    (sidebarOpen || mobile) ? "" : "justify-center"
+  )}
+>
+  {/* Subtle glow layer */}
+  <span className="absolute flex items-center mx-auto inset-0 opacity-0 group-hover:opacity-100 transition duration-500 bg-gradient-to-r from-transparent via-red-500/10 to-transparent blur-lg"></span>
+
+  {/* Lucide Icon */}
+  <LogOut
+    className="
+      w-5 h-5 flex-shrink-0
+      transition-all duration-300
+      group-hover:-translate-x-1 group-hover:scale-110
+    "
+  />
+
+  {/* Text */}
+  {(mobile || sidebarOpen) && (
+    <span className="relative z-10">Sign Out</span>
+  )}
+</button>
       </div>
     </aside>
   )

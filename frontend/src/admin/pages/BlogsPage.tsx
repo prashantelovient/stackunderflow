@@ -179,7 +179,7 @@ export default function BlogsPage() {
         title="Intel Archive"
         subtitle={`${blogs.length} tactical publications indexed in core memory.`}
         action={
-          <Button onClick={openNew} className="rounded-xl shadow-lg shadow-primary/20 font-bold text-xs px-6 py-6 border-none bg-primary hover:scale-[1.02] transition-transform">
+          <Button onClick={openNew} className="rounded-xl shadow-lg shadow-primary/20 font-bold text-xs px-6 py-6 border-none bg-primary hover:scale-[1.02] transition-transform text-white">
             <Plus className="w-5 h-5 mr-3" /> New Publication
           </Button>
         }

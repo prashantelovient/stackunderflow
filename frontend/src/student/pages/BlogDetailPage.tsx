@@ -106,9 +106,9 @@ export default function BlogDetailPage() {
         </div>
 
         {/* Title */}
-        <h1 className="text-3xl lg:text-5xl font-extrabold leading-tight tracking-tight">
-          {blog.title}
-        </h1>
+       <h1 className="text-3xl lg:text-5xl font-extrabold leading-tight tracking-tight text-gray-900 dark:text-white">
+  {blog.title}
+</h1>
       </div>
 
       {/* Content */}
@@ -126,12 +126,35 @@ export default function BlogDetailPage() {
 
       {/* Footer / CTA */}
       <div className="mt-20 p-10 bg-gradient-to-br from-primary/10 to-transparent border border-primary/20 rounded-3xl flex flex-col items-center text-center">
-        <h3 className="text-2xl font-bold mb-3">Enjoyed this article?</h3>
+        <h3 className="text-2xl font-bold mb-3 dark:text-amber-50">Enjoyed this article?</h3>
         <p className="text-muted-foreground max-w-md mb-8">Dive deeper into our courses and master your skills today.</p>
         <Link to="/student/courses">
-          <Button size="lg" className="rounded-xl px-8 font-bold shadow-xl shadow-primary/20 hover:scale-105 transition-transform">
-            Explore Academy
-          </Button>
+       <Button
+  size="lg"
+  className="
+    relative overflow-hidden
+    rounded-2xl px-10 py-6
+    font-semibold tracking-wide
+    text-white
+    bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600
+    shadow-lg shadow-indigo-500/30
+    transition-all duration-300 ease-out
+    hover:scale-105 hover:shadow-xl hover:shadow-purple-500/40
+    active:scale-95
+  "
+>
+  <span className="relative z-10 flex items-center gap-2">
+    Explore Academy →
+  </span>
+
+  {/* subtle shine effect */}
+  <span className="
+    absolute inset-0
+    bg-white/10 opacity-0
+    hover:opacity-100
+    transition duration-300
+  " />
+</Button>
         </Link>
       </div>
     </div>

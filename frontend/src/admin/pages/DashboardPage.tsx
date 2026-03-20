@@ -4,19 +4,31 @@ import { Card, CardContent, CardHeader, PageHeader, Spinner, Badge } from '@/adm
 import { Users, Video, ListVideo, BookOpen, TrendingUp, AlertCircle, ArrowUpRight } from 'lucide-react'
 import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, Legend
+  ResponsiveContainer
 } from 'recharts'
 import { useThemeStore } from '@/store/themeStore'
-import { cn } from '@/utils'
 
 export default function DashboardPage() {
   const { isDark } = useThemeStore()
-  const { data, isLoading, isError } = useQuery({ queryKey: ['analytics'], queryFn: analyticsService.get })
+
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ['analytics'],
+    queryFn: analyticsService.get
+  })
+
+  // ✅ THEME
+  const chartTheme = {
+    textColor: isDark ? '#CBD5F5' : '#475569',
+    gridColor: isDark ? '#334155' : '#E2E8F0',
+    accent: isDark ? '#6366F1' : '#4F46E5'
+  }
 
   if (isLoading) return (
     <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
       <Spinner />
-      <p className="text-sm font-bold text-muted-foreground animate-pulse tracking-widest uppercase">Initializing Core Analytics...</p>
+      <p className="text-sm font-bold text-muted-foreground animate-pulse tracking-widest uppercase">
+        Initializing Core Analytics...
+      </p>
     </div>
   )
 
@@ -28,159 +40,138 @@ export default function DashboardPage() {
           <div className="w-12 h-12 rounded-2xl bg-destructive/20 flex items-center justify-center">
             <AlertCircle className="w-6 h-6 text-destructive" />
           </div>
-          <div className="space-y-1">
+          <div>
             <p className="font-bold text-destructive">Analytics Sync Failed</p>
-            <p className="text-sm text-muted-foreground font-medium">Unable to connect to the telemetry endpoint. Please verify backend accessibility ({import.meta.env.VITE_API_URL || 'localhost:5000'}).</p>
+            <p className="text-sm text-muted-foreground">
+              Unable to connect backend ({import.meta.env.VITE_API_URL || 'localhost:5000'})
+            </p>
           </div>
         </CardContent>
       </Card>
     </div>
   )
 
-  const stats = [
-    { label: 'Total Enrolled Students', value: (data?.totalStudents ?? 0).toLocaleString(), icon: Users, color: 'primary', trend: '+12.5%', desc: 'Active participants' },
-    { label: 'Platform Video Archive', value: (data?.totalVideos ?? 0).toLocaleString(), icon: Video, color: 'indigo', trend: '+5.2%', desc: 'HLS Streamable assets' },
-    { label: 'Active Curriculums', value: (data?.totalCourses ?? 0).toLocaleString(), icon: ListVideo, color: 'violet', trend: '+2.1%', desc: 'Published courses' },
-    { label: 'Knowledge Base Articles', value: (data?.totalBlogs ?? 0).toLocaleString(), icon: BookOpen, color: 'pink', trend: '+8.4%', desc: 'Editorial content' },
-  ]
+  // ✅ FILTER ONLY LAST 6 MONTHS
+  const studentsData = [...(data?.studentsByMonth || [])]
+    .slice(-6)
 
-  const chartTheme = {
-    textColor: isDark ? 'hsl(var(--muted-foreground))' : '#64748b',
-    gridColor: isDark ? 'hsla(var(--border), 0.3)' : '#f1f5f9',
-    accent: 'hsl(var(--primary))'
-  }
+  const videosData = [...(data?.videosByMonth || [])]
+    .slice(-6)
+
+  const stats = [
+    { label: 'Total Enrolled Students', value: (data?.totalStudents ?? 0).toLocaleString(), icon: Users, trend: '+12.5%' },
+    { label: 'Platform Video Archive', value: (data?.totalVideos ?? 0).toLocaleString(), icon: Video, trend: '+5.2%' },
+    { label: 'Active Curriculums', value: (data?.totalCourses ?? 0).toLocaleString(), icon: ListVideo, trend: '+2.1%' },
+    { label: 'Knowledge Base Articles', value: (data?.totalBlogs ?? 0).toLocaleString(), icon: BookOpen, trend: '+8.4%' },
+  ]
 
   return (
     <div className="space-y-10">
       <PageHeader
         title="Administrative Terminal"
-        subtitle="Real-time strategic overview of your educational ecosystem."
+        subtitle="Real-time overview of your platform."
         action={
-          <Badge variant="outline" className="px-4 py-1.5 border-primary/20 text-primary bg-primary/5 font-bold tracking-wider">
+          <Badge variant="outline" className="px-4 py-1.5 border-primary/20 text-primary bg-primary/5 font-bold">
             <TrendingUp className="w-3.5 h-3.5 mr-2" />
-            LIVE TELEMETRY
+            LIVE
           </Badge>
         }
       />
 
-      {/* Stat Cards */}
+      {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map(({ label, value, icon: Icon, color, trend, desc }) => (
-          <Card key={label} className="group hover:border-primary/30 hover:shadow-2xl transition-all duration-500 overflow-visible relative">
-            <div className={`absolute top-0 right-0 w-24 h-24 bg-${color}-500/5 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity`} />
+        {stats.map(({ label, value, icon: Icon, trend }) => (
+          <Card key={label} className="group hover:shadow-xl transition">
             <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-8">
-                <div className={cn(
-                  "w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg transition-transform group-hover:scale-110 duration-500",
-                  "bg-muted/50 text-foreground group-hover:bg-primary group-hover:text-white"
-                )}>
-                  <Icon className="w-7 h-7" />
+              <div className="flex justify-between mb-6">
+                <div className="w-12 h-12 flex items-center justify-center rounded-xl bg-muted group-hover:bg-primary group-hover:text-white transition">
+                  <Icon className="w-6 h-6" />
                 </div>
-                <div className="flex flex-col items-end">
-                  <div className="flex items-center gap-1 text-[11px] font-extrabold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full">
-                    <ArrowUpRight className="w-3 h-3" />
-                    {trend}
-                  </div>
-                </div>
+                <span className="text-xs font-bold text-emerald-500 flex items-center gap-1">
+                  <ArrowUpRight className="w-3 h-3" />
+                  {trend}
+                </span>
               </div>
-              <div className="space-y-0.5">
-                <h3 className="text-[11px] font-extrabold uppercase tracking-widest text-muted-foreground">{label}</h3>
-                <p className="text-3xl font-black tracking-tighter text-foreground">{value}</p>
-                <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-[0.1em] pt-1">{desc}</p>
-              </div>
+              <h3 className="text-xs text-muted-foreground uppercase">{label}</h3>
+              <p className="text-2xl font-bold">{value}</p>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      {/* Charts Section */}
+      {/* Charts */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-        <Card className="p-2">
+
+        {/* Area Chart */}
+        <Card className="p-2 bg-white dark:bg-slate-900 border dark:border-slate-800">
           <CardHeader className="px-6 pt-6 pb-2">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-lg font-bold">Enrollment Velocity</h2>
-                <p className="text-xs font-medium text-muted-foreground">Student acquisition rates monthly</p>
-              </div>
-            </div>
+            <h2 className="font-bold">Enrollment Velocity</h2>
           </CardHeader>
+
           <CardContent className="p-4">
             <ResponsiveContainer width="100%" height={320}>
-              <AreaChart data={data?.studentsByMonth} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <AreaChart data={studentsData}>
                 <defs>
                   <linearGradient id="colorStudents" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={chartTheme.accent} stopOpacity={0.2} />
-                    <stop offset="95%" stopColor={chartTheme.accent} stopOpacity={0} />
+                    <stop offset="5%" stopColor={chartTheme.accent} stopOpacity={0.4} />
+                    <stop offset="95%" stopColor={chartTheme.accent} stopOpacity={0.05} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="4 4" stroke={chartTheme.gridColor} vertical={false} />
-                <XAxis
-                  dataKey="month"
-                  tick={{ fill: chartTheme.textColor, fontSize: 11, fontWeight: 600 }}
-                  axisLine={false}
-                  tickLine={false}
-                  dy={10}
-                />
-                <YAxis
-                  tick={{ fill: chartTheme.textColor, fontSize: 11, fontWeight: 600 }}
-                  axisLine={false}
-                  tickLine={false}
-                />
+
+                <CartesianGrid stroke={chartTheme.gridColor} strokeDasharray="4 4" vertical={false} />
+
+                <XAxis dataKey="month" stroke={chartTheme.textColor} tick={{ fill: chartTheme.textColor }} />
+                <YAxis stroke={chartTheme.textColor} tick={{ fill: chartTheme.textColor }} />
+
                 <Tooltip
                   contentStyle={{
-                    background: isDark ? 'rgba(15, 23, 42, 0.9)' : 'rgba(255, 255, 255, 0.95)',
-                    border: '1px solid hsla(var(--border), 0.2)',
-                    borderRadius: '16px',
-                    backdropFilter: 'blur(8px)',
-                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
+                    background: isDark ? '#0F172A' : '#FFFFFF',
+                    borderRadius: 10
                   }}
-                  itemStyle={{ color: chartTheme.accent, fontWeight: 'bold' }}
+                  labelStyle={{ color: chartTheme.textColor }}
                 />
-                <Area type="monotone" dataKey="count" name="New Students" stroke={chartTheme.accent} strokeWidth={4} fill="url(#colorStudents)" animationDuration={2000} />
+
+                <Area
+                  type="monotone"
+                  dataKey="count"
+                  stroke={chartTheme.accent}
+                  strokeWidth={3}
+                  fill="url(#colorStudents)"
+                />
               </AreaChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
-        <Card className="p-2">
+        {/* Bar Chart */}
+        <Card className="p-2 bg-white dark:bg-slate-900 border dark:border-slate-800">
           <CardHeader className="px-6 pt-6 pb-2">
-            <div>
-              <h2 className="text-lg font-bold">Content Distribution</h2>
-              <p className="text-xs font-medium text-muted-foreground">Video uploads and asset growth</p>
-            </div>
+            <h2 className="font-bold">Content Distribution</h2>
           </CardHeader>
+
           <CardContent className="p-4">
             <ResponsiveContainer width="100%" height={320}>
-              <BarChart data={data?.videosByMonth} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="4 4" stroke={chartTheme.gridColor} vertical={false} />
-                <XAxis
-                  dataKey="month"
-                  tick={{ fill: chartTheme.textColor, fontSize: 11, fontWeight: 600 }}
-                  axisLine={false}
-                  tickLine={false}
-                  dy={10}
-                />
-                <YAxis
-                  tick={{ fill: chartTheme.textColor, fontSize: 11, fontWeight: 600 }}
-                  axisLine={false}
-                  tickLine={false}
-                />
+              <BarChart data={videosData}>
+                <CartesianGrid stroke={chartTheme.gridColor} strokeDasharray="4 4" vertical={false} />
+
+                <XAxis dataKey="month" stroke={chartTheme.textColor} tick={{ fill: chartTheme.textColor }} />
+                <YAxis stroke={chartTheme.textColor} tick={{ fill: chartTheme.textColor }} />
+
                 <Tooltip
-                  cursor={{ fill: 'hsla(var(--muted), 0.3)' }}
                   contentStyle={{
-                    background: isDark ? 'rgba(15, 23, 42, 0.9)' : 'rgba(255, 255, 255, 0.95)',
-                    border: '1px solid hsla(var(--border), 0.2)',
-                    borderRadius: '16px',
-                    backdropFilter: 'blur(8px)'
+                    background: isDark ? '#0F172A' : '#FFFFFF',
+                    borderRadius: 10
                   }}
+                  labelStyle={{ color: chartTheme.textColor }}
                 />
-                <Bar dataKey="count" name="Videos Uploaded" fill={chartTheme.accent} radius={[6, 6, 0, 0]} barSize={30} animationDuration={2000} />
+
+                <Bar dataKey="count" fill={chartTheme.accent} radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
+
       </div>
     </div>
   )
 }
-

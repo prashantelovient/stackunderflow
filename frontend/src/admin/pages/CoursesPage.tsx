@@ -181,9 +181,23 @@ export default function CoursesPage() {
                 title="Course Management"
                 subtitle={`${courses.length} courses available in the system.`}
                 action={
-                    <Button onClick={openNewCourse} className="rounded-xl shadow-lg shadow-primary/20 font-bold text-xs px-6 py-6 border-none bg-primary hover:scale-[1.02] transition-transform">
-                        <PlusCircle className="w-5 h-5 mr-3" />
-                        Init New Curriculum
+                    <Button
+                        onClick={openNewCourse}
+                        className="
+    flex items-center justify-center gap-2
+    rounded-xl
+    px-6 py-3
+    text-xs font-bold
+    bg-primary text-white
+    border-none
+    shadow-md shadow-primary/20
+    hover:scale-[1.02]
+    hover:shadow-lg hover:shadow-primary/30
+    transition-transform duration-200
+  "
+                    >
+                        <PlusCircle className="w-5 h-5" />  {/* Upload icon */}
+                        Create Course
                     </Button>
                 }
             />
@@ -226,28 +240,51 @@ export default function CoursesPage() {
 
                             <div className="flex flex-wrap items-center gap-3 mt-4 sm:mt-0">
                                 <div className="flex flex-col items-center px-4 py-2 bg-muted/50 rounded-2xl border border-border/30">
-                                    <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Structures</span>
+                                    <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Modules</span>
                                     <span className="text-sm font-black text-foreground">{course.moduleCount || 0}</span>
                                 </div>
                                 <div className="flex flex-col items-center px-4 py-2 bg-muted/50 rounded-2xl border border-border/30">
-                                    <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Segments</span>
+                                    <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Lectures</span>
                                     <span className="text-sm font-black text-foreground">{course.lectureCount || 0}</span>
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-2 absolute top-6 right-8">
-                                <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); openEditCourse(course) }} className="h-9 w-9 rounded-xl hover:bg-primary/10 hover:text-primary transition-all">
-                                    <Edit className="w-4 h-4" />
-                                </Button>
-                                <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); setDeleteCourseId(course.id) }} className="h-9 w-9 rounded-xl hover:bg-destructive/10 hover:text-destructive transition-all">
-                                    <Trash className="w-4 h-4" />
-                                </Button>
-                                <div className={cn(
-                                    "h-9 w-9 rounded-xl bg-muted/50 flex items-center justify-center transition-transform duration-500 ml-2",
-                                    expandedCourses.has(course.id) ? "rotate-180 bg-primary/10 text-primary" : ""
-                                )}>
-                                    <ChevronDown className="w-5 h-5" />
-                                </div>
+                            <div className="flex items-center gap-3">
+                                {/* Edit */}
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                        openEditCourse(course)
+                                    }}
+                                    className="p-2 rounded-lg hover:bg-blue-100 transition"
+                                >
+                                    <Edit className="w-5 h-5 text-orange-500" />
+                                </button>
+
+                                {/* Delete */}
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                        setDeleteCourseId(course.id)
+                                    }}
+                                    className="p-2 rounded-lg hover:bg-red-100 transition"
+                                >
+                                    <Trash className="w-5 h-5 text-orange-500" />
+                                </button>
+
+                                {/* Expand */}
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                        toggleCourse(course.id)
+                                    }}
+                                    className="p-2 rounded-full bg-gray-200 dark:bg-primary transition"
+                                >
+                                    <ChevronDown
+                                        className={`w-5 h-5 transition-transform ${expandedCourses.has(course.id) ? 'rotate-180' : ''
+                                            }`}
+                                    />
+                                </button>
                             </div>
                         </div>
 
