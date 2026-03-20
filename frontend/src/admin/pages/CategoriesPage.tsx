@@ -6,7 +6,7 @@ import { categoryService } from '@/admin/services'
 import { DataTable } from '@/admin/components/DataTable'
 import { PageHeader, Spinner, Card, CardContent, Button, Input, Badge } from '@/admin/components/ui'
 import { ConfirmModal, Modal } from '@/admin/components/Modals'
-import { toast, ToastContainer } from '@/admin/components/Modals'
+import { toast, ToastContainer } from '@/admin/components/Toast'
 import { generateSlug, cn } from '@/utils'
 
 interface Category { id: string; name: string; slug: string; videoCount: number }
@@ -114,7 +114,7 @@ export default function CategoriesPage() {
             placeholder="e.g. CYBERNETIC ADVANCEMENT" />
           <Input label="Access Identifier (Slug)" value={formSlug} onChange={(e) => setFormSlug(e.target.value)} placeholder="cyber-advancement" />
           <div className="flex justify-end gap-3 pt-6 border-t border-border/50">
-            <Button variant="ghost" onClick={() => setModalOpen(false)} className="rounded-xl px-6 font-bold text-xs uppercase tracking-widest">ABORT</Button>
+            <Button variant="ghost" onClick={() => setModalOpen(false)} className="rounded-xl px-6 font-bold text-xs uppercase tracking-widest">CANCEL</Button>
             <Button loading={saveMutation.isPending} onClick={() => saveMutation.mutate()} className="rounded-xl px-8 shadow-lg shadow-primary/20 font-bold text-xs uppercase tracking-widest">
               {editItem ? 'UPDATE NODE' : 'DEPLOY NODE'}
             </Button>

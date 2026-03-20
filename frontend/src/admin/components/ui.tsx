@@ -1,3 +1,4 @@
+import * as React from 'react'
 import { cn } from '@/utils'
 import { Button as ShadcnButton } from '@/components/ui/button'
 import { Input as ShadcnInput } from '@/components/ui/input'
@@ -18,33 +19,38 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   loading?: boolean
 }
 
-export function Button({ variant = 'primary', size = 'md', loading, className, children, disabled, ...props }: ButtonProps) {
-  const shadcnVariant =
-    variant === 'primary' ? 'default' :
-      variant === 'danger' ? 'destructive' :
-        variant === 'glass' ? 'ghost' :
-          variant as any
+export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ variant = 'primary', size = 'md', loading, className, children, disabled, ...props }, ref) => {
+    const shadcnVariant =
+      variant === 'primary' ? 'default' :
+        variant === 'danger' ? 'destructive' :
+          variant === 'glass' ? 'ghost' :
+            variant as any
 
-  const shadcnSize = size === 'md' ? 'default' : size === 'icon' ? 'icon' : size
+    const shadcnSize = size === 'md' ? 'default' : size === 'icon' ? 'icon' : size
 
-  return (
-    <ShadcnButton
-      variant={shadcnVariant}
-      size={shadcnSize}
-      className={cn(
-        "rounded-xl font-bold transition-all active:scale-95 select-none",
-        variant === 'glass' && "bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 text-foreground",
-        variant === 'primary' && "shadow-lg shadow-primary/20",
-        className
-      )}
-      disabled={disabled || loading}
-      {...props as any}
-    >
-      {loading && <Loader2 className="mr-2 w-4 h-4 animate-spin text-current" />}
-      {children}
-    </ShadcnButton>
-  )
-}
+    return (
+      <ShadcnButton
+        ref={ref}
+        variant={shadcnVariant}
+        size={shadcnSize}
+        className={cn(
+          "rounded-xl font-bold transition-all active:scale-95 select-none",
+          variant === 'glass' && "bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 text-foreground",
+          variant === 'primary' && "shadow-lg shadow-primary/20",
+          className
+        )}
+        disabled={disabled || loading}
+        {...props as any}
+      >
+        {loading && <Loader2 className="mr-2 w-4 h-4 animate-spin text-current" />}
+        {children}
+      </ShadcnButton>
+    )
+  }
+)
+Button.displayName = 'Button'
+
 
 // ---- Input ----
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {

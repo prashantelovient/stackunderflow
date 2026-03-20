@@ -9,6 +9,13 @@ import { PageHeader, Badge, Spinner, Card, CardContent, Button, Input, Textarea,
 import { ConfirmModal, Modal } from '@/admin/components/Modals'
 import { toast, ToastContainer } from '@/admin/components/Modals'
 import { formatDate, cn } from '@/utils'
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/admin/components/dropdown-menu"
+import { MoreVertical } from "lucide-react"
 
 interface VideoItem { id: string; title: string; description: string; thumbnail: string | null; courseId: string; courseTitle: string; duration: string; uploadDate: string }
 interface CourseItem { id: string; title: string }
@@ -144,21 +151,51 @@ export default function VideosPage() {
       )
     },
     {
-      id: 'actions', header: 'Management',
-      cell: ({ row }) => (
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" onClick={() => setViewVideo(row.original)} className="h-9 w-9 rounded-xl hover:bg-emerald-500/10 hover:text-emerald-500 transition-all group" title="INITIATE PREVIEW">
-            <Eye className="w-4 h-4 group-hover:scale-110" />
-          </Button>
-          <Button variant="ghost" size="icon" onClick={() => openEdit(row.original)} className="h-9 w-9 rounded-xl hover:bg-primary/10 hover:text-primary transition-all group" title="EDIT SYSTEM">
-            <Edit className="w-4 h-4 group-hover:rotate-12" />
-          </Button>
-          <Button variant="ghost" size="icon" onClick={() => setDeleteId(row.original.id)} className="h-9 w-9 rounded-xl hover:bg-destructive/10 hover:text-destructive transition-all group" title="PURGE DATA">
-            <Trash className="w-4 h-4 group-hover:-translate-y-0.5" />
-          </Button>
-        </div>
-      )
-    },
+  id: 'actions',
+  header: 'Management',
+  cell: ({ row }) => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-9 w-9 rounded-xl hover:bg-muted/50 transition-all"
+        >
+          <MoreVertical className="w-4 h-4" />
+        </Button>
+      </DropdownMenuTrigger>
+
+      <DropdownMenuContent
+        align="end"
+        className="w-40 rounded-xl border-border/50 shadow-lg z-50"
+      >
+        <DropdownMenuItem
+          onClick={() => setViewVideo(row.original)}
+          className="flex items-center gap-2 cursor-pointer"
+        >
+          <Eye className="w-4 h-4" />
+          View
+        </DropdownMenuItem>
+
+        <DropdownMenuItem
+          onClick={() => openEdit(row.original)}
+          className="flex items-center gap-2 cursor-pointer"
+        >
+          <Edit className="w-4 h-4" />
+          Edit
+        </DropdownMenuItem>
+
+        <DropdownMenuItem
+          onClick={() => setDeleteId(row.original.id)}
+          className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive"
+        >
+          <Trash className="w-4 h-4" />
+          Delete
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  ),
+},
   ], [courses])
 
   if (isLoading) return (

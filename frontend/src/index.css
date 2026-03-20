@@ -6,280 +6,150 @@
 @custom-variant dark (&:is(.dark *));
 @plugin "@tailwindcss/typography";
 
+/* ───────────────── BASE THEME ───────────────── */
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
-    --radius: 0.5rem;
-    --sidebar-width: 260px;
+    --background: oklch(0.99 0.005 240);
+    --foreground: oklch(0.2 0.02 240);
 
-    /* Lucide icon global color tokens */
-    --icon-color: #d97706;          /* amber-600  – yellow in light mode */
-    --icon-color-dark: #ffffff;     /* white in dark mode */
+    --card: oklch(1 0 0);
+    --card-foreground: oklch(0.2 0.02 240);
+
+    --popover: oklch(1 0 0);
+    --popover-foreground: oklch(0.2 0.02 240);
+
+    --primary: oklch(0.58 0.18 255);
+    --primary-foreground: oklch(0.98 0.005 240);
+
+    --secondary: oklch(0.96 0.01 240);
+    --secondary-foreground: oklch(0.2 0.02 240);
+
+    --muted: oklch(0.96 0.01 240);
+    --muted-foreground: oklch(0.5 0.02 240);
+
+    --accent: oklch(0.94 0.02 255);
+    --accent-foreground: oklch(0.2 0.02 240);
+
+    --destructive: oklch(0.6 0.18 25);
+    --destructive-foreground: oklch(0.98 0.005 240);
+
+    --border: oklch(0.9 0.01 240);
+    --input: oklch(0.9 0.01 240);
+    --ring: oklch(0.58 0.18 255);
+
+    --radius: 0.75rem;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 48%;
+    --background: oklch(0.12 0.015 240);
+    --foreground: oklch(0.98 0.005 240);
+
+    --card: oklch(0.15 0.02 245);
+    --card-foreground: oklch(0.98 0.005 240);
+
+    --popover: oklch(0.15 0.02 245);
+    --popover-foreground: oklch(0.98 0.005 240);
+
+    --primary: oklch(0.65 0.2 255);
+    --primary-foreground: oklch(0.1 0.02 240);
+
+    --secondary: oklch(0.2 0.03 245);
+    --secondary-foreground: oklch(0.98 0.005 240);
+
+    --muted: oklch(0.2 0.03 245);
+    --muted-foreground: oklch(0.7 0.02 240);
+
+    --accent: oklch(0.25 0.05 255);
+    --accent-foreground: oklch(0.98 0.005 240);
+
+    --destructive: oklch(0.5 0.15 25);
+    --destructive-foreground: oklch(0.98 0.005 240);
+
+    --border: oklch(0.25 0.02 240);
+    --input: oklch(0.25 0.02 240);
+    --ring: oklch(0.65 0.2 255);
   }
+
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
-    @apply bg-background text-foreground;
-  }
-  html {
-    @apply font-sans;
+    @apply bg-background text-foreground font-sans;
   }
 }
 
-@layer base {
-  * {
-    border-color: hsl(var(--border));
-  }
-  body {
-    background-color: hsl(var(--background));
-    color: hsl(var(--foreground));
-    font-family: 'Inter', sans-serif;
-  }
-}
+/* ───────── ICON SYSTEM (CUSTOM BEHAVIOR) ───────── */
 
-/* ─── Global Lucide Icon Colour Scheme ──────────────────────────────────────
-   All SVGs produced by lucide-react share the class `lucide`.
-   Default: amber / yellow in light mode, white in dark mode.
-   Semantic override classes (red/green) take precedence via specificity.
-   ─────────────────────────────────────────────────────────────────────────── */
-
-/* Light mode → yellow / amber */
+/* Default (LIGHT MODE) → BLUE ICONS */
 svg.lucide {
-  stroke: oklch(0.65 0.2 255);
-  transition: stroke 0.2s ease;
+  stroke: currentColor;
+  color: hsl(var(--primary)); /* 🔵 Blue */
+  transition: color 0.2s ease, stroke 0.2s ease;
 }
 
-button.group:hover svg.lucide {
-  stroke: white;
-}
+/* Hover → WHITE (only when inside button/group) */
+button:hover svg.lucide,
+/* .group:hover svg.lucide {
+  color: #ffffff;
+} */
 
-/* Dark mode → white */
+/* DARK MODE → ALWAYS WHITE */
 .dark svg.lucide {
   color: #ffffff;
 }
 
-/* ── Explicit utility overrides (use className="lucide-yellow" etc.) ── */
-svg.lucide-yellow  { color: #f59e0b !important; }   /* amber-400 – brighter yellow */
-svg.lucide-white   { color: #ffffff !important; }
-svg.lucide-muted   { color: #9ca3af !important; }   /* gray-400 */
-
-/* ── Semantic: red danger icons (Trash2, Ban, AlertCircle, AlertTriangle, X) ── */
-.text-red-500 svg.lucide,
-.text-red-400 svg.lucide,
-.hover\:text-red-300:hover svg.lucide,
-button.text-red-500 svg.lucide,
-[class*="text-red"] svg.lucide {
-  color: inherit;
+/* 🔴 Destructive icons (Delete) always red */
+.text-destructive svg.lucide {
+  color: hsl(var(--destructive));
 }
 
-/* ── Semantic: green success icons (CheckCircle) ── */
-.text-green-500 svg.lucide,
-.text-green-400 svg.lucide,
-button.text-green-500 svg.lucide,
-[class*="text-green"] svg.lucide {
-  color: inherit;
+/* Optional: keep red even on hover */
+button:hover .text-destructive svg.lucide {
+  color: hsl(var(--destructive));
 }
 
-/* ── Semantic: blue info/action icons (Pencil, Play, ChevronLeft/Right, Search) ── */
-.text-blue-500 svg.lucide,
-.text-blue-600 svg.lucide,
-.text-blue-400 svg.lucide,
-[class*="text-blue"] svg.lucide {
-  color: inherit;
+/* ───────────────── SCROLLBAR ───────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
 }
 
-/* ── Semantic: emerald (Play/view action) ── */
-.text-emerald-500 svg.lucide,
-[class*="text-emerald"] svg.lucide {
-  color: inherit;
+::-webkit-scrollbar-track {
+  background: transparent;
 }
 
-/* ── Semantic: violet / indigo (student sidebar) ── */
-.text-violet-400 svg.lucide,
-[class*="text-violet"] svg.lucide {
-  color: inherit;
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.3);
+  border-radius: 3px;
 }
 
-/* ── Icons explicitly placed on colored backgrounds stay white ── */
-.bg-blue-600 svg.lucide,
-.bg-gradient-to-br svg.lucide,
-[class*="from-violet"] svg.lucide,
-[class*="from-blue"] svg.lucide {
-  color: #ffffff !important;
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
 }
 
-/* Scrollbar */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: hsl(var(--muted-foreground) / 0.3); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: hsl(var(--muted-foreground) / 0.5); }
-
-:root {
-  --background: oklch(0.99 0.005 240);
-  --foreground: oklch(0.2 0.02 240);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.2 0.02 240);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.2 0.02 240);
-  --primary: oklch(0.58 0.18 255);
-  --primary-foreground: oklch(0.98 0.005 240);
-  --secondary: oklch(0.96 0.01 240);
-  --secondary-foreground: oklch(0.2 0.02 240);
-  --muted: oklch(0.96 0.01 240);
-  --muted-foreground: oklch(0.5 0.02 240);
-  --accent: oklch(0.94 0.02 255);
-  --accent-foreground: oklch(0.2 0.02 240);
-  --destructive: oklch(0.6 0.18 25);
-  --destructive-foreground: oklch(0.98 0.005 240);
-  --border: oklch(0.9 0.01 240);
-  --input: oklch(0.9 0.01 240);
-  --ring: oklch(0.58 0.18 255);
-  --chart-1: oklch(0.6 0.15 250);
-  --chart-2: oklch(0.7 0.15 200);
-  --chart-3: oklch(0.5 0.15 150);
-  --chart-4: oklch(0.8 0.15 100);
-  --chart-5: oklch(0.6 0.15 50);
-  --radius: 0.75rem;
-  --sidebar: oklch(0.99 0.005 240);
-  --sidebar-foreground: oklch(0.2 0.02 240);
-  --sidebar-primary: oklch(0.58 0.18 255);
-  --sidebar-primary-foreground: oklch(0.98 0.005 240);
-  --sidebar-accent: oklch(0.94 0.02 255);
-  --sidebar-accent-foreground: oklch(0.2 0.02 240);
-  --sidebar-border: oklch(0.9 0.01 240);
-  --sidebar-ring: oklch(0.58 0.18 255);
-}
-
-.dark {
-  --background: oklch(0.12 0.015 240);
-  --foreground: oklch(0.98 0.005 240);
-  --card: oklch(0.15 0.02 245);
-  --card-foreground: oklch(0.98 0.005 240);
-  --popover: oklch(0.15 0.02 245);
-  --popover-foreground: oklch(0.98 0.005 240);
-  --primary: oklch(0.65 0.2 255);
-  --primary-foreground: oklch(0.1 0.02 240);
-  --secondary: oklch(0.2 0.03 245);
-  --secondary-foreground: oklch(0.98 0.005 240);
-  --muted: oklch(0.2 0.03 245);
-  --muted-foreground: oklch(0.7 0.02 240);
-  --accent: oklch(0.25 0.05 255);
-  --accent-foreground: oklch(0.98 0.005 240);
-  --destructive: oklch(0.5 0.15 25);
-  --destructive-foreground: oklch(0.98 0.005 240);
-  --border: oklch(0.25 0.02 240);
-  --input: oklch(0.25 0.02 240);
-  --ring: oklch(0.65 0.2 255);
-  --chart-1: oklch(0.65 0.2 255);
-  --chart-2: oklch(0.75 0.15 200);
-  --chart-3: oklch(0.6 0.15 150);
-  --chart-4: oklch(0.85 0.15 100);
-  --chart-5: oklch(0.7 0.15 50);
-  --sidebar: oklch(0.1 0.015 240);
-  --sidebar-foreground: oklch(0.95 0.01 240);
-  --sidebar-primary: oklch(0.65 0.2 255);
-  --sidebar-primary-foreground: oklch(0.98 0.005 240);
-  --sidebar-accent: oklch(0.18 0.03 245);
-  --sidebar-accent-foreground: oklch(0.98 0.005 240);
-  --sidebar-border: oklch(0.2 0.02 240);
-  --sidebar-ring: oklch(0.65 0.2 255);
-}
-
+/* ───────────────── THEME TOKENS (SHADCN) ───────────────── */
 @theme inline {
   --font-sans: 'Geist Variable', 'Inter', sans-serif;
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
-  --color-card: var(--card);
-  --color-foreground: var(--foreground);
-  --color-background: var(--background);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
-  --animate-accordion-down: accordion-down 0.2s ease-out;
-  --animate-accordion-up: accordion-up 0.2s ease-out;
 
-  @keyframes accordion-down {
-    from { height: 0; }
-    to { height: var(--radix-accordion-content-height); }
-  }
-  @keyframes accordion-up {
-    from { height: var(--radix-accordion-content-height); }
-    to { height: 0; }
-  }
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --radius: 0.75rem;
 }

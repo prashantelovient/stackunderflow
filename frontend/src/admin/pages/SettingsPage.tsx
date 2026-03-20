@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { settingsService } from '@/admin/services'
 import { PageHeader, Spinner, Card, CardHeader, CardContent, Button, Input, Badge } from '@/admin/components/ui'
-import { toast, ToastContainer } from '@/admin/components/Modals'
+import { toast, ToastContainer } from '@/admin/components/Toast'
 import { Globe, Mail, Cloud, Shield, Settings2, Cpu, Database, Lock, Save, Camera, Terminal, ShieldCheck } from 'lucide-react'
 import { cn } from '@/utils'
 

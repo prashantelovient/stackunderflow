@@ -6,7 +6,7 @@ import { blogService } from '@/admin/services'
 import { DataTable } from '@/admin/components/DataTable'
 import { PageHeader, Badge, Spinner, Card, CardContent, Button, Input, Textarea, Select } from '@/admin/components/ui'
 import { ConfirmModal, Modal } from '@/admin/components/Modals'
-import { toast, ToastContainer } from '@/admin/components/Modals'
+import { toast, ToastContainer } from '@/admin/components/Toast'
 import { formatDate, generateSlug, cn } from '@/utils'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
@@ -244,7 +244,7 @@ export default function BlogsPage() {
           </div>
 
           <div className="flex justify-end gap-3 pt-6 border-t border-border/50">
-            <Button variant="ghost" onClick={() => setModalOpen(false)} className="rounded-xl px-6 font-bold text-xs uppercase tracking-widest">ABORT</Button>
+            <Button variant="ghost" onClick={() => setModalOpen(false)} className="rounded-xl px-6 font-bold text-xs uppercase tracking-widest">CANCEL</Button>
             <Button loading={saveMutation.isPending} onClick={() => saveMutation.mutate()} className="rounded-xl px-8 shadow-lg shadow-primary/20 font-bold text-xs uppercase tracking-widest">
               {editItem ? 'AUTHORIZE UPDATE' : 'AUTHORIZE BROADCAST'}
             </Button>

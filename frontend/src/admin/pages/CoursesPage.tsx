@@ -4,7 +4,7 @@ import { Plus, Pencil, Trash2, BookOpen, ChevronDown, ChevronRight, Layers, File
 import { courseService, moduleService, lectureService, videoService, categoryService } from '@/admin/services'
 import { PageHeader, Badge, Spinner, Card, CardContent, Button, Input, Textarea, Select } from '@/admin/components/ui'
 import { ConfirmModal, Modal } from '@/admin/components/Modals'
-import { toast, ToastContainer } from '@/admin/components/Modals'
+import { toast, ToastContainer } from '@/admin/components/Toast'
 import { cn } from '@/utils'
 
 interface LectureItem { id: string; title: string; description: string; type: string; videoId: any; resourceUrl: string | null; resourceName: string | null; order: number }

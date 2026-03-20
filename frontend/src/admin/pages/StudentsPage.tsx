@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { type ColumnDef } from '@tanstack/react-table'
 import {
@@ -13,13 +13,14 @@ import {
   CardContent, Button
 } from '@/admin/components/ui'
 import { ConfirmModal } from '@/admin/components/Modals'
-import { toast, ToastContainer } from '@/admin/components/Modals'
+import { toast, ToastContainer } from '@/admin/components/Toast'
 import { formatDate } from '@/utils'
 
 // ✅ FIXED IMPORT PATH
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -74,6 +75,13 @@ export default function StudentsPage() {
       setConfirmModal(null)
     },
   })
+
+  const openConfirm = useCallback((type: 'delete' | 'suspend' | 'activate', id: string) => {
+    // Small delay to ensure menu closes properly before modal opens
+    setTimeout(() => {
+      setConfirmModal({ type, id })
+    }, 10)
+  }, [])
 
   // ✅ FIXED useMemo deps
   const columns = useMemo<ColumnDef<Student>[]>(() => [
@@ -144,47 +152,51 @@ export default function StudentsPage() {
 
         return (
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                <MoreHorizontal className="w-4 h-4" />
-              </Button>
-            </DropdownMenuTrigger>
+            <DropdownMenuTrigger
+              render={
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                  <MoreHorizontal className="w-4 h-4" />
+                </Button>
+              }
+            />
 
             <DropdownMenuContent align="end" className="w-44">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuSeparator />
+              <DropdownMenuGroup>
+                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                <DropdownMenuSeparator />
 
-              {student.status === 'active' ? (
+                {student.status === 'active' ? (
+                  <DropdownMenuItem
+                    onSelect={() => openConfirm('suspend', student.id)}
+                  >
+                    <Ban className="w-4 h-4 mr-2" />
+                    Suspend
+                  </DropdownMenuItem>
+                ) : (
+                  <DropdownMenuItem
+                    onSelect={() => openConfirm('activate', student.id)}
+                  >
+                    <CheckCircle className="w-4 h-4 mr-2" />
+                    Activate
+                  </DropdownMenuItem>
+                )}
+
+                <DropdownMenuSeparator />
+
                 <DropdownMenuItem
-                  onClick={() => setConfirmModal({ type: 'suspend', id: student.id })}
+                  onSelect={() => openConfirm('delete', student.id)}
+                  className="text-red-500"
                 >
-                  <Ban className="w-4 h-4 mr-2" />
-                  Suspend
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete
                 </DropdownMenuItem>
-              ) : (
-                <DropdownMenuItem
-                  onClick={() => setConfirmModal({ type: 'activate', id: student.id })}
-                >
-                  <CheckCircle className="w-4 h-4 mr-2" />
-                  Activate
-                </DropdownMenuItem>
-              )}
-
-              <DropdownMenuSeparator />
-
-              <DropdownMenuItem
-                onClick={() => setConfirmModal({ type: 'delete', id: student.id })}
-                className="text-red-500"
-              >
-                <Trash2 className="w-4 h-4 mr-2" />
-                Delete
-              </DropdownMenuItem>
+              </DropdownMenuGroup>
             </DropdownMenuContent>
           </DropdownMenu>
         )
       }
     }
-  ], [setConfirmModal])
+  ], [openConfirm])
 
   if (isLoading) {
     return (
@@ -214,7 +226,7 @@ export default function StudentsPage() {
         title="Students"
         subtitle={`${students.length} students`}
         action={
-          <Button>
+          <Button onClick={() => toast.info('Initialization Protocol: Pending implementation')}>
             <UserPlus className="w-4 h-4 mr-2" />
             Add Student
           </Button>
