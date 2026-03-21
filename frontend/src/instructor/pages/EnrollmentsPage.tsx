@@ -87,15 +87,15 @@ export default function InstructorEnrollmentsPage() {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-black text-white tracking-tight flex items-center gap-3">
+                    <h1 className="text-3xl font-black text-foreground tracking-tight flex items-center gap-3">
                         <ShieldCheck className="w-8 h-8 text-indigo-500" />
                         Enrollment Requests
                     </h1>
-                    <p className="text-slate-400 mt-1">Manage student access to your dynamic course material.</p>
+                    <p className="text-muted-foreground mt-1">Manage student access to your dynamic course material.</p>
                 </div>
 
-                <div className="flex items-center gap-4 bg-slate-900/50 p-2 rounded-2xl border border-slate-800/50 backdrop-blur-md">
-                    <div className="px-4 py-2 text-center border-r border-slate-800">
+                <div className="flex items-center gap-4 bg-muted/50 p-2 rounded-2xl border border-border/50 backdrop-blur-md">
+                    <div className="px-4 py-2 text-center border-r border-border">
                         <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Pending</p>
                         <p className="text-xl font-black text-amber-500">{stats.pending}</p>
                     </div>
@@ -109,15 +109,15 @@ export default function InstructorEnrollmentsPage() {
             {/* Controls */}
             <div className="flex flex-col md:flex-row gap-4">
                 <div className="relative flex-1">
-                    <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                    <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                     <Input
                         placeholder="Filter by student name or course..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="pl-10 bg-slate-900/50 border-slate-800 text-slate-200 h-11 rounded-xl focus:ring-indigo-500/20"
+                        className="pl-10 bg-muted/50 border-border text-foreground h-11 rounded-xl focus:ring-indigo-500/20"
                     />
                 </div>
-                <div className="flex items-center gap-2 bg-slate-900/50 p-1 rounded-xl border border-slate-800">
+                <div className="flex items-center gap-2 bg-muted/50 p-1 rounded-xl border border-border">
                     {(['all', 'pending', 'approved', 'rejected'] as const).map((s) => (
                         <Button
                             key={s}
@@ -126,7 +126,7 @@ export default function InstructorEnrollmentsPage() {
                             onClick={() => setFilterStatus(s)}
                             className={cn(
                                 "capitalize rounded-lg px-4 font-bold text-xs tracking-wider",
-                                filterStatus === s ? "bg-indigo-500 text-white shadow-lg shadow-indigo-500/20" : "text-slate-400 hover:text-white"
+                                filterStatus === s ? "bg-indigo-500 text-white shadow-lg shadow-indigo-500/20" : "text-muted-foreground hover:text-foreground"
                             )}
                         >
                             {s}
@@ -136,15 +136,15 @@ export default function InstructorEnrollmentsPage() {
             </div>
 
             {/* Table */}
-            <div className="border border-slate-800/50 rounded-2xl bg-slate-900/30 overflow-hidden backdrop-blur-xl shadow-2xl">
+            <div className="border border-border/50 rounded-2xl bg-card/30 overflow-hidden backdrop-blur-xl shadow-2xl">
                 <Table>
-                    <TableHeader className="bg-slate-900/50 border-b border-slate-800">
+                    <TableHeader className="bg-muted/50 border-b border-border">
                         <TableRow className="hover:bg-transparent">
-                            <TableHead className="text-slate-400 font-black uppercase text-[10px] tracking-widest py-4">Student</TableHead>
-                            <TableHead className="text-slate-400 font-black uppercase text-[10px] tracking-widest py-4">Requested Course</TableHead>
-                            <TableHead className="text-slate-400 font-black uppercase text-[10px] tracking-widest py-4">Date Requested</TableHead>
-                            <TableHead className="text-slate-400 font-black uppercase text-[10px] tracking-widest py-4">Status</TableHead>
-                            <TableHead className="text-right text-slate-400 font-black uppercase text-[10px] tracking-widest py-4">Actions</TableHead>
+                            <TableHead className="text-muted-foreground font-black uppercase text-[10px] tracking-widest py-4">Student</TableHead>
+                            <TableHead className="text-muted-foreground font-black uppercase text-[10px] tracking-widest py-4">Requested Course</TableHead>
+                            <TableHead className="text-muted-foreground font-black uppercase text-[10px] tracking-widest py-4">Date Requested</TableHead>
+                            <TableHead className="text-muted-foreground font-black uppercase text-[10px] tracking-widest py-4">Status</TableHead>
+                            <TableHead className="text-right text-muted-foreground font-black uppercase text-[10px] tracking-widest py-4">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -163,16 +163,16 @@ export default function InstructorEnrollmentsPage() {
                             </TableRow>
                         ) : (
                             filtered.map((e) => (
-                                <TableRow key={e._id} className="border-slate-800/50 hover:bg-slate-800/30 transition-colors group">
+                                <TableRow key={e._id} className="border-border/50 hover:bg-muted/30 transition-colors group">
                                     <TableCell>
                                         <div className="flex items-center gap-3">
-                                            <Avatar className="w-9 h-9 border border-slate-700">
-                                                <AvatarFallback className="bg-slate-800 text-slate-400 text-xs font-bold">
+                                            <Avatar className="w-9 h-9 border border-border">
+                                                <AvatarFallback className="bg-muted text-muted-foreground text-xs font-bold">
                                                     {e.studentId?.name?.[0] || 'U'}
                                                 </AvatarFallback>
                                             </Avatar>
                                             <div>
-                                                <p className="text-sm font-black text-white group-hover:text-indigo-400 transition-colors">
+                                                <p className="text-sm font-black text-foreground group-hover:text-indigo-400 transition-colors">
                                                     {e.studentId?.name || 'Deleted student'}
                                                 </p>
                                                 <p className="text-[10px] text-slate-500 font-mono">
@@ -186,13 +186,13 @@ export default function InstructorEnrollmentsPage() {
                                             <div className="w-10 h-10 rounded-lg bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20">
                                                 <BookOpen className="w-5 h-5 text-indigo-400" />
                                             </div>
-                                            <p className="text-sm font-bold text-slate-300 line-clamp-1">
+                                            <p className="text-sm font-bold text-foreground line-clamp-1">
                                                 {e.courseId?.title || 'Deleted Course'}
                                             </p>
                                         </div>
                                     </TableCell>
                                     <TableCell>
-                                        <div className="flex items-center gap-2 text-slate-400">
+                                        <div className="flex items-center gap-2 text-muted-foreground">
                                             <Clock className="w-3.5 h-3.5" />
                                             <span className="text-xs font-bold font-mono">
                                                 {format(new Date(e.createdAt), 'MMM dd, yyyy')}
@@ -226,7 +226,7 @@ export default function InstructorEnrollmentsPage() {
                                                 </Button>
                                             </div>
                                         ) : (
-                                            <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest bg-slate-800/50 px-3 py-1.5 rounded-lg border border-slate-800">
+                                            <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest bg-muted/50 px-3 py-1.5 rounded-lg border border-border">
                                                 Action Completed
                                             </span>
                                         )}

@@ -86,26 +86,26 @@ export default function InstructorDashboard() {
             {/* Welcome Section */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold text-white tracking-tight">Dashboard Overview</h1>
-                    <p className="text-slate-400 mt-1">Welcome back, {user?.name}! Here's what's happening today.</p>
+                    <h1 className="text-3xl font-bold text-foreground tracking-tight">Dashboard Overview</h1>
+                    <p className="text-muted-foreground mt-1">Welcome back, {user?.name}! Here's what's happening today.</p>
                 </div>
                 <div className="flex items-center gap-3">
                     <div className="flex -space-x-3 overflow-hidden">
                         {[1, 2, 3, 4].map((i) => (
-                            <Avatar key={i} className="border-2 border-[#020817] w-8 h-8">
+                            <Avatar key={i} className="border-2 border-background w-8 h-8">
                                 <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${i + 10}`} />
                                 <AvatarFallback>U</AvatarFallback>
                             </Avatar>
                         ))}
                     </div>
-                    <span className="text-sm text-slate-400 font-medium">{analytics?.totalStudents || 0} students joined overall</span>
+                    <span className="text-sm text-muted-foreground font-medium">{analytics?.totalStudents || 0} students joined overall</span>
                 </div>
             </div>
 
             {/* Stats Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {stats.map((stat, i) => (
-                    <Card key={i} className="bg-slate-900/40 border-slate-800/80 backdrop-blur-sm hover:border-indigo-500/50 transition-all duration-300 group rounded-3xl">
+                    <Card key={i} className="bg-card/40 border-border/80 backdrop-blur-sm hover:border-indigo-500/50 transition-all duration-300 group rounded-3xl">
                         <CardContent className="p-6">
                             <div className="flex items-center justify-between mb-4">
                                 <div className={cn("p-2.5 rounded-xl transition-colors", stat.bg)}>
@@ -113,15 +113,15 @@ export default function InstructorDashboard() {
                                 </div>
                                 {stat.change !== '0%' && (
                                     <Badge variant="outline" className={cn(
-                                        "bg-slate-800/50 border-slate-700/50 px-2 py-0.5 pointer-events-none",
+                                        "bg-muted/50 border-border/50 px-2 py-0.5 pointer-events-none",
                                         stat.change.startsWith('+') ? "text-emerald-400" : "text-amber-400"
                                     )}>
                                         {stat.change}
                                     </Badge>
                                 )}
                             </div>
-                            <p className="text-sm font-medium text-slate-400">{stat.label}</p>
-                            <h3 className="text-2xl font-bold mt-1 text-white group-hover:scale-[1.02] origin-left transition-transform">{stat.value}</h3>
+                            <p className="text-sm font-medium text-muted-foreground">{stat.label}</p>
+                            <h3 className="text-2xl font-bold mt-1 text-foreground group-hover:scale-[1.02] origin-left transition-transform">{stat.value}</h3>
                         </CardContent>
                     </Card>
                 ))}
@@ -129,13 +129,13 @@ export default function InstructorDashboard() {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Main Chart */}
-                <Card className="lg:col-span-2 bg-slate-900/40 border-slate-800/80 backdrop-blur-sm">
+                <Card className="lg:col-span-2 bg-card/40 border-border/80 backdrop-blur-sm">
                     <CardHeader className="flex flex-row items-center justify-between pb-8">
                         <div>
-                            <CardTitle className="text-white">Revenue Performance</CardTitle>
-                            <CardDescription className="text-slate-500">Monthly earnings comparison for the current year</CardDescription>
+                            <CardTitle className="text-foreground">Revenue Performance</CardTitle>
+                            <CardDescription className="text-muted-foreground/60">Monthly earnings comparison for the current year</CardDescription>
                         </div>
-                        <select className="bg-slate-800 border border-slate-700 text-xs rounded-lg px-2 py-1 outline-none text-slate-300 focus:ring-1 focus:ring-indigo-500">
+                        <select className="bg-muted border border-border text-xs rounded-lg px-2 py-1 outline-none text-muted-foreground focus:ring-1 focus:ring-indigo-500 transition-colors">
                             <option>Last 6 Months</option>
                             <option>Last Year</option>
                         </select>
@@ -149,7 +149,7 @@ export default function InstructorDashboard() {
                                         <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
                                     </linearGradient>
                                 </defs>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+                                <CartesianGrid strokeDasharray="3 3" stroke="currentColor" className="text-border" vertical={false} />
                                 <XAxis
                                     dataKey="name"
                                     stroke="#64748b"
@@ -167,10 +167,10 @@ export default function InstructorDashboard() {
                                 />
                                 <Tooltip
                                     contentStyle={{
-                                        backgroundColor: '#0f172a',
-                                        borderColor: '#1e293b',
+                                        backgroundColor: 'var(--card)',
+                                        borderColor: 'var(--border)',
                                         borderRadius: '12px',
-                                        color: '#f1f5f9'
+                                        color: 'var(--foreground)'
                                     }}
                                     itemStyle={{ color: '#818cf8' }}
                                 />
@@ -188,10 +188,10 @@ export default function InstructorDashboard() {
                 </Card>
 
                 {/* Recently Purchased */}
-                <Card className="bg-slate-900/40 border-slate-800/80 backdrop-blur-sm">
+                <Card className="bg-card/40 border-border/80 backdrop-blur-sm">
                     <CardHeader>
                         <div className="flex items-center justify-between">
-                            <CardTitle className="text-white">Recent Sales</CardTitle>
+                            <CardTitle className="text-foreground">Recent Sales</CardTitle>
                             <Button variant="link" className="text-indigo-400 hover:text-indigo-300 p-0 h-auto text-xs font-semibold uppercase tracking-wider">
                                 View All
                             </Button>
@@ -202,18 +202,18 @@ export default function InstructorDashboard() {
                             {recentStudents.map((student: any) => (
                                 <div key={student.id} className="flex items-center justify-between group">
                                     <div className="flex items-center gap-3">
-                                        <Avatar className="w-10 h-10 border border-slate-800 ring-2 ring-transparent group-hover:ring-indigo-500/20 transition-all">
+                                        <Avatar className="w-10 h-10 border border-border ring-2 ring-transparent group-hover:ring-indigo-500/20 transition-all">
                                             <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${student.name}`} />
                                             <AvatarFallback>{student.name[0]}</AvatarFallback>
                                         </Avatar>
                                         <div className="min-w-0">
-                                            <p className="text-sm font-semibold text-white leading-none mb-1 truncate max-w-[120px] md:max-w-none">{student.name}</p>
-                                            <p className="text-xs text-slate-500 truncate max-w-[120px] md:max-w-none">{student.course}</p>
+                                            <p className="text-sm font-semibold text-foreground leading-none mb-1 truncate max-w-[120px] md:max-w-none">{student.name}</p>
+                                            <p className="text-xs text-muted-foreground truncate max-w-[120px] md:max-w-none">{student.course}</p>
                                         </div>
                                     </div>
                                     <div className="text-right">
-                                        <p className="text-sm font-bold text-white mb-1">{student.amount}</p>
-                                        <p className="text-[10px] text-slate-500 font-medium">{student.date}</p>
+                                        <p className="text-sm font-bold text-foreground mb-1">{student.amount}</p>
+                                        <p className="text-[10px] text-muted-foreground font-medium">{student.date}</p>
                                     </div>
                                 </div>
                             ))}
@@ -226,11 +226,11 @@ export default function InstructorDashboard() {
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
                 <div className="lg:col-span-3">
                     <div className="flex items-center justify-between mb-6">
-                        <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                        <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
                             <Package className="w-5 h-5 text-indigo-400" />
                             Popular Courses
                         </h2>
-                        <Button variant="outline" className="text-slate-400 border-slate-800 hover:bg-slate-800 hover:text-white rounded-xl gap-2 active:scale-95 transition-all text-xs h-9">
+                        <Button variant="outline" className="text-muted-foreground border-border hover:bg-muted hover:text-foreground rounded-xl gap-2 active:scale-95 transition-all text-xs h-9">
                             More Courses
                             <ExternalLink className="w-3 h-3" />
                         </Button>
@@ -238,7 +238,7 @@ export default function InstructorDashboard() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                         {topCourses.map((course: any) => (
-                            <Card key={course.id} className="group overflow-hidden bg-slate-900/40 border-slate-800/80 backdrop-blur-sm hover:translate-y-[-4px] transition-all duration-300">
+                            <Card key={course.id} className="group overflow-hidden bg-card/40 border-border/80 backdrop-blur-sm hover:translate-y-[-4px] transition-all duration-300">
                                 <div className="aspect-video relative overflow-hidden">
                                     <img
                                         src={course.thumbnail}
@@ -246,7 +246,7 @@ export default function InstructorDashboard() {
                                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                                     />
                                     <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
-                                        <Button size="sm" className="w-full bg-white text-black hover:bg-white/90 rounded-lg font-bold gap-2">
+                                        <Button size="sm" className="w-full bg-white text-indigo-600 hover:bg-white/90 rounded-lg font-bold gap-2">
                                             <Play className="fill-current w-3 h-3" />
                                             View Analytics
                                         </Button>
@@ -256,14 +256,14 @@ export default function InstructorDashboard() {
                                     </Badge>
                                 </div>
                                 <CardContent className="p-4">
-                                    <h4 className="font-bold text-white line-clamp-1 mb-3 group-hover:text-indigo-400 transition-colors">{course.name}</h4>
-                                    <div className="flex items-center justify-between pt-3 border-t border-slate-800/50">
+                                    <h4 className="font-bold text-foreground line-clamp-1 mb-3 group-hover:text-indigo-400 transition-colors">{course.name}</h4>
+                                    <div className="flex items-center justify-between pt-3 border-t border-border/50">
                                         <div className="flex flex-col">
-                                            <span className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-0.5">Sales</span>
-                                            <span className="text-sm font-bold text-white">{course.sales}</span>
+                                            <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-0.5">Sales</span>
+                                            <span className="text-sm font-bold text-foreground">{course.sales}</span>
                                         </div>
                                         <div className="flex flex-col text-right">
-                                            <span className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-0.5">Revenue</span>
+                                            <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-0.5">Revenue</span>
                                             <span className="text-sm font-bold text-indigo-400">{course.revenue}</span>
                                         </div>
                                     </div>
@@ -289,7 +289,7 @@ export default function InstructorDashboard() {
                         </CardContent>
                     </Card>
 
-                    <Card className="bg-slate-900/40 border-slate-800/80 backdrop-blur-sm">
+                    <Card className="bg-card/40 border-border/80 backdrop-blur-sm">
                         <CardHeader>
                             <CardTitle className="text-sm font-bold flex items-center gap-2">
                                 <CheckCircle2 className="w-4 h-4 text-emerald-400" />
@@ -301,17 +301,17 @@ export default function InstructorDashboard() {
                                 { task: 'New lesson for Next.js', date: 'Tomorrow', icon: Clock },
                                 { task: 'Update Course Handouts', date: 'Fri, 20 Mar', icon: Clock },
                             ].map((task, i) => (
-                                <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-slate-800/40 border border-slate-800 hover:bg-slate-800/60 transition-colors group cursor-pointer">
-                                    <div className="p-2 bg-slate-900 rounded-lg group-hover:scale-110 transition-transform">
+                                <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-muted/40 border border-border hover:bg-muted/60 transition-colors group cursor-pointer">
+                                    <div className="p-2 bg-muted rounded-lg group-hover:scale-110 transition-transform">
                                         <task.icon className="w-3.5 h-3.5 text-indigo-400" />
                                     </div>
                                     <div className="min-w-0">
-                                        <p className="text-xs font-semibold text-slate-200 truncate">{task.task}</p>
-                                        <p className="text-[10px] text-slate-500 font-medium">{task.date}</p>
+                                        <p className="text-xs font-semibold text-foreground truncate">{task.task}</p>
+                                        <p className="text-[10px] text-muted-foreground font-medium">{task.date}</p>
                                     </div>
                                 </div>
                             ))}
-                            <Button variant="ghost" className="w-full text-slate-500 hover:text-white hover:bg-slate-800/50 h-8 text-[11px] font-bold uppercase tracking-wider rounded-lg">
+                            <Button variant="ghost" className="w-full text-muted-foreground hover:text-foreground hover:bg-muted/50 h-8 text-[11px] font-bold uppercase tracking-wider rounded-lg">
                                 <Plus className="w-3 h-3 mr-1" />
                                 Add New Task
                             </Button>

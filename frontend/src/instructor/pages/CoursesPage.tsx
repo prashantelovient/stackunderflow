@@ -4,10 +4,10 @@ import { courseService, moduleService, lectureService, videoService, categorySer
 import { PageHeader, Badge, Spinner, Button as AdminButton, Input, Textarea, Select } from '@/admin/components/ui'
 import { ConfirmModal, Modal } from '@/admin/components/Modals'
 import { toast, ToastContainer } from '@/admin/components/Toast'
-import { 
-    Plus, Pencil, Trash2, BookOpen, ChevronDown, ChevronRight, Layers, 
-    FileVideo, FileText, Link as LinkIcon, GraduationCap, Layout, Boxes, 
-    Trash, Edit, PlusCircle, MonitorPlay, Zap, ShieldAlert, 
+import {
+    Plus, Pencil, Trash2, BookOpen, ChevronDown, ChevronRight, Layers,
+    FileVideo, FileText, Link as LinkIcon, GraduationCap, Layout, Boxes,
+    Trash, Edit, PlusCircle, MonitorPlay, Zap, ShieldAlert,
     LayoutDashboard, Search, PenSquare, Trash2 as TrashIcon, Eye
 } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
@@ -186,11 +186,11 @@ export default function InstructorCoursesPage() {
             <ToastContainer />
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold text-white tracking-tight">Manage Courses</h1>
-                    <p className="text-slate-400 mt-1">Create, edit and manage your teaching content here.</p>
+                    <h1 className="text-3xl font-bold text-foreground tracking-tight">Manage Courses</h1>
+                    <p className="text-muted-foreground mt-1">Create, edit and manage your teaching content here.</p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <Button 
+                    <Button
                         onClick={openNewCourse}
                         className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-xl gap-2 shadow-lg shadow-indigo-600/20 active:scale-95 transition-all h-10 px-6 font-bold"
                     >
@@ -203,11 +203,11 @@ export default function InstructorCoursesPage() {
             <div className="space-y-6">
                 {courses.map((course) => (
                     <Card key={course.id} className={cn(
-                        "group overflow-hidden border-slate-800 bg-slate-900/40 backdrop-blur-sm transition-all duration-500 rounded-[2.5rem]",
+                        "group overflow-hidden border-border bg-card/40 backdrop-blur-sm transition-all duration-500 rounded-[2.5rem]",
                         expandedCourses.has(course.id) ? "shadow-2xl ring-1 ring-indigo-500/20" : "shadow-lg hover:border-indigo-500/50"
                     )}>
                         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 p-6 sm:p-8 cursor-pointer relative" onClick={() => toggleCourse(course.id)}>
-                            <div className="w-24 h-24 rounded-[1.5rem] flex items-center justify-center flex-shrink-0 transition-transform duration-500 group-hover:scale-105 shadow-xl overflow-hidden border border-slate-700 bg-slate-800">
+                            <div className="w-24 h-24 rounded-[1.5rem] flex items-center justify-center flex-shrink-0 transition-transform duration-500 group-hover:scale-105 shadow-xl overflow-hidden border border-border bg-muted">
                                 <img
                                     src={getThumbnailUrl(course.thumbnail)}
                                     alt={course.title}
@@ -216,22 +216,22 @@ export default function InstructorCoursesPage() {
                             </div>
                             <div className="flex-1 min-w-0 space-y-1">
                                 <div className="flex items-center gap-3">
-                                    <h3 className="text-xl font-bold text-white tracking-tight">{course.title}</h3>
+                                    <h3 className="text-xl font-bold text-foreground tracking-tight">{course.title}</h3>
                                     <Badge variant="outline" className="text-[9px] font-black uppercase tracking-widest bg-indigo-500/5 text-indigo-400 border-indigo-500/20 px-2">
                                         {course.category || 'Uncategorized'}
                                     </Badge>
                                 </div>
-                                <p className="text-sm font-medium text-slate-400 line-clamp-2 pr-12">{course.description}</p>
+                                <p className="text-sm font-medium text-muted-foreground line-clamp-2 pr-12">{course.description}</p>
                             </div>
 
                             <div className="flex flex-wrap items-center gap-3 mt-4 sm:mt-0">
-                                <div className="flex flex-col items-center px-4 py-2 bg-slate-950/40 rounded-2xl border border-slate-800/50">
-                                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Modules</span>
-                                    <span className="text-sm font-bold text-white">{course.moduleCount || 0}</span>
+                                <div className="flex flex-col items-center px-4 py-2 bg-background/40 rounded-2xl border border-border/50">
+                                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Modules</span>
+                                    <span className="text-sm font-bold text-foreground">{course.moduleCount || 0}</span>
                                 </div>
-                                <div className="flex flex-col items-center px-4 py-2 bg-slate-950/40 rounded-2xl border border-slate-800/50">
-                                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Lectures</span>
-                                    <span className="text-sm font-bold text-white">{course.lectureCount || 0}</span>
+                                <div className="flex flex-col items-center px-4 py-2 bg-background/40 rounded-2xl border border-border/50">
+                                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Lectures</span>
+                                    <span className="text-sm font-bold text-foreground">{course.lectureCount || 0}</span>
                                 </div>
                             </div>
 
@@ -242,18 +242,18 @@ export default function InstructorCoursesPage() {
                                 <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); setDeleteCourseId(course.id) }} className="w-9 h-9 rounded-xl hover:bg-red-500/10 hover:text-red-400">
                                     <Trash2 className="w-4 h-4" />
                                 </Button>
-                                <Button variant="ghost" size="icon" className="w-9 h-9 rounded-xl hover:bg-slate-800">
+                                <Button variant="ghost" size="icon" className="w-9 h-9 rounded-xl hover:bg-muted">
                                     <ChevronDown className={cn("w-5 h-5 transition-transform", expandedCourses.has(course.id) && "rotate-180")} />
                                 </Button>
                             </div>
                         </div>
 
                         {expandedCourses.has(course.id) && (
-                            <div className="animate-in slide-in-from-top-4 duration-500 border-t border-slate-800">
-                                <div className="p-4 px-8 bg-slate-950/20 flex items-center justify-between border-b border-slate-800">
+                            <div className="animate-in slide-in-from-top-4 duration-500 border-t border-border">
+                                <div className="p-4 px-8 bg-background/20 flex items-center justify-between border-b border-border">
                                     <div className="flex items-center gap-3">
                                         <Boxes className="w-4 h-4 text-indigo-400" />
-                                        <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">Modules</span>
+                                        <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Modules</span>
                                     </div>
                                     <Button onClick={() => openNewModule(course.id)} variant="outline" className="h-8 text-[10px] font-bold uppercase px-4 border-indigo-500/30 text-indigo-400 hover:bg-indigo-500 hover:text-white rounded-xl">
                                         <Plus className="w-3.5 h-3.5 mr-2" />
@@ -267,20 +267,20 @@ export default function InstructorCoursesPage() {
                                         <p className="text-[11px] font-bold uppercase tracking-widest">No Modules Yet</p>
                                     </div>
                                 ) : (
-                                    <div className="divide-y divide-slate-800">
+                                    <div className="divide-y divide-border">
                                         {(course.modules || []).map((mod, idx) => (
-                                            <div key={mod.id} className="bg-slate-950/10">
-                                                <div className="flex items-center gap-5 p-6 pl-10 cursor-pointer hover:bg-slate-800/30 transition-colors" onClick={() => toggleModule(mod.id)}>
+                                            <div key={mod.id} className="bg-background/10">
+                                                <div className="flex items-center gap-5 p-6 pl-10 cursor-pointer hover:bg-muted/30 transition-colors" onClick={() => toggleModule(mod.id)}>
                                                     <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-400 border border-indigo-500/20 font-bold text-xs">
                                                         {(idx + 1).toString().padStart(2, '0')}
                                                     </div>
                                                     <div className="flex-1 min-w-0">
-                                                        <span className="text-md font-bold text-white">{mod.title}</span>
-                                                        {mod.description && <p className="text-xs text-slate-500 line-clamp-1 mt-0.5">{mod.description}</p>}
+                                                        <span className="text-md font-bold text-foreground">{mod.title}</span>
+                                                        {mod.description && <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">{mod.description}</p>}
                                                     </div>
 
                                                     <div className="flex items-center gap-4">
-                                                        <Badge className="bg-slate-800 text-slate-400 border-none px-3">
+                                                        <Badge className="bg-muted text-muted-foreground border-none px-3">
                                                             {(mod.lectures || []).length} LECTURES
                                                         </Badge>
                                                         <div className="flex items-center gap-1">
@@ -296,29 +296,29 @@ export default function InstructorCoursesPage() {
                                                 </div>
 
                                                 {expandedModules.has(mod.id) && (
-                                                    <div className="bg-slate-950/30 pb-4 animate-in fade-in slide-in-from-left-2 duration-300 border-t border-slate-800/50">
+                                                    <div className="bg-background/30 pb-4 animate-in fade-in slide-in-from-left-2 duration-300 border-t border-border/50">
                                                         <div className="px-10 pl-24 py-3 flex items-center justify-between">
-                                                            <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-600">Lectures</span>
+                                                            <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-muted-foreground">Lectures</span>
                                                             <Button onClick={() => openNewLecture(mod.id)} variant="ghost" className="text-[10px] font-bold h-7 px-3 bg-indigo-500/5 text-indigo-400 hover:bg-indigo-500 hover:text-white rounded-lg">
                                                                 <Plus className="w-3 h-3 mr-1.5" /> New Lecture
                                                             </Button>
                                                         </div>
                                                         {(mod.lectures || []).length === 0 ? (
-                                                            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-700 text-center py-6">Empty Buffer</p>
+                                                            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground text-center py-6">Empty Buffer</p>
                                                         ) : (
                                                             <div className="space-y-2 px-10 pl-24 pr-16">
                                                                 {(mod.lectures || []).map((lec) => (
-                                                                    <div key={lec.id} className="flex items-center gap-4 p-4 bg-slate-900/40 rounded-2xl border border-slate-800 hover:border-indigo-500/30 hover:bg-slate-800/60 transition-all group/lec shadow-sm">
-                                                                        <div className="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center group-hover/lec:bg-indigo-500/10 transition-colors">
+                                                                    <div key={lec.id} className="flex items-center gap-4 p-4 bg-background/40 rounded-2xl border border-border hover:border-indigo-500/30 hover:bg-muted/60 transition-all group/lec shadow-sm">
+                                                                        <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center group-hover/lec:bg-indigo-500/10 transition-colors">
                                                                             {lectureTypeIcon(lec.type)}
                                                                         </div>
                                                                         <div className="flex-1 min-w-0">
-                                                                            <span className="text-sm font-bold text-slate-300 group-hover/lec:text-white block truncate">{lec.title}</span>
+                                                                            <span className="text-sm font-bold text-foreground/80 group-hover/lec:text-foreground block truncate">{lec.title}</span>
                                                                             <div className="flex items-center gap-2 mt-0.5">
-                                                                                <span className="text-[9px] font-bold text-slate-600 uppercase tracking-widest">{lec.type}</span>
+                                                                                <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">{lec.type}</span>
                                                                                 {lec.videoId?.title && (
                                                                                     <>
-                                                                                        <span className="text-slate-800">|</span>
+                                                                                        <span className="text-border">|</span>
                                                                                         <span className="text-[9px] font-bold text-indigo-400/70 uppercase tracking-widest truncate max-w-[150px]">
                                                                                             <MonitorPlay className="w-2.5 h-2.5 inline mr-1" />
                                                                                             {lec.videoId.title}
@@ -362,13 +362,13 @@ export default function InstructorCoursesPage() {
                     <Textarea label="Description" value={courseForm.description} onChange={(e) => setCourseForm(f => ({ ...f, description: e.target.value }))} placeholder="Enter description..." />
 
                     <div className="space-y-4">
-                        <label className="text-[11px] font-bold uppercase tracking-widest text-slate-500" htmlFor="course-thumb">Thumbnail</label>
+                        <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground" htmlFor="course-thumb">Thumbnail</label>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="p-8 border-2 border-dashed border-slate-800 rounded-2xl flex flex-col items-center justify-center gap-4 bg-slate-900/40 relative">
+                            <div className="p-8 border-2 border-dashed border-border rounded-2xl flex flex-col items-center justify-center gap-4 bg-muted/40 relative">
                                 {thumbnailPreview ? (
                                     <img src={thumbnailPreview} alt="Preview" className="w-full aspect-video object-cover rounded-xl shadow-lg" />
                                 ) : (
-                                    <BookOpen className="w-8 h-8 text-slate-700" />
+                                    <BookOpen className="w-8 h-8 text-muted-foreground/40" />
                                 )}
                                 <input type="file" accept="image/*" className="sr-only" id="course-thumb" onChange={(e) => {
                                     const file = e.target.files?.[0]
@@ -381,7 +381,7 @@ export default function InstructorCoursesPage() {
                                 <label htmlFor="course-thumb" className="text-[10px] font-bold uppercase tracking-widest bg-white text-black px-5 py-2.5 rounded-xl cursor-pointer hover:opacity-80 transition-all shadow-lg active:scale-95">Upload Image</label>
                             </div>
                             <div className="flex flex-col justify-center space-y-4">
-                                <p className="text-[10px] font-bold text-slate-600 uppercase tracking-widest text-center">OR PASTE URL</p>
+                                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest text-center">OR PASTE URL</p>
                                 <Input
                                     label="Thumbnail URL"
                                     value={courseForm.thumbnail}

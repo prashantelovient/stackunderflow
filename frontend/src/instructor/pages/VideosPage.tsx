@@ -104,7 +104,7 @@ export default function InstructorVideosPage() {
             cell: ({ row }) => {
                 const thumb = row.original.thumbnail;
                 return (
-                    <div className="relative w-24 h-14 rounded-xl overflow-hidden bg-slate-800/50 border border-slate-700/50 group/thumb">
+                    <div className="relative w-24 h-14 rounded-xl overflow-hidden bg-muted/50 border border-border/50 group/thumb">
                         {thumb ? (
                             <img src={getThumbnailUrl(thumb)!} alt="" className="w-full h-full object-cover group-hover/thumb:scale-110 transition-transform duration-500" />
                         ) : (
@@ -124,8 +124,8 @@ export default function InstructorVideosPage() {
             header: 'Asset Identifier',
             cell: ({ row }) => (
                 <div className="flex flex-col">
-                    <span className="font-bold text-white text-sm tracking-tight">{row.original.title}</span>
-                    <span className="text-[10px] uppercase font-extrabold text-slate-500 tracking-widest pt-0.5 line-clamp-1 max-w-[200px]">{row.original.description}</span>
+                    <span className="font-bold text-foreground text-sm tracking-tight">{row.original.title}</span>
+                    <span className="text-[10px] uppercase font-extrabold text-muted-foreground tracking-widest pt-0.5 line-clamp-1 max-w-[200px]">{row.original.description}</span>
                 </div>
             )
         },
@@ -143,7 +143,7 @@ export default function InstructorVideosPage() {
             accessorKey: 'duration',
             header: 'Duration',
             cell: ({ row }) => (
-                <div className="flex items-center gap-1.5 text-xs font-black font-mono text-slate-400">
+                <div className="flex items-center gap-1.5 text-xs font-black font-mono text-muted-foreground">
                     <Clock className="w-3.5 h-3.5" />
                     {row.original.duration}
                 </div>
@@ -153,7 +153,7 @@ export default function InstructorVideosPage() {
             accessorKey: 'uploadDate',
             header: 'Registry Date',
             cell: ({ row }) => (
-                <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground">
                     <Calendar className="w-3.5 h-3.5" />
                     {formatDate(row.original.uploadDate)}
                 </div>
@@ -165,18 +165,18 @@ export default function InstructorVideosPage() {
             cell: ({ row }) => (
                 <DropdownMenu>
                     <DropdownMenuTrigger
-                        className="h-9 w-9 rounded-xl hover:bg-slate-800 transition-all text-slate-400 hover:text-white flex items-center justify-center outline-none"
+                        className="h-9 w-9 rounded-xl hover:bg-muted transition-all text-muted-foreground hover:text-foreground flex items-center justify-center outline-none"
                     >
                         <MoreVertical className="w-4 h-4" />
                     </DropdownMenuTrigger>
 
                     <DropdownMenuContent
                         align="end"
-                        className="w-40 rounded-xl border-slate-800 bg-slate-900 text-slate-200 shadow-2xl z-50"
+                        className="w-40 rounded-xl border-border bg-card text-foreground shadow-2xl z-50"
                     >
                         <DropdownMenuItem
                             onClick={() => setViewVideo(row.original)}
-                            className="flex items-center gap-2 cursor-pointer hover:bg-slate-800"
+                            className="flex items-center gap-2 cursor-pointer hover:bg-muted"
                         >
                             <Eye className="w-4 h-4" />
                             View
@@ -184,7 +184,7 @@ export default function InstructorVideosPage() {
 
                         <DropdownMenuItem
                             onClick={() => openEdit(row.original)}
-                            className="flex items-center gap-2 cursor-pointer hover:bg-slate-800"
+                            className="flex items-center gap-2 cursor-pointer hover:bg-muted"
                         >
                             <Edit className="w-4 h-4" />
                             Edit
@@ -206,7 +206,7 @@ export default function InstructorVideosPage() {
     if (isLoading) return (
         <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
             <Spinner />
-            <p className="text-[10px] font-extrabold text-slate-500 uppercase tracking-[0.2em] animate-pulse font-mono">Syncing HLS Content Nodes...</p>
+            <p className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-[0.2em] animate-pulse font-mono">Syncing HLS Content Nodes...</p>
         </div>
     )
 
@@ -215,8 +215,8 @@ export default function InstructorVideosPage() {
             <ToastContainer />
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold text-white tracking-tight">Video Archives</h1>
-                    <p className="text-slate-400 mt-1">Manage your course video assets and HLS broadcast nodes.</p>
+                    <h1 className="text-3xl font-bold text-foreground tracking-tight">Video Archives</h1>
+                    <p className="text-muted-foreground mt-1">Manage your course video assets and HLS broadcast nodes.</p>
                 </div>
                 <div className="flex items-center gap-3">
                     <Button
@@ -229,7 +229,7 @@ export default function InstructorVideosPage() {
                 </div>
             </div>
 
-            <Card className="rounded-[2rem] overflow-hidden border-slate-800/80 shadow-xl bg-slate-900/40 backdrop-blur-sm">
+            <Card className="rounded-[2rem] overflow-hidden border-border/80 shadow-xl bg-card/40 backdrop-blur-sm">
                 <CardContent className="p-0">
                     <DataTable
                         data={videos}
@@ -253,13 +253,13 @@ export default function InstructorVideosPage() {
                     </div>
 
                     <div className="space-y-4">
-                        <label className="text-[11px] font-bold uppercase tracking-widest text-slate-500 ml-1" htmlFor="video-thumb">Visualization (Thumbnail)</label>
+                        <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground ml-1" htmlFor="video-thumb">Visualization (Thumbnail)</label>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="p-8 border-2 border-dashed border-slate-800 rounded-2xl flex flex-col items-center justify-center gap-4 bg-slate-900/40 relative">
+                            <div className="p-8 border-2 border-dashed border-border rounded-2xl flex flex-col items-center justify-center gap-4 bg-muted/40 relative">
                                 {thumbnailPreview ? (
                                     <img src={thumbnailPreview} alt="Preview" className="w-full aspect-video object-cover rounded-xl shadow-lg" />
                                 ) : (
-                                    <Film className="w-8 h-8 text-slate-700" />
+                                    <Film className="w-8 h-8 text-muted-foreground/40" />
                                 )}
                                 <input type="file" accept="image/*" className="sr-only" id="video-thumb" onChange={(e) => {
                                     const file = e.target.files?.[0]
@@ -272,7 +272,7 @@ export default function InstructorVideosPage() {
                                 <label htmlFor="video-thumb" className="text-[10px] font-bold uppercase tracking-widest bg-white text-black px-5 py-2.5 rounded-xl cursor-pointer hover:opacity-80 transition-all shadow-lg active:scale-95">Upload Image</label>
                             </div>
                             <div className="flex flex-col justify-center space-y-4">
-                                <p className="text-[10px] font-bold text-slate-600 uppercase tracking-widest text-center">OR PASTE URL</p>
+                                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest text-center">OR PASTE URL</p>
                                 <Input
                                     label="Thumbnail URL"
                                     value={(form as any).thumbnail}
@@ -288,9 +288,9 @@ export default function InstructorVideosPage() {
                     </div>
 
                     <div className="space-y-3">
-                        <label className="text-[11px] font-bold uppercase tracking-widest text-slate-500 ml-1">Segment Binary (Video)</label>
-                        <div className="p-8 border-2 border-dashed border-slate-800 rounded-3xl flex flex-col items-center justify-center gap-3 bg-slate-900/20">
-                            <UploadCloud className="w-10 h-10 text-slate-700" />
+                        <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Segment Binary (Video)</label>
+                        <div className="p-8 border-2 border-dashed border-border rounded-3xl flex flex-col items-center justify-center gap-3 bg-muted/20">
+                            <UploadCloud className="w-10 h-10 text-muted-foreground/40" />
                             <label className="cursor-pointer">
                                 <input type="file" accept="video/*" onChange={(e) => {
                                     const file = e.target.files?.[0]
@@ -301,13 +301,13 @@ export default function InstructorVideosPage() {
                             {videoFile ? (
                                 <p className="text-[10px] font-mono font-bold text-emerald-400 uppercase mt-2">Ready: {videoFile.name} ({(videoFile.size / (1024 * 1024)).toFixed(2)} MB)</p>
                             ) : (
-                                <p className="text-[10px] font-medium text-slate-600 uppercase tracking-widest">No source segment linked.</p>
+                                <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest">No source segment linked.</p>
                             )}
                         </div>
                     </div>
 
-                    <div className="flex justify-end gap-3 pt-6 border-t border-slate-800/50">
-                        <Button variant="ghost" onClick={() => setModalOpen(false)} className="rounded-xl px-6 font-bold text-xs text-slate-400 hover:text-white">DISCARD</Button>
+                    <div className="flex justify-end gap-3 pt-6 border-t border-border/50">
+                        <Button variant="ghost" onClick={() => setModalOpen(false)} className="rounded-xl px-6 font-bold text-xs text-muted-foreground hover:text-foreground">DISCARD</Button>
                         <Button loading={saveMutation.isPending} onClick={() => saveMutation.mutate()} className="bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl px-8 shadow-lg shadow-indigo-600/20 font-bold text-xs uppercase tracking-widest h-11">
                             {editItem ? 'UPDATE CONFIG' : 'INITIALIZE ASSET'}
                         </Button>
@@ -344,26 +344,26 @@ export default function InstructorVideosPage() {
                         ) : (
                             <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
                                 <Spinner className="w-10 h-10" />
-                                <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Synchronizing Signal...</p>
+                                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Synchronizing Signal...</p>
                             </div>
                         )}
                     </div>
                     <div className="space-y-4 px-2 pb-2">
                         <div className="flex items-center justify-between gap-4">
                             <div className="space-y-1">
-                                <h3 className="text-xl font-black tracking-tight text-white">{viewVideo?.title}</h3>
+                                <h3 className="text-xl font-black tracking-tight text-foreground">{viewVideo?.title}</h3>
                                 <div className="flex items-center gap-3">
                                     <Badge variant="outline" className="text-[9px] font-extrabold bg-indigo-500/5 border-indigo-500/20 text-indigo-400 uppercase tracking-widest">
                                         {viewVideo?.courseTitle}
                                     </Badge>
-                                    <span className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                                    <span className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
                                         <Clock className="w-3.5 h-3.5" />
                                         {viewVideo?.duration}
                                     </span>
                                 </div>
                             </div>
                         </div>
-                        <p className="text-sm font-medium text-slate-400 leading-relaxed p-6 bg-slate-950/40 rounded-3xl border border-slate-800/50 italic">
+                        <p className="text-sm font-medium text-muted-foreground leading-relaxed p-6 bg-muted/40 rounded-3xl border border-border/50 italic">
                             {viewVideo?.description}
                         </p>
                     </div>

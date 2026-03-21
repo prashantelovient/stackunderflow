@@ -28,6 +28,7 @@ import {
     DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import { useAuthStore } from '@/auth/store/authStore'
+import { ThemeToggle } from '@/components/ThemeToggle'
 
 const sidebarItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/instructor/dashboard' },
@@ -52,7 +53,7 @@ export default function InstructorLayout() {
     }
 
     return (
-        <div className="min-h-screen bg-[#020817] text-slate-200 selection:bg-indigo-500/30">
+        <div className="min-h-screen bg-background text-foreground transition-colors duration-300 selection:bg-indigo-500/30">
             {/* Background Decor */}
             <div className="fixed inset-0 overflow-hidden pointer-events-none">
                 <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-500/10 blur-[120px] rounded-full" />
@@ -61,13 +62,13 @@ export default function InstructorLayout() {
 
             <div className="flex relative z-10">
                 {/* Sidebar */}
-                <aside className="w-64 h-screen sticky top-0 border-r border-slate-800/50 bg-[#020817]/80 backdrop-blur-xl hidden md:flex flex-col">
+                <aside className="w-64 h-screen sticky top-0 border-r border-border/50 bg-background/80 backdrop-blur-xl hidden md:flex flex-col">
                     <div className="p-6">
                         <Link to="/instructor/dashboard" className="flex items-center gap-2 group">
                             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-white shadow-lg shadow-indigo-500/20 group-hover:scale-110 transition-transform">
                                 V
                             </div>
-                            <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
+                            <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/60">
                                 VaultLearn
                             </span>
                         </Link>
@@ -84,7 +85,7 @@ export default function InstructorLayout() {
                                         "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative",
                                         isActive
                                             ? "bg-indigo-500/10 text-indigo-400 font-medium"
-                                            : "text-slate-400 hover:text-white hover:bg-slate-800/50"
+                                            : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                                     )}
                                 >
                                     <item.icon className={cn("w-5 h-5 transition-transform duration-200", !isActive && "group-hover:scale-110")} />
@@ -100,7 +101,7 @@ export default function InstructorLayout() {
                     <div className="p-4 mt-auto">
                         <div className="bg-gradient-to-br from-indigo-500/10 to-purple-500/5 rounded-2xl p-4 border border-indigo-500/20">
                             <p className="text-xs font-semibold text-indigo-400 uppercase tracking-wider mb-2">Upgrade Pro</p>
-                            <p className="text-xs text-slate-400 leading-relaxed mb-3">Get advanced analytics and premium course tools.</p>
+                            <p className="text-xs text-muted-foreground leading-relaxed mb-3">Get advanced analytics and premium course tools.</p>
                             <Button size="sm" className="w-full bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg shadow-lg shadow-indigo-600/20 transition-all active:scale-95">
                                 Upgrage Now
                             </Button>
@@ -108,7 +109,7 @@ export default function InstructorLayout() {
 
                         <button
                             onClick={handleLogout}
-                            className="flex items-center gap-3 px-3 py-2.5 mt-4 rounded-xl text-slate-400 hover:text-red-400 hover:bg-red-500/5 transition-all w-full group"
+                            className="flex items-center gap-3 px-3 py-2.5 mt-4 rounded-xl text-muted-foreground hover:text-red-400 hover:bg-red-500/5 transition-all w-full group"
                         >
                             <LogOut className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                             <span>Logout</span>
@@ -119,42 +120,45 @@ export default function InstructorLayout() {
                 {/* Main Content */}
                 <main className="flex-1 min-w-0">
                     {/* Header */}
-                    <header className="h-20 border-b border-slate-800/50 flex items-center justify-between px-8 bg-[#020817]/40 backdrop-blur-md sticky top-0 z-20">
+                    <header className="h-20 border-b border-border/50 flex items-center justify-between px-8 bg-background/40 backdrop-blur-md sticky top-0 z-20">
                         <div className="relative max-w-md w-full hidden sm:block">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                             <input
                                 type="text"
                                 placeholder="Search courses, students..."
-                                className="w-full bg-slate-900/50 border border-slate-800 rounded-xl py-2 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/50 transition-all text-sm"
+                                className="w-full bg-muted/50 border border-border rounded-xl py-2 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/50 transition-all text-sm"
                             />
                         </div>
 
+
+
                         <div className="flex items-center gap-4">
-                            <Button variant="ghost" size="icon" className="relative text-slate-400 hover:text-white rounded-full">
+                            <ThemeToggle />
+                            <Button variant="ghost" size="icon" className="relative text-muted-foreground hover:text-foreground rounded-full">
                                 <Bell className="w-5 h-5" />
-                                <span className="absolute top-2 right-2 w-2 h-2 bg-indigo-500 rounded-full border-2 border-[#020817]" />
+                                <span className="absolute top-2 right-2 w-2 h-2 bg-indigo-500 rounded-full border-2 border-background" />
                             </Button>
 
-                            <div className="h-8 w-px bg-slate-800 mx-1" />
+                            <div className="h-8 w-px bg-border mx-1" />
 
                             <DropdownMenu>
-                                <DropdownMenuTrigger className="flex items-center gap-3 hover:bg-slate-800/50 p-1.5 rounded-full transition-all pr-3 outline-none cursor-pointer">
-                                    <Avatar className="w-8 h-8 rounded-full border border-slate-700">
+                                <DropdownMenuTrigger className="flex items-center gap-3 hover:bg-muted/50 p-1.5 rounded-full transition-all pr-3 outline-none cursor-pointer">
+                                    <Avatar className="w-8 h-8 rounded-full border border-border">
                                         <AvatarImage src="https://api.dicebear.com/7.x/avataaars/svg?seed=John" />
-                                        <AvatarFallback>JD</AvatarFallback>
+                                        <AvatarFallback className="bg-muted text-muted-foreground">JD</AvatarFallback>
                                     </Avatar>
                                     <div className="text-left hidden sm:block">
-                                        <p className="text-sm font-semibold text-white leading-tight">{user?.name || 'Instructor'}</p>
-                                        <p className="text-xs text-slate-500 capitalize">{user?.role || 'Instructor'}</p>
+                                        <p className="text-sm font-semibold text-foreground leading-tight">{user?.name || 'Instructor'}</p>
+                                        <p className="text-xs text-muted-foreground capitalize">{user?.role || 'Instructor'}</p>
                                     </div>
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent className="w-56 bg-slate-900 border-slate-800 text-slate-200">
+                                <DropdownMenuContent className="w-56 bg-card border-border text-foreground">
                                     <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                                    <DropdownMenuSeparator className="bg-slate-800" />
-                                    <DropdownMenuItem className="hover:bg-slate-800">Profile</DropdownMenuItem>
-                                    <DropdownMenuItem className="hover:bg-slate-800">Billing</DropdownMenuItem>
-                                    <DropdownMenuItem className="hover:bg-slate-800">Settings</DropdownMenuItem>
-                                    <DropdownMenuSeparator className="bg-slate-800" />
+                                    <DropdownMenuSeparator className="bg-border" />
+                                    <DropdownMenuItem className="hover:bg-muted">Profile</DropdownMenuItem>
+                                    <DropdownMenuItem className="hover:bg-muted">Billing</DropdownMenuItem>
+                                    <DropdownMenuItem className="hover:bg-muted">Settings</DropdownMenuItem>
+                                    <DropdownMenuSeparator className="bg-border" />
                                     <DropdownMenuItem onClick={handleLogout} className="text-red-400 hover:bg-red-500/10 cursor-pointer">Log out</DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>

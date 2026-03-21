@@ -41,8 +41,8 @@ export default function InstructorStudentsPage() {
                         {row.original.name?.charAt(0)?.toUpperCase()}
                     </div>
                     <div className="flex flex-col">
-                        <span className="font-bold text-white text-sm tracking-tight">{row.original.name}</span>
-                        <span className="text-[10px] uppercase font-extrabold text-slate-500 tracking-widest pt-0.5 flex items-center gap-1">
+                        <span className="font-bold text-foreground text-sm tracking-tight">{row.original.name}</span>
+                        <span className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-widest pt-0.5 flex items-center gap-1">
                             <Mail className="w-3 h-3" />
                             {row.original.email}
                         </span>
@@ -71,7 +71,7 @@ export default function InstructorStudentsPage() {
             header: 'Enrollments',
             cell: ({ row }) => (
                 <div className="flex items-center gap-2">
-                    <div className="px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700 text-xs font-black font-mono text-indigo-400">
+                    <div className="px-2.5 py-1 rounded-lg bg-muted border border-border text-xs font-black font-mono text-indigo-400">
                         {row.original.enrollmentCount}
                     </div>
                     <GraduationCap className="w-4 h-4 text-slate-600" />
@@ -82,7 +82,7 @@ export default function InstructorStudentsPage() {
             accessorKey: 'createdAt',
             header: 'Registration Date',
             cell: ({ row }) => (
-                <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
+                <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground">
                     <Calendar className="w-3.5 h-3.5" />
                     {formatDate(row.original.createdAt)}
                 </div>
@@ -109,7 +109,7 @@ export default function InstructorStudentsPage() {
             id: 'actions',
             header: '',
             cell: () => (
-                <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl hover:bg-slate-800 transition-all text-slate-400 hover:text-white">
+                <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl hover:bg-muted transition-all text-muted-foreground hover:text-foreground">
                     <ExternalLink className="w-4 h-4" />
                 </Button>
             )
@@ -120,7 +120,7 @@ export default function InstructorStudentsPage() {
         return (
             <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
                 <Spinner />
-                <p className="text-[10px] font-extrabold text-slate-500 uppercase tracking-[0.2em] animate-pulse font-mono">Retrieving Student Registry...</p>
+                <p className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-[0.2em] animate-pulse font-mono">Retrieving Student Registry...</p>
             </div>
         )
     }
@@ -129,36 +129,36 @@ export default function InstructorStudentsPage() {
         <div className="space-y-8 animate-in fade-in duration-700">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold text-white tracking-tight">Student Community</h1>
-                    <p className="text-slate-400 mt-1">Registry of learners currently enrolled in your curriculum.</p>
+                    <h1 className="text-3xl font-bold text-foreground tracking-tight">Student Community</h1>
+                    <p className="text-muted-foreground mt-1">Registry of learners currently enrolled in your curriculum.</p>
                 </div>
-                <div className="flex items-center gap-3 bg-slate-900/50 p-1 rounded-2xl border border-slate-800/50">
+                <div className="flex items-center gap-3 bg-muted/50 p-1 rounded-2xl border border-border/50">
                     <Button variant="ghost" className="rounded-xl px-4 font-bold text-xs text-indigo-400 bg-indigo-400/10">ALL STUDENTS</Button>
-                    <Button variant="ghost" className="rounded-xl px-4 font-bold text-xs text-slate-400">ENROLLED</Button>
+                    <Button variant="ghost" className="rounded-xl px-4 font-bold text-xs text-muted-foreground">ENROLLED</Button>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Card className="bg-gradient-to-br from-indigo-500/10 to-transparent border-slate-800/80 rounded-[2rem]">
+                <Card className="bg-gradient-to-br from-indigo-500/10 to-transparent border-border/80 rounded-[2rem]">
                     <CardContent className="p-6 flex items-center gap-4">
                         <div className="w-12 h-12 rounded-2xl bg-indigo-500/20 flex items-center justify-center text-indigo-400">
                             <Users className="w-6 h-6" />
                         </div>
                         <div>
-                            <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Active Learners</p>
-                            <p className="text-2xl font-black text-white">{students.length}</p>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Active Learners</p>
+                            <p className="text-2xl font-black text-foreground">{students.length}</p>
                         </div>
                     </CardContent>
                 </Card>
 
-                <Card className="bg-gradient-to-br from-emerald-500/10 to-transparent border-slate-800/80 rounded-[2rem]">
+                <Card className="bg-gradient-to-br from-emerald-500/10 to-transparent border-border/80 rounded-[2rem]">
                     <CardContent className="p-6 flex items-center gap-4">
                         <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 flex items-center justify-center text-emerald-400">
                             <GraduationCap className="w-6 h-6" />
                         </div>
                         <div>
-                            <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Avg Enrollments</p>
-                            <p className="text-2xl font-black text-white">
+                            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Avg Enrollments</p>
+                            <p className="text-2xl font-black text-foreground">
                                 {students.length > 0
                                     ? (students.reduce((acc, s) => acc + s.enrollmentCount, 0) / students.length).toFixed(1)
                                     : '0.0'
@@ -168,14 +168,14 @@ export default function InstructorStudentsPage() {
                     </CardContent>
                 </Card>
 
-                <Card className="bg-gradient-to-br from-purple-500/10 to-transparent border-slate-800/80 rounded-[2rem]">
+                <Card className="bg-gradient-to-br from-purple-500/10 to-transparent border-border/80 rounded-[2rem]">
                     <CardContent className="p-6 flex items-center gap-4">
                         <div className="w-12 h-12 rounded-2xl bg-purple-500/20 flex items-center justify-center text-purple-400">
                             <BookOpen className="w-6 h-6" />
                         </div>
                         <div>
-                            <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Total Course Reach</p>
-                            <p className="text-2xl font-black text-white">
+                            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Total Course Reach</p>
+                            <p className="text-2xl font-black text-foreground">
                                 {new Set(students.flatMap(s => s.instructorCourses)).size}
                             </p>
                         </div>
@@ -183,7 +183,7 @@ export default function InstructorStudentsPage() {
                 </Card>
             </div>
 
-            <Card className="rounded-[2.5rem] overflow-hidden border-slate-800/80 shadow-2xl bg-slate-900/40 backdrop-blur-md">
+            <Card className="rounded-[2.5rem] overflow-hidden border-border/80 shadow-2xl bg-card/40 backdrop-blur-md">
                 <CardContent className="p-0">
                     <DataTable
                         data={students}
