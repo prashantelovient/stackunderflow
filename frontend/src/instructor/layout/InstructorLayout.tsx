@@ -154,7 +154,7 @@ export default function InstructorLayout() {
                                 </DropdownMenuContent>
                             </DropdownMenu>
 
-                            <Button className="hidden sm:flex bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-xl gap-2 shadow-lg shadow-indigo-600/20 active:scale-95 transition-all">
+                            <Button onClick={() => navigate('/instructor/courses')} className="hidden sm:flex bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-xl gap-2 shadow-lg shadow-indigo-600/20 active:scale-95 transition-all">
                                 <PlusCircle className="w-4 h-4" />
                                 Create Course
                             </Button>

@@ -18,6 +18,7 @@ import categoryRoutes from './src/routes/categoryRoutes.js';
 import streamRoutes from './src/routes/streamRoutes.js';
 import progressRoutes from './src/routes/progressRoutes.js';
 import authRoutes from './src/routes/authRoutes.js';
+import instructorRoutes from './src/routes/instructorRoutes.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -45,6 +46,7 @@ app.use('/api/categories', categoryRoutes);
 app.use('/api/stream', streamRoutes);
 app.use('/api/progress', progressRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/instructor', instructorRoutes);
 
 /* Health Check */
 app.get('/api/health', (req, res) => {

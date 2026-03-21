@@ -14,6 +14,7 @@ export const createCourse = async (req, res, next) => {
             description,
             thumbnail: thumbnailPath,
             categoryId: categoryObjectId,
+            instructorId: req.user.role === 'instructor' ? req.user.id : (req.body.instructorId || null),
         });
 
         res.status(201).json(course);
@@ -24,7 +25,12 @@ export const createCourse = async (req, res, next) => {
 
 export const getCourses = async (req, res, next) => {
     try {
-        const courses = await Course.find()
+        const query = {};
+        if (req.user.role === 'instructor') {
+            query.instructorId = req.user.id;
+        }
+
+        const courses = await Course.find(query)
             .populate('categoryId', 'name')
             .populate({
                 path: 'modules',
@@ -110,6 +116,13 @@ export const updateCourse = async (req, res, next) => {
             updateData.thumbnail = req.body.thumbnail;
         }
 
+        const oldCourse = await Course.findById(req.params.id).exec();
+        if (!oldCourse) return res.status(404).json({ message: 'Course not found' });
+
+        if (req.user.role === 'instructor' && oldCourse.instructorId?.toString() !== req.user.id) {
+            return res.status(403).json({ message: 'Forbidden: You do not own this course' });
+        }
+
         const course = await Course.findByIdAndUpdate(
             req.params.id,
             updateData,
@@ -126,6 +139,13 @@ export const deleteCourse = async (req, res, next) => {
     try {
         if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
             return res.status(404).json({ message: 'Course not found' });
+        }
+
+        const course = await Course.findById(req.params.id).exec();
+        if (!course) return res.status(404).json({ message: 'Course not found' });
+
+        if (req.user.role === 'instructor' && course.instructorId?.toString() !== req.user.id) {
+            return res.status(403).json({ message: 'Forbidden: You do not own this course' });
         }
 
         // Delete all lectures in all modules of this course

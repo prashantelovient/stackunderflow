@@ -53,14 +53,41 @@ const topCourses = [
     { id: 3, name: 'Framer Motion Masterclass', sales: 56, revenue: '$5,544', rating: 5.0, thumbnail: 'https://images.unsplash.com/photo-1618477247222-acbdb0e159b3?w=400&h=250&fit=crop' },
 ]
 
+import { useQuery } from '@tanstack/react-query'
+import { instructorService } from '../services/instructorService'
+import { useAuthStore } from '@/auth/store/authStore'
+
 export default function InstructorDashboard() {
+    const { user } = useAuthStore()
+    const { data: analytics, isLoading } = useQuery({
+        queryKey: ['instructor-analytics'],
+        queryFn: instructorService.getAnalytics,
+    })
+
+    if (isLoading) {
+        return <div className="flex items-center justify-center min-h-[400px]">
+            <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+        </div>
+    }
+
+    const stats = [
+        { label: 'Total Revenue', value: analytics?.totalRevenue || '$0', change: '+0%', icon: DollarSign, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+        { label: 'Active Students', value: analytics?.totalStudents?.toString() || '0', change: '+0%', icon: Users, color: 'text-indigo-500', bg: 'bg-indigo-500/10' },
+        { label: 'Courses Published', value: analytics?.totalCourses?.toString() || '0', change: '0%', icon: BookOpen, color: 'text-purple-500', bg: 'bg-purple-500/10' },
+        { label: 'Avg. Course Rating', value: analytics?.avgRating?.toString() || '0', change: '0', icon: TrendingUp, color: 'text-amber-500', bg: 'bg-amber-500/10' },
+    ]
+
+    const revenueData = analytics?.revenueData || []
+    const recentStudents = analytics?.recentStudents || []
+    const topCourses = analytics?.topCourses || []
+
     return (
         <div className="space-y-8 animate-in fade-in duration-700">
             {/* Welcome Section */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-3xl font-bold text-white tracking-tight">Dashboard Overview</h1>
-                    <p className="text-slate-400 mt-1">Welcome back, John! Here's what's happening today.</p>
+                    <p className="text-slate-400 mt-1">Welcome back, {user?.name}! Here's what's happening today.</p>
                 </div>
                 <div className="flex items-center gap-3">
                     <div className="flex -space-x-3 overflow-hidden">
@@ -70,23 +97,15 @@ export default function InstructorDashboard() {
                                 <AvatarFallback>U</AvatarFallback>
                             </Avatar>
                         ))}
-                        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-800 border-2 border-[#020817] text-[10px] font-bold text-slate-400">
-                            +12
-                        </div>
                     </div>
-                    <span className="text-sm text-slate-400 font-medium">12 students joined this week</span>
+                    <span className="text-sm text-slate-400 font-medium">{analytics?.totalStudents || 0} students joined overall</span>
                 </div>
             </div>
 
             {/* Stats Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {[
-                    { label: 'Total Revenue', value: '$12,450', change: '+12.5%', icon: DollarSign, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
-                    { label: 'Active Students', value: '1,284', change: '+5.2%', icon: Users, color: 'text-indigo-500', bg: 'bg-indigo-500/10' },
-                    { label: 'Courses Published', value: '14', change: '0%', icon: BookOpen, color: 'text-purple-500', bg: 'bg-purple-500/10' },
-                    { label: 'Avg. Course Rating', value: '4.8', change: '+0.1', icon: TrendingUp, color: 'text-amber-500', bg: 'bg-amber-500/10' },
-                ].map((stat, i) => (
-                    <Card key={i} className="bg-slate-900/40 border-slate-800/80 backdrop-blur-sm hover:border-indigo-500/50 transition-all duration-300 group">
+                {stats.map((stat, i) => (
+                    <Card key={i} className="bg-slate-900/40 border-slate-800/80 backdrop-blur-sm hover:border-indigo-500/50 transition-all duration-300 group rounded-3xl">
                         <CardContent className="p-6">
                             <div className="flex items-center justify-between mb-4">
                                 <div className={cn("p-2.5 rounded-xl transition-colors", stat.bg)}>
@@ -180,7 +199,7 @@ export default function InstructorDashboard() {
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-6">
-                            {recentStudents.map((student) => (
+                            {recentStudents.map((student: any) => (
                                 <div key={student.id} className="flex items-center justify-between group">
                                     <div className="flex items-center gap-3">
                                         <Avatar className="w-10 h-10 border border-slate-800 ring-2 ring-transparent group-hover:ring-indigo-500/20 transition-all">
@@ -218,7 +237,7 @@ export default function InstructorDashboard() {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                        {topCourses.map((course) => (
+                        {topCourses.map((course: any) => (
                             <Card key={course.id} className="group overflow-hidden bg-slate-900/40 border-slate-800/80 backdrop-blur-sm hover:translate-y-[-4px] transition-all duration-300">
                                 <div className="aspect-video relative overflow-hidden">
                                     <img
