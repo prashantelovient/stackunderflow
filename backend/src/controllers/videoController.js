@@ -25,6 +25,7 @@ export const uploadVideo = async (req, res, next) => {
       thumbnail: thumbnailPath,
       duration: duration ? parseInt(duration, 10) : null,
       courseId: courseObjectId,
+      instructorId: req.user.role === 'instructor' ? req.user.id : (req.body.instructorId || null),
       status: 'processing',
     });
 
@@ -39,7 +40,12 @@ export const uploadVideo = async (req, res, next) => {
 
 export const getVideos = async (req, res, next) => {
   try {
-    const videos = await Video.find().populate('courseId', 'title').exec();
+    const query = {};
+    if (req.user.role === 'instructor') {
+      query.instructorId = req.user.id;
+    }
+
+    const videos = await Video.find(query).populate('courseId', 'title').exec();
 
     const formatted = videos.map(v => ({
       ...v.toObject(),
@@ -103,6 +109,13 @@ export const updateVideo = async (req, res, next) => {
       updateData.thumbnail = req.body.thumbnail;
     }
 
+    const oldVideo = await Video.findById(req.params.id).exec();
+    if (!oldVideo) return res.status(404).json({ message: 'Video not found' });
+
+    if (req.user.role === 'instructor' && oldVideo.instructorId?.toString() !== req.user.id) {
+      return res.status(403).json({ message: 'Forbidden: You do not own this video' });
+    }
+
     const video = await Video.findByIdAndUpdate(
       req.params.id,
       updateData,
@@ -117,9 +130,13 @@ export const updateVideo = async (req, res, next) => {
 
 export const deleteVideo = async (req, res, next) => {
   try {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-      return res.status(404).json({ message: 'Video not found' });
+    const video = await Video.findById(req.params.id).exec();
+    if (!video) return res.status(404).json({ message: 'Video not found' });
+
+    if (req.user.role === 'instructor' && video.instructorId?.toString() !== req.user.id) {
+      return res.status(403).json({ message: 'Forbidden: You do not own this video' });
     }
+
     await Video.findByIdAndDelete(req.params.id).exec();
     res.json({ message: 'Video deleted successfully' });
   } catch (error) {

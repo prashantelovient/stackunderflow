@@ -20,6 +20,7 @@ import SettingsPage from '@/admin/pages/SettingsPage'
 import InstructorLayout from '@/instructor/layout/InstructorLayout'
 import InstructorDashboardPage from '@/instructor/pages/DashboardPage'
 import InstructorCoursesPage from '@/instructor/pages/CoursesPage'
+import InstructorVideosPage from '@/instructor/pages/VideosPage'
 
 // ── Student ───────────────────────────────────────────────────────────────────
 import StudentLayout from '@/student/layout/StudentLayout'
@@ -138,6 +139,7 @@ export default function AppRouter() {
           <Route index element={<Navigate to="/instructor/dashboard" replace />} />
           <Route path="dashboard" element={<InstructorDashboardPage />} />
           <Route path="courses" element={<InstructorCoursesPage />} />
+          <Route path="videos" element={<InstructorVideosPage />} />
           <Route path="students" element={<div className="p-8 text-white h-[400px] flex items-center justify-center border border-dashed border-slate-800 rounded-3xl bg-slate-900/40">Students Management (Coming Soon)</div>} />
           <Route path="messages" element={<div className="p-8 text-white h-[400px] flex items-center justify-center border border-dashed border-slate-800 rounded-3xl bg-slate-900/40">Instructor Messages (Coming Soon)</div>} />
           <Route path="analytics" element={<div className="p-8 text-white h-[400px] flex items-center justify-center border border-dashed border-slate-800 rounded-3xl bg-slate-900/40">Advanced Analytics (Coming Soon)</div>} />

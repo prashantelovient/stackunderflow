@@ -12,7 +12,8 @@ import {
     ChevronRight,
     PlusCircle,
     ExternalLink,
-    Plus
+    Plus,
+    FileVideo
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -30,6 +31,7 @@ import { useAuthStore } from '@/auth/store/authStore'
 const sidebarItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/instructor/dashboard' },
     { icon: BookOpen, label: 'My Courses', path: '/instructor/courses' },
+    { icon: FileVideo, label: 'Videos', path: '/instructor/videos' },
     { icon: Users, label: 'Students', path: '/instructor/students' },
     { icon: MessageSquare, label: 'Messages', path: '/instructor/messages' },
     { icon: PieChart, label: 'Analytics', path: '/instructor/analytics' },
