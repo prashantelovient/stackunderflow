@@ -7,6 +7,8 @@ import {
   ResponsiveContainer
 } from 'recharts'
 import { useThemeStore } from '@/store/themeStore'
+import { BentoStyles, GlobalSpotlight, ParticleCard } from '@/components/ui/magic-bento'
+import { useRef } from 'react'
 
 export default function DashboardPage() {
   const { isDark } = useThemeStore()
@@ -65,8 +67,11 @@ export default function DashboardPage() {
     { label: 'Knowledge Base Articles', value: (data?.totalBlogs ?? 0).toLocaleString(), icon: BookOpen, trend: '+8.4%' },
   ]
 
+  const statsRef = useRef<HTMLDivElement>(null)
+
   return (
-    <div className="space-y-10">
+    <div className="space-y-10 bento-section">
+      <BentoStyles glowColor="132, 0, 255" />
       <PageHeader
         title="Administrative Terminal"
         subtitle="Real-time overview of your platform."
@@ -78,11 +83,18 @@ export default function DashboardPage() {
         }
       />
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <GlobalSpotlight gridRef={statsRef} spotlightRadius={400} glowColor="132, 0, 255" />
+      <div ref={statsRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 relative">
         {stats.map(({ label, value, icon: Icon, trend }) => (
-          <Card key={label} className="group hover:shadow-xl transition">
-            <CardContent className="p-6">
+          <ParticleCard
+            key={label}
+            className="group hover:shadow-xl transition rounded-2xl overflow-hidden card--border-glow"
+            enableTilt={true}
+            enableMagnetism={true}
+            clickEffect={true}
+            particleCount={8}
+          >
+            <CardContent className="p-6 relative z-10">
               <div className="flex justify-between mb-6">
                 <div className="w-12 h-12 flex items-center justify-center rounded-xl bg-muted group-hover:bg-primary group-hover:text-white transition">
                   <Icon className="w-6 h-6" />
@@ -95,7 +107,7 @@ export default function DashboardPage() {
               <h3 className="text-xs text-muted-foreground uppercase">{label}</h3>
               <p className="text-2xl font-bold">{value}</p>
             </CardContent>
-          </Card>
+          </ParticleCard>
         ))}
       </div>
 

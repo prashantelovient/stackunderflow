@@ -12,6 +12,8 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { BentoStyles, GlobalSpotlight, ParticleCard } from '@/components/ui/magic-bento'
+import { useRef } from 'react'
 
 const getThumbnailUrl = (path: string | null) => {
   if (!path) return null
@@ -42,8 +44,14 @@ function StatCard({
   color: string
 }) {
   return (
-    <Card className="bg-card backdrop-blur border-border hover:bg-muted/50 transition-colors shadow-sm">
-      <CardContent className="p-5 pt-5">
+    <ParticleCard
+      className="bg-card backdrop-blur border-border hover:bg-muted/50 transition-colors shadow-sm rounded-xl overflow-hidden card--border-glow"
+      enableTilt={true}
+      enableMagnetism={true}
+      clickEffect={true}
+      particleCount={8}
+    >
+      <CardContent className="p-5 pt-5 relative z-10">
         <div className="flex items-start justify-between mb-4">
           <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center shadow-lg shadow-black/5', color)}>
             <Icon className="w-5 h-5 text-white" />
@@ -57,7 +65,7 @@ function StatCard({
         <p className="text-2xl font-bold">{value}</p>
         <p className="text-sm text-muted-foreground mt-0.5">{label}</p>
       </CardContent>
-    </Card>
+    </ParticleCard>
   )
 }
 
@@ -73,8 +81,14 @@ function CourseCard({ course }: { course: Course }) {
   const colorClass = colors[course.title.charCodeAt(0) % colors.length]
 
   return (
-    <Link to={`/student/courses/${course.id}`} className="group">
-      <Card className="h-full bg-card border-border overflow-hidden hover:bg-muted transition-all duration-300 hover:-translate-y-0.5 shadow-sm hover:shadow-lg">
+    <Link to={`/student/courses/${course.id}`} className="group h-full">
+      <ParticleCard
+        className="h-full bg-card border-border overflow-hidden hover:bg-muted transition-all duration-300 hover:-translate-y-0.5 shadow-sm hover:shadow-lg rounded-xl card--border-glow"
+        enableTilt={true}
+        enableMagnetism={false}
+        clickEffect={true}
+        particleCount={12}
+      >
         <div className={cn('relative h-36 bg-gradient-to-br', colorClass, 'flex items-center justify-center overflow-hidden')}>
           {course.thumbnail ? (
             <img
@@ -92,7 +106,7 @@ function CourseCard({ course }: { course: Course }) {
             </div>
           </div>
         </div>
-        <CardContent className="p-4">
+        <CardContent className="p-4 relative z-10">
           <h3 className="font-semibold text-sm leading-snug group-hover:text-primary transition-colors line-clamp-1">
             {course.title}
           </h3>
@@ -101,7 +115,7 @@ function CourseCard({ course }: { course: Course }) {
             <Badge variant="secondary" className="text-[10px] font-medium opacity-70">View Course</Badge>
           </div>
         </CardContent>
-      </Card>
+      </ParticleCard>
     </Link>
   )
 }
@@ -187,8 +201,16 @@ export default function StudentDashboardPage() {
   const hour = new Date().getHours()
   const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'
 
+  const statsRef = useRef<HTMLDivElement>(null)
+  const coursesRef = useRef<HTMLDivElement>(null)
+
   return (
-    <div className="p-4 lg:p-8 space-y-8 max-w-7xl mx-auto">
+    <div className="p-4 lg:p-8 space-y-8 max-w-7xl mx-auto bento-section">
+      <BentoStyles glowColor="132, 0, 255" />
+
+      <GlobalSpotlight gridRef={statsRef} spotlightRadius={400} glowColor="132, 0, 255" />
+      <GlobalSpotlight gridRef={coursesRef} spotlightRadius={400} glowColor="132, 0, 255" />
+
       {/* Hero greeting */}
       <Card className="relative overflow-hidden rounded-2xl bg-primary/10 border-primary/20 p-6 lg:p-8">
         <div className="absolute inset-0 overflow-hidden">
@@ -217,7 +239,7 @@ export default function StudentDashboardPage() {
       </Card>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div ref={statsRef} className="grid grid-cols-2 lg:grid-cols-4 gap-4 relative">
         <StatCard
           icon={ListVideo}
           label="Available Courses"
@@ -291,7 +313,7 @@ export default function StudentDashboardPage() {
             <p>No courses available yet</p>
           </Card>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          <div ref={coursesRef} className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 relative">
             {recentCourses.map((c) => <CourseCard key={c.id} course={c} />)}
           </div>
         )}

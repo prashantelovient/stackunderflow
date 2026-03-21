@@ -14,6 +14,8 @@ import {
     Plus,
     BookOpen
 } from 'lucide-react'
+import { BentoStyles, GlobalSpotlight, ParticleCard } from '@/components/ui/magic-bento'
+import { useRef } from 'react'
 import {
     BarChart,
     Bar,
@@ -81,8 +83,12 @@ export default function InstructorDashboard() {
     const recentStudents = analytics?.recentStudents || []
     const topCourses = analytics?.topCourses || []
 
+    const statsRef = useRef<HTMLDivElement>(null)
+    const coursesRef = useRef<HTMLDivElement>(null)
+
     return (
-        <div className="space-y-8 animate-in fade-in duration-700">
+        <div className="space-y-8 animate-in fade-in duration-700 bento-section">
+            <BentoStyles glowColor="132, 0, 255" />
             {/* Welcome Section */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
@@ -103,10 +109,18 @@ export default function InstructorDashboard() {
             </div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <GlobalSpotlight gridRef={statsRef} spotlightRadius={400} glowColor="132, 0, 255" />
+            <div ref={statsRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 relative">
                 {stats.map((stat, i) => (
-                    <Card key={i} className="bg-card/40 border-border/80 backdrop-blur-sm hover:border-indigo-500/50 transition-all duration-300 group rounded-3xl">
-                        <CardContent className="p-6">
+                    <ParticleCard
+                        key={i}
+                        className="bg-card/40 border-border/80 backdrop-blur-sm hover:border-indigo-500/50 transition-all duration-300 group rounded-3xl overflow-hidden card--border-glow"
+                        enableTilt={true}
+                        enableMagnetism={true}
+                        clickEffect={true}
+                        particleCount={8}
+                    >
+                        <CardContent className="p-6 relative z-10">
                             <div className="flex items-center justify-between mb-4">
                                 <div className={cn("p-2.5 rounded-xl transition-colors", stat.bg)}>
                                     <stat.icon className={cn("w-5 h-5", stat.color)} />
@@ -123,9 +137,10 @@ export default function InstructorDashboard() {
                             <p className="text-sm font-medium text-muted-foreground">{stat.label}</p>
                             <h3 className="text-2xl font-bold mt-1 text-foreground group-hover:scale-[1.02] origin-left transition-transform">{stat.value}</h3>
                         </CardContent>
-                    </Card>
+                    </ParticleCard>
                 ))}
             </div>
+
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Main Chart */}
@@ -236,9 +251,16 @@ export default function InstructorDashboard() {
                         </Button>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    <GlobalSpotlight gridRef={coursesRef} spotlightRadius={400} glowColor="132, 0, 255" />
+                    <div ref={coursesRef} className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 relative">
                         {topCourses.map((course: any) => (
-                            <Card key={course.id} className="group overflow-hidden bg-card/40 border-border/80 backdrop-blur-sm hover:translate-y-[-4px] transition-all duration-300">
+                            <ParticleCard
+                                key={course.id}
+                                className="group overflow-hidden bg-card/40 border-border/80 backdrop-blur-sm hover:translate-y-[-4px] transition-all duration-300 rounded-2xl card--border-glow"
+                                enableTilt={true}
+                                clickEffect={true}
+                                particleCount={12}
+                            >
                                 <div className="aspect-video relative overflow-hidden">
                                     <img
                                         src={course.thumbnail}
@@ -255,7 +277,7 @@ export default function InstructorDashboard() {
                                         {course.rating} ★
                                     </Badge>
                                 </div>
-                                <CardContent className="p-4">
+                                <CardContent className="p-4 relative z-10">
                                     <h4 className="font-bold text-foreground line-clamp-1 mb-3 group-hover:text-indigo-400 transition-colors">{course.name}</h4>
                                     <div className="flex items-center justify-between pt-3 border-t border-border/50">
                                         <div className="flex flex-col">
@@ -268,7 +290,7 @@ export default function InstructorDashboard() {
                                         </div>
                                     </div>
                                 </CardContent>
-                            </Card>
+                            </ParticleCard>
                         ))}
                     </div>
                 </div>
