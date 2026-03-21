@@ -1,4 +1,5 @@
 export { default as Admin } from './Admin.js';
+export { default as Instructor } from './Instructor.js';
 export { default as Student } from './Student.js';
 export { default as Category } from './Category.js';
 export { default as Course } from './Course.js';

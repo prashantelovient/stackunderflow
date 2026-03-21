@@ -4,7 +4,7 @@ import {
   Sun, Moon, GraduationCap, PlaySquare, Bell, ChevronRight
 } from 'lucide-react'
 import { useState } from 'react'
-import { useStudentAuthStore } from '@/student/store/studentAuthStore'
+import { useAuthStore } from '@/auth/store/authStore'
 import { useThemeStore } from '@/store/themeStore'
 import { cn } from '@/utils'
 import { Button } from '@/components/ui/button'
@@ -21,12 +21,12 @@ const navItems = [
 export default function StudentLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [mobileOpen, setMobileOpen] = useState(false)
-  const { student, logout } = useStudentAuthStore()
+  const { user, logout } = useAuthStore()
   const { isDark, toggle } = useThemeStore()
   const navigate = useNavigate()
   const location = useLocation()
 
-  const displayName = student?.name || student?.email || 'Student'
+  const displayName = user?.name || user?.email || 'Student'
   const avatarInitial = displayName.charAt(0).toUpperCase()
 
   const handleLogout = () => {
@@ -63,14 +63,14 @@ export default function StudentLayout() {
       {(mobile || sidebarOpen) && (
         <div className="mx-3 my-4 rounded-xl bg-muted/60 px-4 py-3 flex items-center gap-3">
           <Avatar className="w-9 h-9 border border-border/50">
-            <AvatarImage src={student?.avatar} />
+            <AvatarImage src={user?.avatar} />
             <AvatarFallback className="bg-gradient-to-br from-amber-500 to-yellow-500 text-white text-sm font-bold">
               {avatarInitial}
             </AvatarFallback>
           </Avatar>
           <div className="overflow-hidden">
             <p className="text-sm font-semibold truncate">{displayName}</p>
-            <p className="text-xs text-muted-foreground truncate">{student?.email || ''}</p>
+            <p className="text-xs text-muted-foreground truncate">{user?.email || ''}</p>
           </div>
         </div>
       )}
@@ -208,7 +208,7 @@ export default function StudentLayout() {
             {/* Student profile */}
             <div className="flex items-center gap-2.5 pl-3 border-l border-border ml-1">
               <Avatar className="w-8 h-8 border border-border/50">
-                <AvatarImage src={student?.avatar} />
+                <AvatarImage src={user?.avatar} />
                 <AvatarFallback className="bg-gradient-to-br from-amber-500 to-yellow-500 text-white text-[10px] font-bold">
                   {avatarInitial}
                 </AvatarFallback>

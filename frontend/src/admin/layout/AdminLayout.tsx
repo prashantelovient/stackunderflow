@@ -5,7 +5,7 @@ import {
   GraduationCap, ChevronLeft, ChevronRight
 } from 'lucide-react'
 import { useState } from 'react'
-import { useAuthStore } from '@/admin/store/authStore'
+import { useAuthStore } from '@/auth/store/authStore'
 import { useThemeStore } from '@/store/themeStore'
 import { cn } from '@/utils'
 import { Button, Badge } from '@/admin/components/ui'
@@ -24,16 +24,15 @@ const navItems = [
 export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [mobileOpen, setMobileOpen] = useState(false)
-
-  const { admin, logout } = useAuthStore()
+  const { user, logout } = useAuthStore()
   const { isDark, toggle } = useThemeStore()
   const navigate = useNavigate()
 
-  const displayName = admin?.name || admin?.email || 'Admin'
+  const displayName = user?.name || user?.email || 'Admin'
 
   const handleLogout = () => {
     logout()
-    navigate('/admin/login')
+    navigate('/login')
   }
 
   const Sidebar = ({ mobile = false }: { mobile?: boolean }) => (
@@ -109,7 +108,7 @@ export default function AdminLayout() {
 
   return (
     <div className="flex h-screen bg-background">
-      
+
       {/* Sidebar */}
       <div className="hidden lg:flex relative">
         <Sidebar />
@@ -133,10 +132,10 @@ export default function AdminLayout() {
 
       {/* Main */}
       <div className="flex-1 flex flex-col">
-        
+
         {/* Header */}
         <header className="flex items-center justify-end h-16 px-6 border-b">
-          
+
           <button
             onClick={() => setMobileOpen(true)}
             className="lg:hidden p-2 rounded-md hover:bg-primary hover:text-white"
@@ -145,7 +144,7 @@ export default function AdminLayout() {
           </button>
 
           <div className="flex items-center gap-4">
-            
+
             {/* Theme Toggle */}
             <Button variant="ghost" size="icon" onClick={toggle} className="group hover:bg-primary hover:text-white">
               {isDark ? (

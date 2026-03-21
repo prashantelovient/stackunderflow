@@ -153,3 +153,44 @@ button:hover .text-destructive svg.lucide {
 
   --radius: 0.75rem;
 }
+/* ───────── GLASS & NEON EFFECTS ───────── */
+@layer utilities {
+  .glass {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  }
+  
+  .glass-dark {
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(30, 41, 59, 0.5);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+  }
+
+  .neon-indigo {
+    box-shadow: 0 0 15px rgba(99, 102, 241, 0.5);
+  }
+
+  .neon-purple {
+    box-shadow: 0 0 15px rgba(168, 85, 247, 0.5);
+  }
+
+  .text-gradient {
+    background: linear-gradient(to right, #818cf8, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+}
+
+/* ───────── ANIMATIONS ───────── */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}

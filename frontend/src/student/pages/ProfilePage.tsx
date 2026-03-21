@@ -4,7 +4,7 @@ import {
   User, Mail, Calendar, PlayCircle, CheckCircle2, Trophy,
   TrendingUp, Clock, BookOpen, ChevronRight
 } from 'lucide-react'
-import { useStudentAuthStore } from '@/student/store/studentAuthStore'
+import { useAuthStore } from '@/auth/store/authStore'
 import { courses, studentVideos, watchProgress } from '@/student/services/studentService'
 import { formatDate, cn } from '@/utils'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -34,7 +34,7 @@ function StatItem({ icon: Icon, label, value, color }: {
 }
 
 export default function ProfilePage() {
-  const { student } = useStudentAuthStore()
+  const { user: student } = useAuthStore()
   const displayName = student?.name || 'Student'
   const avatarInitial = displayName.charAt(0).toUpperCase()
 

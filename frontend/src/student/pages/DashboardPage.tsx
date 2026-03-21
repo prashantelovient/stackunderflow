@@ -4,7 +4,7 @@ import {
   PlayCircle, BookOpen, Clock, Trophy, TrendingUp,
   ChevronRight, Flame, ArrowRight, ListVideo
 } from 'lucide-react'
-import { useStudentAuthStore } from '@/student/store/studentAuthStore'
+import { useAuthStore } from '@/auth/store/authStore'
 import { courses, studentVideos, watchProgress } from '@/student/services/studentService'
 import type { Course, Video } from '@/student/services/studentService'
 import { cn } from '@/utils'
@@ -153,7 +153,7 @@ function VideoCard({ video, progress }: { video: Video; progress?: number }) {
 }
 
 export default function StudentDashboardPage() {
-  const { student } = useStudentAuthStore()
+  const { user: student } = useAuthStore()
 
   const { data: allCourses, isLoading: loadingCourses } = useQuery({
     queryKey: ['student-courses'],

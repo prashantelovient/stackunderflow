@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { useStudentAuthStore } from '@/student/store/studentAuthStore'
+import { useAuthStore } from '@/auth/store/authStore'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
@@ -8,7 +8,7 @@ export const studentApiClient = axios.create({
 })
 
 studentApiClient.interceptors.request.use((config) => {
-  const token = useStudentAuthStore.getState().token
+  const token = useAuthStore.getState().token
   if (token) config.headers.Authorization = `Bearer ${token}`
   return config
 })
@@ -17,7 +17,7 @@ studentApiClient.interceptors.response.use(
   (res) => res,
   (error) => {
     if (error.response?.status === 401) {
-      useStudentAuthStore.getState().logout()
+      useAuthStore.getState().logout()
       window.location.href = '/login'
     }
     return Promise.reject(error)

@@ -1,10 +1,13 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { useAuthStore } from '@/admin/store/authStore'
-import { useStudentAuthStore } from '@/student/store/studentAuthStore'
+import { useAuthStore } from '@/auth/store/authStore'
+import { useEffect, useState } from 'react'
+
+// ── Auth ──────────────────────────────────────────────────────────────────────
+import LoginPage from '@/auth/pages/LoginPage'
+import RegisterPage from '@/auth/pages/RegisterPage'
 
 // ── Admin ────────────────────────────────────────────────────────────────────
 import AdminLayout from '@/admin/layout/AdminLayout'
-import AdminLoginPage from '@/admin/pages/LoginPage'
 import DashboardPage from '@/admin/pages/DashboardPage'
 import StudentsPage from '@/admin/pages/StudentsPage'
 import VideosPage from '@/admin/pages/VideosPage'
@@ -13,10 +16,13 @@ import AdminBlogsPage from '@/admin/pages/BlogsPage'
 import CategoriesPage from '@/admin/pages/CategoriesPage'
 import SettingsPage from '@/admin/pages/SettingsPage'
 
+// ── Instructor ──────────────────────────────────────────────────────────────
+import InstructorLayout from '@/instructor/layout/InstructorLayout'
+import InstructorDashboardPage from '@/instructor/pages/DashboardPage'
+import InstructorCoursesPage from '@/instructor/pages/CoursesPage'
+
 // ── Student ───────────────────────────────────────────────────────────────────
 import StudentLayout from '@/student/layout/StudentLayout'
-import StudentLoginPage from '@/student/pages/LoginPage'
-import StudentRegisterPage from '@/student/pages/RegisterPage'
 import StudentDashboardPage from '@/student/pages/DashboardPage'
 import CoursesPage from '@/student/pages/CoursesPage'
 import CourseDetailPage from '@/student/pages/CourseDetailPage'
@@ -26,35 +32,88 @@ import BlogDetailPage from '@/student/pages/BlogDetailPage'
 import ProfilePage from '@/student/pages/ProfilePage'
 
 // ── Route guards ──────────────────────────────────────────────────────────────
-function AdminRoute({ children }: { children: React.ReactNode }) {
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
-  return isAuthenticated ? <>{children}</> : <Navigate to="/admin/login" replace />
-}
+function ProtectedRoute({
+  children,
+  requiredRole
+}: {
+  children: React.ReactNode,
+  requiredRole?: 'student' | 'instructor' | 'admin'
+}) {
+  const { isAuthenticated, user } = useAuthStore()
 
-function StudentRoute({ children }: { children: React.ReactNode }) {
-  const isAuthenticated = useStudentAuthStore((s) => s.isAuthenticated)
-  return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />
+  }
+
+  // Handle case where auth is authenticated but user info hasn't loaded (hydration)
+  if (!user) {
+    return null; // Return null effectively "waiting" for store hydration
+  }
+
+  if (requiredRole && user?.role !== requiredRole) {
+    const role = user?.role || 'student'
+    const homeMap: Record<string, string> = {
+      student: '/student/dashboard',
+      instructor: '/instructor/dashboard',
+      admin: '/admin/dashboard'
+    }
+    return <Navigate to={homeMap[role] || '/login'} replace />
+  }
+
+  return <>{children}</>
 }
 
 // ── Router ────────────────────────────────────────────────────────────────────
 export default function AppRouter() {
+  const { isAuthenticated, user } = useAuthStore()
+  const [isHydrated, setIsHydrated] = useState(false)
+
+  useEffect(() => {
+    // Zustand persist/hydrate check
+    const checkHydration = () => {
+      setIsHydrated(true)
+    }
+    checkHydration()
+  }, [])
+
+  if (!isHydrated) return null
+
   return (
     <BrowserRouter>
       <Routes>
-        {/* Root → student login */}
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        {/* Auth routes */}
+        <Route
+          path="/login"
+          element={
+            isAuthenticated && user ? (
+              <Navigate to={user?.role === 'student' ? '/student/dashboard' : user?.role === 'instructor' ? '/instructor/dashboard' : '/admin/dashboard'} replace />
+            ) : (
+              <LoginPage />
+            )
+          }
+        />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/admin/login" element={<Navigate to="/login" replace />} />
 
-        {/* ── Student public ──────────────────────────────── */}
-        <Route path="/login" element={<StudentLoginPage />} />
-        <Route path="/register" element={<StudentRegisterPage />} />
+        {/* Root redirect based on auth */}
+        <Route
+          path="/"
+          element={
+            isAuthenticated && user ? (
+              <Navigate to={user?.role === 'student' ? '/student/dashboard' : user?.role === 'instructor' ? '/instructor/dashboard' : '/admin/dashboard'} replace />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
 
         {/* ── Student protected ───────────────────────────── */}
         <Route
           path="/student"
           element={
-            <StudentRoute>
+            <ProtectedRoute requiredRole="student">
               <StudentLayout />
-            </StudentRoute>
+            </ProtectedRoute>
           }
         >
           <Route index element={<Navigate to="/student/dashboard" replace />} />
@@ -67,16 +126,31 @@ export default function AppRouter() {
           <Route path="profile" element={<ProfilePage />} />
         </Route>
 
-        {/* ── Admin public ────────────────────────────────── */}
-        <Route path="/admin/login" element={<AdminLoginPage />} />
+        {/* ── Instructor protected ──────────────────────────── */}
+        <Route
+          path="/instructor"
+          element={
+            <ProtectedRoute requiredRole="instructor">
+              <InstructorLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<Navigate to="/instructor/dashboard" replace />} />
+          <Route path="dashboard" element={<InstructorDashboardPage />} />
+          <Route path="courses" element={<InstructorCoursesPage />} />
+          <Route path="students" element={<div className="p-8 text-white h-[400px] flex items-center justify-center border border-dashed border-slate-800 rounded-3xl bg-slate-900/40">Students Management (Coming Soon)</div>} />
+          <Route path="messages" element={<div className="p-8 text-white h-[400px] flex items-center justify-center border border-dashed border-slate-800 rounded-3xl bg-slate-900/40">Instructor Messages (Coming Soon)</div>} />
+          <Route path="analytics" element={<div className="p-8 text-white h-[400px] flex items-center justify-center border border-dashed border-slate-800 rounded-3xl bg-slate-900/40">Advanced Analytics (Coming Soon)</div>} />
+          <Route path="settings" element={<div className="p-8 text-white h-[400px] flex items-center justify-center border border-dashed border-slate-800 rounded-3xl bg-slate-900/40">Instructor Settings (Coming Soon)</div>} />
+        </Route>
 
         {/* ── Admin protected ─────────────────────────────── */}
         <Route
           path="/admin"
           element={
-            <AdminRoute>
+            <ProtectedRoute requiredRole="admin">
               <AdminLayout />
-            </AdminRoute>
+            </ProtectedRoute>
           }
         >
           <Route index element={<Navigate to="/admin/dashboard" replace />} />
