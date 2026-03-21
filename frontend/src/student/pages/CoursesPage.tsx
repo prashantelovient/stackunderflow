@@ -32,78 +32,63 @@ function CourseCard({ course, index }: { course: CourseType; index: number }) {
   const pillLabel = course.description?.trim() ? course.description : 'Uncategorized'
 
   return (
-    <div className="group relative rounded-2xl overflow-hidden border border-border/60 bg-card/80 shadow-[0_20px_50px_-30px_rgba(0,0,0,0.45)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_30px_70px_-35px_rgba(0,0,0,0.6)] hover:border-primary/30 dark:border-white/10 dark:bg-[#0f1426]">
-      <Link to={`/student/courses/${course.id}`} aria-label={`Open ${course.title}`} className="absolute inset-0 z-0" />
+    <div className="group relative rounded-3xl overflow-hidden border border-border/80 bg-card shadow-[0_4px_25px_-12px_rgba(0,0,0,0.3)] transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_40px_80px_-40px_rgba(0,0,0,0.5)] active:scale-[0.98] dark:bg-[#0f1426]/60 backdrop-blur-md">
+      <Link to={`/student/courses/${course.id}`} className="absolute inset-0 z-20" />
+
+      {/* Enrollment Badge */}
+      {course.isEnrolled && (
+        <div className="absolute top-4 right-4 z-30 flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-emerald-500 text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-emerald-500/30 border border-white/20 animate-in fade-in zoom-in duration-500">
+           <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+           Enrolled
+        </div>
+      )}
 
       {/* Thumbnail / gradient */}
-      <div className={cn('relative h-44 bg-gradient-to-br flex items-center justify-center overflow-hidden', gradient)}>
+      <div className={cn('relative h-48 bg-gradient-to-br flex items-center justify-center overflow-hidden', gradient)}>
         {course.thumbnail ? (
           <img
             src={getThumbnailUrl(course.thumbnail)!}
             alt={course.title}
-            className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
             onError={(e) => {
               (e.target as HTMLImageElement).style.display = 'none'
             }}
           />
         ) : (
-          <ListVideo className="w-12 h-12 text-white/40" />
+          <ListVideo className="w-14 h-14 text-white/30" />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+        
+        {/* Play Icon on Hover */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10">
+            <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-xl border border-white/30 flex items-center justify-center scale-75 group-hover:scale-100 transition-transform duration-500">
+                <PlayCircle className="w-8 h-8 text-white fill-white/20" />
+            </div>
+        </div>
       </div>
 
       {/* Content */}
-      <div className="relative z-10 p-4">
-        <div className="flex items-start justify-between gap-3">
-          <h3 className="text-sm font-semibold uppercase tracking-wide line-clamp-1 text-foreground">
+      <div className="p-6">
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <span className="shrink-0 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-[9px] font-black tracking-[0.1em] px-2 py-0.5 uppercase">
+                {pillLabel}
+            </span>
+          </div>
+          
+          <h3 className="text-lg font-black text-foreground line-clamp-2 leading-tight group-hover:text-indigo-400 transition-colors">
             {course.title}
           </h3>
-          <span className="shrink-0 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[11px] font-semibold px-2.5 py-0.5">
-            {videoCount} video{videoCount === 1 ? '' : 's'}
-          </span>
-        </div>
-        <div className="mt-2">
-          <span
-            className="inline-flex max-w-full items-center rounded-full bg-muted/50 text-muted-foreground border border-border/60 px-2.5 py-0.5 text-[11px] truncate"
-            title={pillLabel}
-          >
-            {pillLabel}
-          </span>
-        </div>
-
-        <div className="mt-4 pt-4 border-t border-border/50 flex items-center gap-3">
-         <Link
-  to={`/student/courses/${course.id}`}
-  className="
-    relative z-10 flex-1 text-center
-    text-sm font-medium
-    rounded-lg px-4 py-2
-    border border-border
-    bg-muted/60
-    backdrop-blur-sm
-    text-foreground
-    hover:bg-muted/60
-    hover:border-primary/40
-    transition-all duration-200
-  "
->
- Explore
-</Link>
-          <div className="relative z-10 flex items-center gap-2">
-            <span
-              className="inline-flex items-center gap-1 rounded-lg border border-border/70 bg-muted/30 px-2 py-1 text-[11px] text-muted-foreground"
-              title={`${moduleCount} modules`}
-            >
-              <Layers className="w-3.5 h-3.5" />
-              {moduleCount}
-            </span>
-            <span
-              className="inline-flex items-center gap-1 rounded-lg border border-border/70 bg-muted/30 px-2 py-1 text-[11px] text-muted-foreground"
-              title={`${videoCount} videos`}
-            >
-              <PlayCircle className="w-3.5 h-3.5" />
-              {videoCount}
-            </span>
+          
+          <div className="flex items-center gap-4 pt-4 border-t border-border/40">
+            <div className="flex items-center gap-1.5 text-muted-foreground">
+                <Layers className="w-4 h-4 text-indigo-500" />
+                <span className="text-xs font-bold uppercase tracking-widest leading-none">{moduleCount} Modules</span>
+            </div>
+            <div className="flex items-center gap-1.5 text-muted-foreground">
+                <PlayCircle className="w-4 h-4 text-purple-500" />
+                <span className="text-xs font-bold uppercase tracking-widest leading-none font-mono">{videoCount} Assets</span>
+            </div>
           </div>
         </div>
       </div>

@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import {
     ArrowLeft, PlayCircle, CheckCircle2, Clock, PlaySquare, ChevronRight, ChevronDown, Lock,
-    Layers, FileText, Link as LinkIcon, FileVideo
+    Layers, FileText, Link as LinkIcon, FileVideo, ShieldCheck, Zap
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
+import { toast, ToastContainer } from '@/admin/components/Toast'
 import { courses, watchProgress } from '@/student/services/studentService'
 import type { Video, LectureItem, ModuleItem } from '@/student/services/studentService'
 import { cn } from '@/utils'
@@ -37,20 +38,27 @@ function LectureRow({
     progress,
     completed,
     courseId,
+    isEnrolled,
 }: {
     lecture: LectureItem
     index: number
     progress?: number
     completed?: boolean
     courseId: string
+    isEnrolled?: boolean
 }) {
     const navigate = useNavigate()
+    const isLocked = !isEnrolled
     const videoData = typeof lecture.videoId === 'object' && lecture.videoId ? lecture.videoId as Video : null
     const videoId = videoData?.id || (typeof lecture.videoId === 'string' ? lecture.videoId : null)
     const durationSec = videoData?.duration ? parseInt(videoData.duration) : 0
     const progressPct = (progress && durationSec) ? Math.min(100, Math.round((progress / durationSec) * 100)) : 0
 
     const handleClick = () => {
+        if (isLocked) {
+            toast.error('Access Restricted: Complete enrollment to unlock this segment.')
+            return
+        }
         if (lecture.type === 'video' && videoId) {
             navigate(`/student/watch/${videoId}?course=${courseId}`)
         } else if (lecture.resourceUrl) {
@@ -71,24 +79,30 @@ function LectureRow({
         <div
             onClick={handleClick}
             className={cn(
-                'group flex items-center gap-4 p-4 rounded-xl cursor-pointer transition-all duration-200',
-                'bg-card border border-border hover:bg-muted/80 shadow-sm hover:shadow-md'
+                'group flex items-center gap-4 p-4 rounded-xl cursor-pointer transition-all duration-300',
+                'bg-card border border-border hover:bg-muted/80 shadow-sm hover:shadow-md h-20',
+                isLocked && 'opacity-60 grayscale-[0.5] border-dashed bg-slate-900/10'
             )}
         >
             {/* Index / status */}
-            <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold">
-                {completed ? (
+            <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-black font-mono">
+                {isLocked ? (
+                    <Lock className="w-4 h-4 text-slate-500" />
+                ) : completed ? (
                     <CheckCircle2 className="w-6 h-6 text-emerald-400" />
                 ) : (
                     <span className="text-gray-500 group-hover:hidden">{index + 1}</span>
                 )}
-                {!completed && (
+                {!completed && !isLocked && (
                     <PlayCircle className="w-6 h-6 text-violet-400 hidden group-hover:block" />
                 )}
             </div>
 
             {/* Icon */}
-            <div className="relative flex-shrink-0 w-10 h-10 rounded-lg bg-gray-800/50 overflow-hidden flex items-center justify-center">
+            <div className={cn(
+                "relative flex-shrink-0 w-12 h-12 rounded-xl bg-gray-800/50 overflow-hidden flex items-center justify-center border border-white/5 shadow-inner transition-transform group-hover:scale-105",
+                isLocked && "blur-[1px]"
+            )}>
                 {lecture.type === 'video' && videoData?.thumbnail ? (
                     <img
                         src={getThumbnailUrl(videoData.thumbnail)!}
@@ -106,45 +120,39 @@ function LectureRow({
             </div>
 
             {/* Info */}
-            <div className="flex-1 min-w-0">
+            <div className={cn("flex-1 min-w-0 transition-all", isLocked && 'blur-[0.5px]')}>
                 <h4 className={cn(
-                    'text-sm font-semibold leading-snug line-clamp-1 transition-colors',
-                    completed ? 'text-muted-foreground/60 line-through' : 'text-foreground group-hover:text-primary'
+                    'text-sm font-black leading-snug line-clamp-1 transition-colors tracking-tight',
+                    completed ? 'text-muted-foreground/60 line-through' : 'text-foreground group-hover:text-primary',
+                    isLocked && 'text-slate-500'
                 )}>
                     {lecture.title}
                 </h4>
                 <div className="flex items-center gap-2 mt-0.5">
-                    <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider px-1.5 py-0.5 bg-muted rounded">{lecture.type}</span>
-                    {lecture.description && (
-                        <p className="text-xs text-muted-foreground line-clamp-1">{lecture.description}</p>
-                    )}
+                    <Badge variant="outline" className={cn(
+                        "text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 border-white/5",
+                        isLocked ? 'bg-slate-800/40 text-slate-600' : 'bg-muted text-muted-foreground'
+                    )}>
+                        {lecture.type}
+                    </Badge>
                 </div>
-                {progress !== undefined && progress > 0 && !completed && lecture.type === 'video' && (
-                    <div className="mt-2">
-                        <div className="h-1 bg-muted rounded-full overflow-hidden w-32 border border-border/50">
-                            <div
-                                className="h-full bg-primary rounded-full transition-all"
-                                style={{ width: `${progressPct}%` }}
-                            />
-                        </div>
-                    </div>
-                )}
             </div>
 
             {/* Duration */}
             {lecture.type === 'video' && videoData?.duration && (
-                <div className="flex-shrink-0 flex items-center gap-1 text-gray-500">
+                <div className="flex-shrink-0 flex items-center gap-1.5 text-gray-500 font-mono text-[10px] font-bold">
                     <Clock className="w-3.5 h-3.5" />
-                    <span className="text-xs">{videoData.duration}</span>
+                    <span>{videoData.duration}</span>
                 </div>
             )}
 
-            <ChevronRight className="w-4 h-4 text-gray-600 group-hover:text-violet-400 transition-colors flex-shrink-0" />
+            {!isLocked && <ChevronRight className="w-4 h-4 text-gray-600 group-hover:text-violet-400 transition-colors flex-shrink-0" />}
         </div>
     )
 }
 
 export default function CourseDetailPage() {
+    const qc = useQueryClient()
     const { id } = useParams<{ id: string }>()
     const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set())
 
@@ -152,6 +160,16 @@ export default function CourseDetailPage() {
         queryKey: ['student-course', id],
         queryFn: () => courses.getById(id!),
         enabled: !!id,
+    })
+
+    const enrollMutation = useMutation({
+        mutationFn: () => courses.enroll(id!),
+        onSuccess: () => {
+            qc.invalidateQueries({ queryKey: ['student-course', id] })
+            qc.invalidateQueries({ queryKey: ['student-courses'] })
+            toast.success('Enrollment Established: Content nodes unlocked.')
+        },
+        onError: () => toast.error('Enrollment Failed: Security protocol rejection.')
     })
 
     const { data: progressList } = useQuery({
@@ -167,7 +185,6 @@ export default function CourseDetailPage() {
 
     const courseModules = course?.modules || []
 
-    // Count all video lectures for progress
     const allVideoLectures: { videoId: string; lecture: LectureItem }[] = []
     courseModules.forEach(mod => {
         (mod.lectures || []).forEach(lec => {
@@ -192,7 +209,6 @@ export default function CourseDetailPage() {
         })
     }
 
-    // Auto-expand all modules
     useEffect(() => {
         if (courseModules.length > 0 && expandedModules.size === 0) {
             const allIds = new Set(courseModules.map(m => m.id))
@@ -206,7 +222,6 @@ export default function CourseDetailPage() {
         ? gradients[course.title.charCodeAt(0) % gradients.length]
         : gradients[0]
 
-    // Find first video lecture for "Start Learning" button
     const firstVideoLecture = allVideoLectures[0]
 
     if (loadingCourse) {
@@ -236,7 +251,6 @@ export default function CourseDetailPage() {
 
     return (
         <div className="p-4 lg:p-8 max-w-5xl mx-auto">
-            {/* Back */}
             <Link
                 to="/student/courses"
                 className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6 font-medium group"
@@ -245,7 +259,6 @@ export default function CourseDetailPage() {
                 Back to courses
             </Link>
 
-            {/* Hero card */}
             <div className={cn('relative rounded-3xl overflow-hidden shadow-2xl mb-10 group', gradientClass)}>
                 {course.thumbnail && (
                     <div className="absolute inset-0">
@@ -264,7 +277,6 @@ export default function CourseDetailPage() {
                         <p className="text-white/80 mt-4 text-sm lg:text-lg max-w-2xl leading-relaxed">{course.description}</p>
                     )}
 
-                    {/* Stats */}
                     <div className="flex flex-wrap items-center gap-6 mt-8">
                         <div className="flex items-center gap-2 text-white/90 text-sm font-medium">
                             <Layers className="w-4 h-4 text-white/70" />
@@ -274,14 +286,15 @@ export default function CourseDetailPage() {
                             <PlayCircle className="w-4 h-4 text-white/70" />
                             <span>{totalLectures} lecture{totalLectures !== 1 ? 's' : ''}</span>
                         </div>
-                        <div className="flex items-center gap-2 text-white/90 text-sm font-medium">
-                            <CheckCircle2 className="w-4 h-4 text-white/70" />
-                            <span>{completedCount} completed</span>
-                        </div>
+                        {course.isEnrolled && (
+                            <div className="flex items-center gap-2 text-white/90 text-sm font-medium">
+                                <CheckCircle2 className="w-4 h-4 text-white/70" />
+                                <span>{completedCount} completed</span>
+                            </div>
+                        )}
                     </div>
 
-                    {/* Progress */}
-                    {allVideoLectures.length > 0 && (
+                    {course.isEnrolled && allVideoLectures.length > 0 && (
                         <div className="mt-8 max-w-md">
                             <div className="flex items-center justify-between text-xs font-bold text-white/80 mb-2 uppercase tracking-wider">
                                 <span>Your Progress</span>
@@ -296,22 +309,59 @@ export default function CourseDetailPage() {
                         </div>
                     )}
 
-                    {/* Start/Continue button */}
-                    {firstVideoLecture && (
-                        <Link
-                            to={`/student/watch/${firstVideoLecture.videoId}?course=${id}`}
-                        >
-                            <Button className="mt-10 h-12 px-8 bg-white text-primary-foreground hover:bg-white/90 hover:scale-105 transition-all rounded-xl font-bold text-base shadow-xl shadow-black/20">
-                                <PlayCircle className="w-5 h-5 mr-2" />
-                                {progressPercent > 0 ? 'Continue Learning' : 'Start Learning'}
+                    {course.isEnrolled ? (
+                        firstVideoLecture ? (
+                            <Link
+                                to={`/student/watch/${firstVideoLecture.videoId}?course=${id}`}
+                            >
+                                <Button className="mt-10 h-14 px-10 bg-white text-black hover:bg-white/90 hover:scale-105 transition-all rounded-2xl font-black text-sm uppercase tracking-widest shadow-2xl shadow-black/40 border border-white/20">
+                                    <PlayCircle className="w-5 h-5 mr-3 fill-black/10" />
+                                    {progressPercent > 0 ? 'Resynchronize Learning' : 'Initialize Terminal'}
+                                </Button>
+                            </Link>
+                        ) : null
+                    ) : (
+                        <div className="mt-10 flex flex-col sm:flex-row gap-4">
+                            <Button
+                                onClick={() => enrollMutation.mutate()}
+                                disabled={enrollMutation.isPending}
+                                className="h-14 px-10 bg-indigo-500 text-white hover:bg-indigo-400 hover:scale-105 transition-all rounded-2xl font-black text-sm uppercase tracking-[0.15em] shadow-2xl shadow-indigo-500/30 border border-indigo-400/30"
+                            >
+                                {enrollMutation.isPending ? 'Syncing...' : 'Enroll in Course'}
+                                <Zap className="w-4 h-4 ml-3 fill-white/20" />
                             </Button>
-                        </Link>
+                            <Button variant="outline" className="h-14 px-8 border-white/20 bg-white/5 backdrop-blur-md text-white hover:bg-white/10 rounded-2xl font-black text-sm uppercase tracking-widest">
+                                Watch Trailer
+                            </Button>
+                        </div>
                     )}
                 </div>
             </div>
 
-            {/* Course Content (Modules + Lectures) */}
-            <div>
+            <ToastContainer />
+
+            {!course.isEnrolled && (
+                <div className="bg-indigo-500/5 border border-indigo-500/20 rounded-3xl p-6 mb-10 flex flex-col md:flex-row items-center justify-between gap-6 animate-pulse">
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-2xl bg-indigo-500/20 flex items-center justify-center">
+                            <Lock className="w-6 h-6 text-indigo-400" />
+                        </div>
+                        <div>
+                            <h4 className="text-white font-black tracking-tight uppercase text-xs">Access Restricted</h4>
+                            <p className="text-slate-400 text-sm">Course binaries are encrypted. Enroll to initialize decryption protocols.</p>
+                        </div>
+                    </div>
+                    <Button
+                        onClick={() => enrollMutation.mutate()}
+                        variant="ghost"
+                        className="text-indigo-400 hover:text-indigo-300 font-black text-[10px] uppercase tracking-widest"
+                    >
+                        Learn More About Enrollment →
+                    </Button>
+                </div>
+            )}
+
+            <div className={cn("transition-all duration-700", !course.isEnrolled && "blur-[2px] pointer-events-none select-none grayscale-[0.3]")}>
                 <h2 className="text-xl font-bold mb-6 flex items-center gap-3">
                     Course Content
                     <span className="text-xs font-medium text-muted-foreground bg-muted px-2 py-1 rounded-full border border-border">
@@ -319,13 +369,7 @@ export default function CourseDetailPage() {
                     </span>
                 </h2>
 
-                {loadingCourse ? (
-                    <div className="space-y-2">
-                        {Array(5).fill(0).map((_, i) => (
-                            <div key={i} className="h-20 animate-pulse bg-white/5 rounded-xl" />
-                        ))}
-                    </div>
-                ) : courseModules.length === 0 ? (
+                {courseModules.length === 0 ? (
                     <div className="text-center py-12 text-gray-500">
                         <PlaySquare className="w-10 h-10 mx-auto mb-3 opacity-40" />
                         <p>No content in this course yet</p>
@@ -343,7 +387,6 @@ export default function CourseDetailPage() {
 
                             return (
                                 <div key={mod.id} className="rounded-2xl border border-border overflow-hidden bg-card shadow-sm hover:shadow-md transition-shadow">
-                                    {/* Module Header */}
                                     <button
                                         onClick={() => toggleModule(mod.id)}
                                         className="w-full flex items-center gap-4 p-5 text-left hover:bg-muted/50 transition-colors"
@@ -358,7 +401,7 @@ export default function CourseDetailPage() {
                                         <div className="flex items-center gap-3 flex-shrink-0">
                                             <div className="hidden sm:flex flex-col items-end mr-2">
                                                 <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{moduleLectures.length} Items</span>
-                                                {moduleVideoLds.length > 0 && (
+                                                {course.isEnrolled && moduleVideoLds.length > 0 && (
                                                     <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">{moduleCompleted}/{moduleVideoLds.length} Done</span>
                                                 )}
                                             </div>
@@ -366,7 +409,6 @@ export default function CourseDetailPage() {
                                         </div>
                                     </button>
 
-                                    {/* Lectures */}
                                     {isExpanded && (
                                         <div className="border-t border-border p-4 space-y-3 bg-muted/20">
                                             {moduleLectures.length === 0 ? (
@@ -382,6 +424,7 @@ export default function CourseDetailPage() {
                                                             progress={videoId ? progressMap[videoId]?.progress : undefined}
                                                             completed={videoId ? progressMap[videoId]?.completed : false}
                                                             courseId={id!}
+                                                            isEnrolled={course.isEnrolled}
                                                         />
                                                     )
                                                 })

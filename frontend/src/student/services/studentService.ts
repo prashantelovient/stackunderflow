@@ -88,6 +88,7 @@ export interface Course {
   categoryId: string | null
   moduleCount: number
   lectureCount: number
+  isEnrolled: boolean
   modules?: ModuleItem[]
   createdAt: string
 }
@@ -117,6 +118,10 @@ export const courses = {
   },
   getById: async (id: string): Promise<Course> => {
     const res = await studentApiClient.get(`/courses/${id}`)
+    return res.data
+  },
+  enroll: async (courseId: string): Promise<any> => {
+    const res = await studentApiClient.post('/student/enroll', { courseId })
     return res.data
   },
 }

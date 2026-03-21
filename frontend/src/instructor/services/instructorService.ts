@@ -5,4 +5,8 @@ export const instructorService = {
         const res = await apiClient.get('/instructor/analytics')
         return res.data
     },
+    getStudents: async () => {
+        const res = await apiClient.get('/instructor/students')
+        return res.data
+    },
 }

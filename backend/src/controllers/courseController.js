@@ -41,13 +41,27 @@ export const getCourses = async (req, res, next) => {
             })
             .exec();
 
+        let studentEnrolledCourses = [];
+        if (req.user.role === 'student') {
+            const student = await mongoose.model('Student').findById(req.user.id);
+            if (student) studentEnrolledCourses = student.enrolledCourses.map(id => id.toString());
+        }
+
         const formatted = courses.map(c => {
             const obj = c.toObject();
             const modules = obj.modules || [];
             const lectureCount = modules.reduce((sum, m) => sum + (m.lectures ? m.lectures.length : 0), 0);
 
+            let isEnrolled = false;
+            if (req.user.role === 'student') {
+                isEnrolled = studentEnrolledCourses.includes(c._id.toString());
+            } else if (req.user.role === 'admin' || (req.user.role === 'instructor' && c.instructorId?.toString() === req.user.id)) {
+                isEnrolled = true;
+            }
+
             return {
                 ...obj,
+                isEnrolled,
                 categoryId: c.categoryId ? (c.categoryId.id || c.categoryId._id?.toString?.()) : null,
                 category: c.categoryId ? c.categoryId.name : 'Uncategorized',
                 moduleCount: modules.length,
@@ -86,13 +100,43 @@ export const getCourseById = async (req, res, next) => {
         const modules = obj.modules || [];
         const lectureCount = modules.reduce((sum, m) => sum + (m.lectures ? m.lectures.length : 0), 0);
 
+        // Check enrollment if current user is a student
+        let isEnrolled = false;
+        if (req.user.role === 'student' || !req.user.role) { // Handling edge cases
+            const student = await mongoose.model('Student').findById(req.user.id);
+            if (student && student.enrolledCourses.includes(req.params.id)) {
+                isEnrolled = true;
+            }
+        } else if (req.user.role === 'admin' || (req.user.role === 'instructor' && c.instructorId?.toString() === req.user.id)) {
+            isEnrolled = true; // Admins and the instructor themselves have access
+        }
+
         const formatted = {
             ...obj,
+            isEnrolled,
             categoryId: c.categoryId ? (c.categoryId.id || c.categoryId._id?.toString?.()) : null,
             category: c.categoryId ? c.categoryId.name : 'Uncategorized',
             moduleCount: modules.length,
             lectureCount,
         };
+
+        // Redact paths/sensitive info if not enrolled
+        if (!isEnrolled) {
+            formatted.modules = formatted.modules.map(m => ({
+                ...m,
+                lectures: m.lectures.map(l => ({
+                    ...l,
+                    videoId: l.videoId ? {
+                        title: l.videoId.title,
+                        thumbnail: l.videoId.thumbnail,
+                        duration: l.videoId.duration,
+                        status: l.videoId.status,
+                        // No videoPath
+                    } : null
+                }))
+            }));
+        }
+
         res.json(formatted);
     } catch (error) {
         next(error);

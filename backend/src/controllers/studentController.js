@@ -122,3 +122,29 @@ export const activateStudent = async (req, res, next) => {
     next(error);
   }
 };
+
+export const enrollCourse = async (req, res, next) => {
+  try {
+    const studentId = req.user.id;
+    const { courseId } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(courseId)) {
+      return res.status(400).json({ message: 'Invalid course ID' });
+    }
+
+    const student = await Student.findById(studentId);
+    if (!student) return res.status(404).json({ message: 'Student not found' });
+
+    if (student.enrolledCourses.includes(courseId)) {
+      return res.status(400).json({ message: 'Already enrolled in this course' });
+    }
+
+    student.enrolledCourses.push(courseId);
+    await student.save();
+
+    res.json({ message: 'Enrollment successful' });
+  } catch (error) {
+    next(error);
+  }
+};
+

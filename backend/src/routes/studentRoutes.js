@@ -1,5 +1,5 @@
 import express from 'express';
-import { getStudents, getStudentById, deleteStudent, suspendStudent, activateStudent, registerStudent, loginStudent } from '../controllers/studentController.js';
+import { getStudents, getStudentById, deleteStudent, suspendStudent, activateStudent, registerStudent, loginStudent, enrollCourse } from '../controllers/studentController.js';
 import { authMiddleware } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
@@ -9,6 +9,7 @@ router.post('/login', loginStudent);
 
 router.use(authMiddleware);
 
+router.post('/enroll', enrollCourse);
 router.get('/', getStudents);
 router.get('/:id', getStudentById);
 router.delete('/:id', deleteStudent);

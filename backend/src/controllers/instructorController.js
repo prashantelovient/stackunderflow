@@ -19,19 +19,15 @@ export const getInstructorAnalytics = async (req, res, next) => {
         });
 
         // 4. Count total videos in these courses
-        // First get modules for these courses
         const modules = await mongoose.model('Module').find({ courseId: { $in: courseIds } });
         const moduleIds = modules.map(m => m._id);
 
-        // Then get lectures for these modules
         const lectures = await mongoose.model('Lecture').find({ moduleId: { $in: moduleIds } });
         const totalVideos = lectures.length;
 
-        // Mock remaining stats for visual consistency with admin dashboard
-        const totalRevenue = totalCourses * 1000; // Mock revenue
-        const avgRating = 4.8; // Mock rating
+        const totalRevenue = totalCourses * 1000;
+        const avgRating = 4.8;
 
-        // Weekly students join chart (mocked for now, but following the admin pattern)
         const now = new Date();
         const twelveMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 11, 1);
 
@@ -71,19 +67,52 @@ export const getInstructorAnalytics = async (req, res, next) => {
             totalRevenue: `$${totalRevenue}`,
             avgRating,
             studentsByMonth: buildMonthlyData(studentAgg),
-            // For the dashboard UI charts
             revenueData: buildMonthlyData([{ _id: { year: now.getFullYear(), month: now.getMonth() + 1 }, count: totalRevenue }])
                 .map(d => ({ name: d.name, revenue: d.count })),
-            recentStudents: [], // Potentially fetch actual recent enrollments
+            recentStudents: [],
             topCourses: courses.slice(0, 3).map(c => ({
                 id: c._id,
                 name: c.title,
-                sales: 0, // Mock
-                revenue: '$0', // Mock
-                rating: 4.5, // Mock
+                sales: 0,
+                revenue: '$0',
+                rating: 4.5,
                 thumbnail: c.thumbnail
             }))
         });
+
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const getMyStudents = async (req, res, next) => {
+    try {
+        const instructorId = req.user.id;
+        const instructorObjectId = new mongoose.Types.ObjectId(instructorId);
+
+        const courses = await Course.find({ instructorId: instructorObjectId }).select('_id title');
+        const courseIds = courses.map(c => c._id);
+
+        const students = await Student.find({
+            enrolledCourses: { $in: courseIds }
+        }).select('-password').lean();
+
+        const formattedStudents = students.map(student => {
+            const instructorCourseEnrollments = student.enrolledCourses
+                .filter(ecId => courseIds.some(cid => cid.equals(ecId)))
+                .map(ecId => {
+                    const foundCourse = courses.find(c => c._id.equals(ecId));
+                    return foundCourse ? foundCourse.title : 'Deleted Course';
+                });
+
+            return {
+                ...student,
+                instructorCourses: instructorCourseEnrollments,
+                enrollmentCount: instructorCourseEnrollments.length,
+            };
+        });
+
+        res.json(formattedStudents);
 
     } catch (error) {
         next(error);
