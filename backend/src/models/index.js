@@ -8,3 +8,4 @@ export { default as Lecture } from './Lecture.js';
 export { default as Video } from './Video.js';
 export { default as Blog } from './Blog.js';
 export { default as WatchProgress } from './WatchProgress.js';
+export { default as Enrollment } from './Enrollment.js';

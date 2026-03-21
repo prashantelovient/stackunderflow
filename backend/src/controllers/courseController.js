@@ -23,6 +23,8 @@ export const createCourse = async (req, res, next) => {
     }
 };
 
+import Enrollment from '../models/Enrollment.js';
+
 export const getCourses = async (req, res, next) => {
     try {
         const query = {};
@@ -42,9 +44,11 @@ export const getCourses = async (req, res, next) => {
             .exec();
 
         let studentEnrolledCourses = [];
+        let pendingCourses = [];
         if (req.user.role === 'student') {
-            const student = await mongoose.model('Student').findById(req.user.id);
-            if (student) studentEnrolledCourses = student.enrolledCourses.map(id => id.toString());
+            const enrollments = await Enrollment.find({ studentId: req.user.id });
+            studentEnrolledCourses = enrollments.filter(e => e.status === 'approved').map(e => e.courseId.toString());
+            pendingCourses = enrollments.filter(e => e.status === 'pending').map(e => e.courseId.toString());
         }
 
         const formatted = courses.map(c => {
@@ -53,8 +57,10 @@ export const getCourses = async (req, res, next) => {
             const lectureCount = modules.reduce((sum, m) => sum + (m.lectures ? m.lectures.length : 0), 0);
 
             let isEnrolled = false;
+            let isPending = false;
             if (req.user.role === 'student') {
                 isEnrolled = studentEnrolledCourses.includes(c._id.toString());
+                isPending = pendingCourses.includes(c._id.toString());
             } else if (req.user.role === 'admin' || (req.user.role === 'instructor' && c.instructorId?.toString() === req.user.id)) {
                 isEnrolled = true;
             }
@@ -62,6 +68,8 @@ export const getCourses = async (req, res, next) => {
             return {
                 ...obj,
                 isEnrolled,
+                isPending,
+
                 categoryId: c.categoryId ? (c.categoryId.id || c.categoryId._id?.toString?.()) : null,
                 category: c.categoryId ? c.categoryId.name : 'Uncategorized',
                 moduleCount: modules.length,
@@ -102,18 +110,22 @@ export const getCourseById = async (req, res, next) => {
 
         // Check enrollment if current user is a student
         let isEnrolled = false;
-        if (req.user.role === 'student' || !req.user.role) { // Handling edge cases
-            const student = await mongoose.model('Student').findById(req.user.id);
-            if (student && student.enrolledCourses.includes(req.params.id)) {
-                isEnrolled = true;
+        let isPending = false;
+        if (req.user.role === 'student' || !req.user.role) {
+            const enrollment = await Enrollment.findOne({ studentId: req.user.id, courseId: req.params.id });
+            if (enrollment) {
+                isEnrolled = enrollment.status === 'approved';
+                isPending = enrollment.status === 'pending';
             }
         } else if (req.user.role === 'admin' || (req.user.role === 'instructor' && c.instructorId?.toString() === req.user.id)) {
-            isEnrolled = true; // Admins and the instructor themselves have access
+            isEnrolled = true;
         }
 
         const formatted = {
             ...obj,
             isEnrolled,
+            isPending,
+
             categoryId: c.categoryId ? (c.categoryId.id || c.categoryId._id?.toString?.()) : null,
             category: c.categoryId ? c.categoryId.name : 'Uncategorized',
             moduleCount: modules.length,

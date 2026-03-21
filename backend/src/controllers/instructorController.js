@@ -85,36 +85,80 @@ export const getInstructorAnalytics = async (req, res, next) => {
     }
 };
 
+import Enrollment from '../models/Enrollment.js';
+
+export const getMyEnrollments = async (req, res, next) => {
+    try {
+        const instructorId = req.user.id;
+        const enrollments = await Enrollment.find({ instructorId })
+            .populate('studentId', 'name email')
+            .populate('courseId', 'title thumbnail')
+            .sort({ createdAt: -1 });
+
+        res.json(enrollments);
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const updateEnrollmentStatus = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { status } = req.body;
+        const instructorId = req.user.id;
+
+        if (!['approved', 'rejected'].includes(status)) {
+            return res.status(400).json({ message: 'Invalid status' });
+        }
+
+        const enrollment = await Enrollment.findOne({ _id: id, instructorId });
+        if (!enrollment) return res.status(404).json({ message: 'Enrollment record not found or unauthorized' });
+
+        enrollment.status = status;
+        if (status === 'approved') {
+            enrollment.approvalDate = new Date();
+        }
+
+        await enrollment.save();
+
+        res.json({ message: `Enrollment status updated to ${status}` });
+    } catch (error) {
+        next(error);
+    }
+};
+
 export const getMyStudents = async (req, res, next) => {
     try {
         const instructorId = req.user.id;
-        const instructorObjectId = new mongoose.Types.ObjectId(instructorId);
 
-        const courses = await Course.find({ instructorId: instructorObjectId }).select('_id title');
-        const courseIds = courses.map(c => c._id);
+        // Find all approved enrollments for this instructor
+        const enrollments = await Enrollment.find({ instructorId, status: 'approved' })
+            .populate('studentId', '-password')
+            .populate('courseId', 'title')
+            .lean();
 
-        const students = await Student.find({
-            enrolledCourses: { $in: courseIds }
-        }).select('-password').lean();
+        // Group by student
+        const studentMap = new Map();
 
-        const formattedStudents = students.map(student => {
-            const instructorCourseEnrollments = student.enrolledCourses
-                .filter(ecId => courseIds.some(cid => cid.equals(ecId)))
-                .map(ecId => {
-                    const foundCourse = courses.find(c => c._id.equals(ecId));
-                    return foundCourse ? foundCourse.title : 'Deleted Course';
+        enrollments.forEach(e => {
+            if (!e.studentId) return;
+            const sId = e.studentId._id.toString();
+            if (!studentMap.has(sId)) {
+                studentMap.set(sId, {
+                    ...e.studentId,
+                    instructorCourses: [],
+                    enrollmentCount: 0
                 });
-
-            return {
-                ...student,
-                instructorCourses: instructorCourseEnrollments,
-                enrollmentCount: instructorCourseEnrollments.length,
-            };
+            }
+            const s = studentMap.get(sId);
+            s.instructorCourses.push(e.courseId ? e.courseId.title : 'Deleted Course');
+            s.enrollmentCount += 1;
         });
 
-        res.json(formattedStudents);
+        res.json(Array.from(studentMap.values()));
 
     } catch (error) {
         next(error);
     }
 };
+

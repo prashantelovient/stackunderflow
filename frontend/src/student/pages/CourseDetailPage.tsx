@@ -320,6 +320,16 @@ export default function CourseDetailPage() {
                                 </Button>
                             </Link>
                         ) : null
+                    ) : course.isPending ? (
+                        <div className="mt-10">
+                            <Button
+                                disabled
+                                className="h-14 px-10 bg-amber-500/20 text-amber-500 cursor-not-allowed rounded-2xl font-black text-sm uppercase tracking-[0.15em] border border-amber-500/30"
+                            >
+                                Pending Approval
+                                <Clock className="w-4 h-4 ml-3 animate-pulse" />
+                            </Button>
+                        </div>
                     ) : (
                         <div className="mt-10 flex flex-col sm:flex-row gap-4">
                             <Button
@@ -341,25 +351,40 @@ export default function CourseDetailPage() {
             <ToastContainer />
 
             {!course.isEnrolled && (
-                <div className="bg-indigo-500/5 border border-indigo-500/20 rounded-3xl p-6 mb-10 flex flex-col md:flex-row items-center justify-between gap-6 animate-pulse">
+                <div className={cn(
+                    "rounded-3xl p-6 mb-10 flex flex-col md:flex-row items-center justify-between gap-6 animate-pulse border",
+                    course.isPending ? "bg-amber-500/5 border-amber-500/20" : "bg-indigo-500/5 border-indigo-500/20"
+                )}>
                     <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-2xl bg-indigo-500/20 flex items-center justify-center">
-                            <Lock className="w-6 h-6 text-indigo-400" />
+                        <div className={cn(
+                            "w-12 h-12 rounded-2xl flex items-center justify-center",
+                            course.isPending ? "bg-amber-500/20" : "bg-indigo-500/20"
+                        )}>
+                            {course.isPending ? <Clock className="w-6 h-6 text-amber-400" /> : <Lock className="w-6 h-6 text-indigo-400" />}
                         </div>
                         <div>
-                            <h4 className="text-white font-black tracking-tight uppercase text-xs">Access Restricted</h4>
-                            <p className="text-slate-400 text-sm">Course binaries are encrypted. Enroll to initialize decryption protocols.</p>
+                            <h4 className={cn("font-black tracking-tight uppercase text-xs", course.isPending ? "text-amber-400" : "text-white")}>
+                                {course.isPending ? 'Enrollment Pending' : 'Access Restricted'}
+                            </h4>
+                            <p className="text-slate-400 text-sm">
+                                {course.isPending
+                                    ? 'Request transmitted. Instructor authorization is currently in progress.'
+                                    : 'Course binaries are encrypted. Enroll to initialize decryption protocols.'}
+                            </p>
                         </div>
                     </div>
-                    <Button
-                        onClick={() => enrollMutation.mutate()}
-                        variant="ghost"
-                        className="text-indigo-400 hover:text-indigo-300 font-black text-[10px] uppercase tracking-widest"
-                    >
-                        Learn More About Enrollment →
-                    </Button>
+                    {!course.isPending && (
+                        <Button
+                            onClick={() => enrollMutation.mutate()}
+                            variant="ghost"
+                            className="text-indigo-400 hover:text-indigo-300 font-black text-[10px] uppercase tracking-widest"
+                        >
+                            Learn More About Enrollment →
+                        </Button>
+                    )}
                 </div>
             )}
+
 
             <div className={cn("transition-all duration-700", !course.isEnrolled && "blur-[2px] pointer-events-none select-none grayscale-[0.3]")}>
                 <h2 className="text-xl font-bold mb-6 flex items-center gap-3">

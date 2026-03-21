@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
-import { PlayCircle, BookOpen, Layers, Search, ListVideo } from 'lucide-react'
+import { PlayCircle, BookOpen, Layers, Search, ListVideo, Clock } from 'lucide-react'
+
 import { courses } from '@/student/services/studentService'
 import type { Course as CourseType } from '@/student/services/studentService'
 import { cn } from '@/utils'
@@ -36,12 +37,18 @@ function CourseCard({ course, index }: { course: CourseType; index: number }) {
       <Link to={`/student/courses/${course.id}`} className="absolute inset-0 z-20" />
 
       {/* Enrollment Badge */}
-      {course.isEnrolled && (
+      {course.isEnrolled ? (
         <div className="absolute top-4 right-4 z-30 flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-emerald-500 text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-emerald-500/30 border border-white/20 animate-in fade-in zoom-in duration-500">
-           <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-           Enrolled
+          <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+          Enrolled
         </div>
-      )}
+      ) : course.isPending ? (
+        <div className="absolute top-4 right-4 z-30 flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-amber-500 text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-amber-500/30 border border-white/20 animate-in fade-in zoom-in duration-500">
+          <Clock className="w-3 h-3 animate-spin duration-1000" />
+          Pending
+        </div>
+      ) : null}
+
 
       {/* Thumbnail / gradient */}
       <div className={cn('relative h-48 bg-gradient-to-br flex items-center justify-center overflow-hidden', gradient)}>
@@ -58,12 +65,12 @@ function CourseCard({ course, index }: { course: CourseType; index: number }) {
           <ListVideo className="w-14 h-14 text-white/30" />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
-        
+
         {/* Play Icon on Hover */}
         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10">
-            <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-xl border border-white/30 flex items-center justify-center scale-75 group-hover:scale-100 transition-transform duration-500">
-                <PlayCircle className="w-8 h-8 text-white fill-white/20" />
-            </div>
+          <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-xl border border-white/30 flex items-center justify-center scale-75 group-hover:scale-100 transition-transform duration-500">
+            <PlayCircle className="w-8 h-8 text-white fill-white/20" />
+          </div>
         </div>
       </div>
 
@@ -72,22 +79,22 @@ function CourseCard({ course, index }: { course: CourseType; index: number }) {
         <div className="space-y-3">
           <div className="flex items-center gap-2">
             <span className="shrink-0 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-[9px] font-black tracking-[0.1em] px-2 py-0.5 uppercase">
-                {pillLabel}
+              {pillLabel}
             </span>
           </div>
-          
+
           <h3 className="text-lg font-black text-foreground line-clamp-2 leading-tight group-hover:text-indigo-400 transition-colors">
             {course.title}
           </h3>
-          
+
           <div className="flex items-center gap-4 pt-4 border-t border-border/40">
             <div className="flex items-center gap-1.5 text-muted-foreground">
-                <Layers className="w-4 h-4 text-indigo-500" />
-                <span className="text-xs font-bold uppercase tracking-widest leading-none">{moduleCount} Modules</span>
+              <Layers className="w-4 h-4 text-indigo-500" />
+              <span className="text-xs font-bold uppercase tracking-widest leading-none">{moduleCount} Modules</span>
             </div>
             <div className="flex items-center gap-1.5 text-muted-foreground">
-                <PlayCircle className="w-4 h-4 text-purple-500" />
-                <span className="text-xs font-bold uppercase tracking-widest leading-none font-mono">{videoCount} Assets</span>
+              <PlayCircle className="w-4 h-4 text-purple-500" />
+              <span className="text-xs font-bold uppercase tracking-widest leading-none font-mono">{videoCount} Assets</span>
             </div>
           </div>
         </div>
@@ -112,8 +119,8 @@ export default function CoursesPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
         <div>
           <h1 className="text-xl lg:text-3xl font-bold tracking-tight text-foreground">
-  Courses
-</h1>
+            Courses
+          </h1>
           <p className="text-sm text-muted-foreground mt-1">{allCourses.length} courses in your library</p>
         </div>
         <div className="relative w-full sm:w-72">

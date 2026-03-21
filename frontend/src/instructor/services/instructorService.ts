@@ -9,4 +9,12 @@ export const instructorService = {
         const res = await apiClient.get('/instructor/students')
         return res.data
     },
+    getEnrollments: async () => {
+        const res = await apiClient.get('/instructor/enrollments')
+        return res.data
+    },
+    updateEnrollmentStatus: async (id: string, status: 'approved' | 'rejected') => {
+        const res = await apiClient.patch(`/instructor/enrollments/${id}`, { status })
+        return res.data
+    },
 }

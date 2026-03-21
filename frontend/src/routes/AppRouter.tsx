@@ -22,6 +22,8 @@ import InstructorDashboardPage from '@/instructor/pages/DashboardPage'
 import InstructorCoursesPage from '@/instructor/pages/CoursesPage'
 import InstructorVideosPage from '@/instructor/pages/VideosPage'
 import InstructorStudentsPage from '@/instructor/pages/StudentsPage'
+import InstructorEnrollmentsPage from '@/instructor/pages/EnrollmentsPage'
+
 
 // ── Student ───────────────────────────────────────────────────────────────────
 import StudentLayout from '@/student/layout/StudentLayout'
@@ -142,6 +144,8 @@ export default function AppRouter() {
           <Route path="courses" element={<InstructorCoursesPage />} />
           <Route path="videos" element={<InstructorVideosPage />} />
           <Route path="students" element={<InstructorStudentsPage />} />
+          <Route path="enrollments" element={<InstructorEnrollmentsPage />} />
+
           <Route path="messages" element={<div className="p-8 text-white h-[400px] flex items-center justify-center border border-dashed border-slate-800 rounded-3xl bg-slate-900/40">Instructor Messages (Coming Soon)</div>} />
           <Route path="analytics" element={<div className="p-8 text-white h-[400px] flex items-center justify-center border border-dashed border-slate-800 rounded-3xl bg-slate-900/40">Advanced Analytics (Coming Soon)</div>} />
           <Route path="settings" element={<div className="p-8 text-white h-[400px] flex items-center justify-center border border-dashed border-slate-800 rounded-3xl bg-slate-900/40">Instructor Settings (Coming Soon)</div>} />

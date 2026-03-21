@@ -89,9 +89,11 @@ export interface Course {
   moduleCount: number
   lectureCount: number
   isEnrolled: boolean
+  isPending: boolean
   modules?: ModuleItem[]
   createdAt: string
 }
+
 
 export interface Blog {
   id: string

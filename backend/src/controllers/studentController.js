@@ -123,6 +123,9 @@ export const activateStudent = async (req, res, next) => {
   }
 };
 
+import Enrollment from '../models/Enrollment.js';
+import Course from '../models/Course.js';
+
 export const enrollCourse = async (req, res, next) => {
   try {
     const studentId = req.user.id;
@@ -132,19 +135,34 @@ export const enrollCourse = async (req, res, next) => {
       return res.status(400).json({ message: 'Invalid course ID' });
     }
 
-    const student = await Student.findById(studentId);
-    if (!student) return res.status(404).json({ message: 'Student not found' });
+    const course = await Course.findById(courseId);
+    if (!course) return res.status(404).json({ message: 'Course not found' });
 
-    if (student.enrolledCourses.includes(courseId)) {
-      return res.status(400).json({ message: 'Already enrolled in this course' });
+    // Check for existing enrollment/request
+    const existing = await Enrollment.findOne({ studentId, courseId });
+    if (existing) {
+      if (existing.status === 'approved') return res.status(400).json({ message: 'Synchronization locked: Course is already in your established network.' });
+      if (existing.status === 'pending') return res.status(400).json({ message: 'Handshake Pending: Instructor authorization required.' });
+      // If rejected, maybe allow resubmitting? Let's check user's request
     }
 
-    student.enrolledCourses.push(courseId);
-    await student.save();
+    // Create enrollment request
+    const enrollment = new Enrollment({
+      studentId: new mongoose.Types.ObjectId(studentId),
+      courseId: new mongoose.Types.ObjectId(courseId),
+      instructorId: course.instructorId, // Link request to the specific instructor
+      status: 'pending'
+    });
 
-    res.json({ message: 'Enrollment successful' });
+    await enrollment.save();
+
+    res.json({
+      message: 'Enrollment requested: Transmitting handshake signals to instructor terminal.',
+      status: 'pending'
+    });
   } catch (error) {
     next(error);
   }
 };
+
 

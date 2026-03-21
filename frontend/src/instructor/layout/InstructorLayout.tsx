@@ -13,7 +13,8 @@ import {
     PlusCircle,
     ExternalLink,
     Plus,
-    FileVideo
+    FileVideo,
+    ShieldCheck
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -33,10 +34,12 @@ const sidebarItems = [
     { icon: BookOpen, label: 'My Courses', path: '/instructor/courses' },
     { icon: FileVideo, label: 'Videos', path: '/instructor/videos' },
     { icon: Users, label: 'Students', path: '/instructor/students' },
+    { icon: ShieldCheck, label: 'Enrollments', path: '/instructor/enrollments' },
     { icon: MessageSquare, label: 'Messages', path: '/instructor/messages' },
     { icon: PieChart, label: 'Analytics', path: '/instructor/analytics' },
     { icon: Settings, label: 'Settings', path: '/instructor/settings' },
 ]
+
 
 export default function InstructorLayout() {
     const location = useLocation()
