@@ -1,4 +1,4 @@
-import { Course, Video, Student } from '../models/index.js';
+import { Course, Video, Student, Enrollment } from '../models/index.js';
 import mongoose from 'mongoose';
 
 export const getInstructorAnalytics = async (req, res, next) => {
@@ -85,8 +85,6 @@ export const getInstructorAnalytics = async (req, res, next) => {
     }
 };
 
-import Enrollment from '../models/Enrollment.js';
-
 export const getMyEnrollments = async (req, res, next) => {
     try {
         const instructorId = req.user.id;
@@ -117,6 +115,10 @@ export const updateEnrollmentStatus = async (req, res, next) => {
         enrollment.status = status;
         if (status === 'approved') {
             enrollment.approvalDate = new Date();
+            // Sync with Student model
+            await Student.findByIdAndUpdate(enrollment.studentId, {
+                $addToSet: { enrolledCourses: enrollment.courseId }
+            }).exec();
         }
 
         await enrollment.save();
@@ -161,4 +163,3 @@ export const getMyStudents = async (req, res, next) => {
         next(error);
     }
 };
-

@@ -29,7 +29,6 @@ import { cn } from '@/utils'
 import { format } from 'date-fns'
 
 interface Enrollment {
-
     _id: string
     studentId: {
         _id: string
@@ -68,9 +67,11 @@ export default function InstructorEnrollmentsPage() {
     })
 
     const filtered = enrollments.filter(e => {
+        const studentName = e.studentId?.name || 'Unknown Student'
+        const courseTitle = e.courseId?.title || 'Unknown Course'
         const matchesSearch =
-            e.studentId.name.toLowerCase().includes(search.toLowerCase()) ||
-            e.courseId.title.toLowerCase().includes(search.toLowerCase())
+            studentName.toLowerCase().includes(search.toLowerCase()) ||
+            courseTitle.toLowerCase().includes(search.toLowerCase())
         const matchesStatus = filterStatus === 'all' || e.status === filterStatus
         return matchesSearch && matchesStatus
     })
@@ -167,12 +168,16 @@ export default function InstructorEnrollmentsPage() {
                                         <div className="flex items-center gap-3">
                                             <Avatar className="w-9 h-9 border border-slate-700">
                                                 <AvatarFallback className="bg-slate-800 text-slate-400 text-xs font-bold">
-                                                    {e.studentId.name[0]}
+                                                    {e.studentId?.name?.[0] || 'U'}
                                                 </AvatarFallback>
                                             </Avatar>
                                             <div>
-                                                <p className="text-sm font-black text-white group-hover:text-indigo-400 transition-colors">{e.studentId.name}</p>
-                                                <p className="text-[10px] text-slate-500 font-mono">{e.studentId.email}</p>
+                                                <p className="text-sm font-black text-white group-hover:text-indigo-400 transition-colors">
+                                                    {e.studentId?.name || 'Deleted student'}
+                                                </p>
+                                                <p className="text-[10px] text-slate-500 font-mono">
+                                                    {e.studentId?.email || 'N/A'}
+                                                </p>
                                             </div>
                                         </div>
                                     </TableCell>
@@ -181,7 +186,9 @@ export default function InstructorEnrollmentsPage() {
                                             <div className="w-10 h-10 rounded-lg bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20">
                                                 <BookOpen className="w-5 h-5 text-indigo-400" />
                                             </div>
-                                            <p className="text-sm font-bold text-slate-300 line-clamp-1">{e.courseId.title}</p>
+                                            <p className="text-sm font-bold text-slate-300 line-clamp-1">
+                                                {e.courseId?.title || 'Deleted Course'}
+                                            </p>
                                         </div>
                                     </TableCell>
                                     <TableCell>
@@ -263,6 +270,3 @@ function StatusBadge({ status }: { status: string }) {
             return null
     }
 }
-
-
-

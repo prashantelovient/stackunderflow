@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { Course, Module, Lecture } from '../models/index.js';
+import { Course, Module, Lecture, Student, Enrollment, WatchProgress } from '../models/index.js';
 
 export const createCourse = async (req, res, next) => {
     try {
@@ -23,7 +23,7 @@ export const createCourse = async (req, res, next) => {
     }
 };
 
-import Enrollment from '../models/Enrollment.js';
+
 
 export const getCourses = async (req, res, next) => {
     try {
@@ -207,8 +207,27 @@ export const deleteCourse = async (req, res, next) => {
         // Delete all lectures in all modules of this course
         const modules = await Module.find({ courseId: req.params.id }).exec();
         const moduleIds = modules.map(m => m._id);
+
+        // Find all lectures to get videoIds for progress deletion
+        const lectures = await Lecture.find({ moduleId: { $in: moduleIds } }).exec();
+        const videoIds = lectures.map(l => l.videoId).filter(id => id);
+
+        if (videoIds.length > 0) {
+            await WatchProgress.deleteMany({ videoId: { $in: videoIds } }).exec();
+        }
+
         await Lecture.deleteMany({ moduleId: { $in: moduleIds } }).exec();
         await Module.deleteMany({ courseId: req.params.id }).exec();
+
+        // Delete all enrollments for this course
+        await Enrollment.deleteMany({ courseId: req.params.id }).exec();
+
+        // Remove course from all students' enrolledCourses
+        await Student.updateMany(
+            { enrolledCourses: req.params.id },
+            { $pull: { enrolledCourses: req.params.id } }
+        ).exec();
+
         await Course.findByIdAndDelete(req.params.id).exec();
 
         res.json({ message: 'Course deleted successfully' });
