@@ -25,6 +25,8 @@ export default function DashboardPage() {
     accent: isDark ? '#6366F1' : '#4F46E5'
   }
 
+  const statsRef = useRef<HTMLDivElement>(null)
+
   if (isLoading) return (
     <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
       <Spinner />
@@ -67,7 +69,6 @@ export default function DashboardPage() {
     { label: 'Knowledge Base Articles', value: (data?.totalBlogs ?? 0).toLocaleString(), icon: BookOpen, trend: '+8.4%' },
   ]
 
-  const statsRef = useRef<HTMLDivElement>(null)
 
   return (
     <div className="space-y-10 bento-section">

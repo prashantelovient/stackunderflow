@@ -66,6 +66,9 @@ export default function InstructorDashboard() {
         queryFn: instructorService.getAnalytics,
     })
 
+    const statsRef = useRef<HTMLDivElement>(null)
+    const coursesRef = useRef<HTMLDivElement>(null)
+
     if (isLoading) {
         return <div className="flex items-center justify-center min-h-[400px]">
             <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
@@ -83,8 +86,6 @@ export default function InstructorDashboard() {
     const recentStudents = analytics?.recentStudents || []
     const topCourses = analytics?.topCourses || []
 
-    const statsRef = useRef<HTMLDivElement>(null)
-    const coursesRef = useRef<HTMLDivElement>(null)
 
     return (
         <div className="space-y-8 animate-in fade-in duration-700 bento-section">

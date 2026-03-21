@@ -1,17 +1,14 @@
 {
   "name": "admin-dashboard-root",
   "version": "1.0.0",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
   "scripts": {
     "start": "concurrently \"npm run backend\" \"npm run frontend\"",
     "backend": "cd backend && npm start",
     "frontend": "cd frontend && npm run dev",
     "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
     "db:start": "mongod --port 27018 --dbpath ./database_new"
-  },
-  "devDependencies": {
-    "concurrently": "^8.2.2"
-  },
-  "dependencies": {
-    "gsap": "^3.14.2"
   }
 }
