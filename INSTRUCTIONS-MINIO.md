@@ -23,14 +23,23 @@ It effectively outputs dynamically signed HLS files so users NEVER observe the r
 
 ## 🔥 Running MinIO Locally
 
-To make this work locally without AWS, spin up a MinIO Docker instance if you haven't already:
+To make this work locally without AWS, spin up a MinIO Docker instance:
 
-1. **Start MinIO Docker Container:**
-```bash
-docker run -p 9000:9000 -p 9001:9001 -e "MINIO_ROOT_USER=minioadmin" -e "MINIO_ROOT_PASSWORD=minioadmin" minio/minio server /data --console-address ":9001"
-```
-2. **Setup Buckets**: Navigate to `http://localhost:9001` (Admin Username: `minioadmin` // Password: `minioadmin`).
-3. **Create**: Hit the **Buckets** tab, create one named exactly `videolearn`.
-4. Leave it as completely `Private`. You don't need to configure public policies because our backend controller completely presigns URLs handling authorization for you!
+1. **Start MinIO via Docker Compose:**
+   The `docker-compose.yml` file is configured to start MinIO and automatically create the `videolearn` bucket for you.
+   ```bash
+   docker compose up -d
+   ```
+
+2. **Access the Dashboard**: Navigate to `http://localhost:9001`
+   - **Username**: `minioadmin`
+   - **Password**: `minioadmin`
+
+3. **Bucket Verification**:
+   The `videolearn` bucket is created automatically on startup by the `createbuckets` helper container. You can verify it by clicking the **Buckets** tab in the dashboard.
+
+4. **Persistence**:
+   Data is stored in a persistent Docker volume named `minio_data`, so your videos will remain available even if the containers are removed.
 
 That's it! Reboot your Express node process and test out the end-to-end MinIO pipeline uploads!
+
