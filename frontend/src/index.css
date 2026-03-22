@@ -38,36 +38,48 @@
     --ring: oklch(0.58 0.18 255);
 
     --radius: 0.75rem;
+
+    /* Cosmic Curator Light Tokens */
+    --cosmic-primary: #0061a9;
+    --cosmic-secondary: #7445b2;
+    --cosmic-tertiary: #006a60;
+    --cosmic-bg: #fdfcff;
   }
 
   .dark {
-    --background: oklch(0.12 0.015 240);
-    --foreground: oklch(0.98 0.005 240);
+    --background: #0b0e14;
+    --foreground: #ecedf6;
 
-    --card: oklch(0.15 0.02 245);
-    --card-foreground: oklch(0.98 0.005 240);
+    --card: #161a21;
+    --card-foreground: #ecedf6;
 
-    --popover: oklch(0.15 0.02 245);
-    --popover-foreground: oklch(0.98 0.005 240);
+    --popover: #161a21;
+    --popover-foreground: #ecedf6;
 
-    --primary: oklch(0.65 0.2 255);
-    --primary-foreground: oklch(0.1 0.02 240);
+    --primary: #70b1ff;
+    --primary-foreground: #002f58;
 
-    --secondary: oklch(0.2 0.03 245);
-    --secondary-foreground: oklch(0.98 0.005 240);
+    --secondary: #bc87fe;
+    --secondary-foreground: #340064;
 
-    --muted: oklch(0.2 0.03 245);
-    --muted-foreground: oklch(0.7 0.02 240);
+    --muted: #1c2028;
+    --muted-foreground: #a9abb3;
 
-    --accent: oklch(0.25 0.05 255);
-    --accent-foreground: oklch(0.98 0.005 240);
+    --accent: #22262f;
+    --accent-foreground: #ecedf6;
 
-    --destructive: oklch(0.5 0.15 25);
-    --destructive-foreground: oklch(0.98 0.005 240);
+    --destructive: #ff6e84;
+    --destructive-foreground: #490013;
 
-    --border: oklch(0.25 0.02 240);
-    --input: oklch(0.25 0.02 240);
-    --ring: oklch(0.65 0.2 255);
+    --border: #45484f;
+    --input: #22262f;
+    --ring: #70b1ff;
+
+    /* Cosmic Curator Dark Tokens */
+    --cosmic-primary: #70b1ff;
+    --cosmic-secondary: #bc87fe;
+    --cosmic-tertiary: #a0fff0;
+    --cosmic-bg: #0b0e14;
   }
 
   * {
@@ -84,7 +96,8 @@
 /* Default (LIGHT MODE) → BLUE ICONS */
 svg.lucide {
   stroke: currentColor;
-  color: hsl(var(--primary)); /* 🔵 Blue */
+  color: hsl(var(--primary));
+  /* 🔵 Blue */
   transition: color 0.2s ease, stroke 0.2s ease;
 }
 
@@ -130,7 +143,11 @@ button:hover .text-destructive svg.lucide {
 
 /* ───────────────── THEME TOKENS (SHADCN) ───────────────── */
 @theme inline {
+  --radius: 0.75rem;
+
   --font-sans: 'Geist Variable', 'Inter', sans-serif;
+  --font-headline: 'Plus Jakarta Sans', sans-serif;
+  --font-body: 'Manrope', sans-serif;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -151,8 +168,11 @@ button:hover .text-destructive svg.lucide {
   --color-input: var(--input);
   --color-ring: var(--ring);
 
-  --radius: 0.75rem;
+  --color-cosmic-primary: var(--cosmic-primary);
+  --color-cosmic-secondary: var(--cosmic-secondary);
+  --color-cosmic-bg: var(--cosmic-bg);
 }
+
 /* ───────── GLASS & NEON EFFECTS ───────── */
 @layer utilities {
   .glass {
@@ -161,12 +181,33 @@ button:hover .text-destructive svg.lucide {
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
   }
-  
+
   .glass-dark {
     background: rgba(15, 23, 42, 0.4);
     backdrop-filter: blur(12px);
     border: 1px solid rgba(30, 41, 59, 0.5);
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+  }
+
+  .glass-panel {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+  }
+
+  .dark .glass-panel {
+    background: rgba(22, 26, 33, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .cosmic-glow {
+    position: absolute;
+    width: 400px;
+    height: 400px;
+    background: var(--cosmic-primary);
+    filter: blur(120px);
+    opacity: 0.15;
+    z-index: -1;
   }
 
   .neon-indigo {
@@ -178,17 +219,29 @@ button:hover .text-destructive svg.lucide {
   }
 
   .text-gradient {
-    background: linear-gradient(to right, #818cf8, #a78bfa);
+    background: linear-gradient(135deg, var(--cosmic-primary), var(--cosmic-secondary));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+  }
+
+  .bg-cosmic-gradient {
+    background: linear-gradient(135deg, var(--cosmic-primary), var(--cosmic-secondary));
   }
 }
 
 /* ───────── ANIMATIONS ───────── */
 @keyframes float {
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-  100% { transform: translateY(0px); }
+  0% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+
+  100% {
+    transform: translateY(0px);
+  }
 }
 
 .animate-float {
