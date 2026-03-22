@@ -3,11 +3,12 @@ import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   ArrowLeft, ChevronRight, ChevronDown, CheckCircle2, PlayCircle, SkipForward,
-  Clock, List, X, PlaySquare, Layers, ShieldCheck
+  Clock, List, X, PlaySquare, Layers, ShieldCheck, FileText, Link as LinkIcon, Download
 } from 'lucide-react'
+import { toast } from 'sonner'
 import videojs from 'video.js'
 import 'video.js/dist/video-js.css'
-import { studentVideos, courses, watchProgress } from '@/student/services/studentService'
+import { studentVideos, courses, watchProgress, lectureService } from '@/student/services/studentService'
 import type { Video } from '@/student/services/studentService'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
@@ -423,18 +424,51 @@ export default function WatchPage() {
                         {isExpanded && (
                           <div className="pl-9 space-y-1 mt-1 border-l ml-3.5 border-dashed border-muted-foreground/20">
                             {mod.lectures.map((lec) => {
-                              if (lec.type !== 'video') return null
-                              const v = typeof lec.videoId === 'object' && lec.videoId ? lec.videoId as Video : null
-                              if (!v) return null
+                              if (lec.type === 'video') {
+                                const v = typeof lec.videoId === 'object' && lec.videoId ? lec.videoId as Video : null
+                                if (!v) return null
+
+                                return (
+                                  <SidebarVideoItem
+                                    key={v.id}
+                                    video={v}
+                                    isActive={v.id === videoId}
+                                    isCompleted={progressMap[v.id]?.completed || false}
+                                    onClick={() => navigate(`/student/watch/${v.id}?course=${courseId}`)}
+                                  />
+                                )
+                              }
 
                               return (
-                                <SidebarVideoItem
-                                  key={v.id}
-                                  video={v}
-                                  isActive={v.id === videoId}
-                                  isCompleted={progressMap[v.id]?.completed || false}
-                                  onClick={() => navigate(`/student/watch/${v.id}?course=${courseId}`)}
-                                />
+                                <button
+                                  key={lec.id || (lec as any)._id}
+                                  onClick={async () => {
+                                    const lid = (lec.id || (lec as any)._id) as string;
+                                    if (!lid) return toast.error('Lecture ID missing');
+                                    try {
+                                      const url = await lectureService.getResourceUrl(lid);
+                                      if (!url) throw new Error('No URL returned from server');
+                                      window.open(url, '_blank');
+                                    } catch (error) {
+                                      console.error('Resource download error:', error);
+                                      toast.error('Failed to access resource');
+                                    }
+                                  }}
+                                  className={cn(
+                                    'w-full flex items-center gap-3 p-2.5 rounded-xl text-left transition-all border border-transparent hover:bg-muted/80 group/res'
+                                  )}
+                                >
+                                  <div className="w-14 h-9 rounded-lg bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20">
+                                    {lec.type === 'material' ? <FileText className="w-4 h-4 text-emerald-500" /> : <LinkIcon className="w-4 h-4 text-emerald-500" />}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-xs font-semibold line-clamp-2 leading-tight tracking-tight text-foreground/80">
+                                      {lec.title}
+                                    </p>
+                                    <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest mt-0.5">{lec.resourceName || 'Resource'}</p>
+                                  </div>
+                                  <Download className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover/res:opacity-100 transition-opacity" />
+                                </button>
                               )
                             })}
                           </div>

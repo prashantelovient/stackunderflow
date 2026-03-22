@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { courseService, moduleService, lectureService, videoService, categoryService } from '@/admin/services'
+import { courseService, moduleService, lectureService, videoService, categoryService, noteService } from '@/admin/services'
 import { PageHeader, Badge, Spinner, Button as AdminButton, Input, Textarea, Select } from '@/admin/components/ui'
 import { ConfirmModal, Modal } from '@/admin/components/Modals'
 import { toast, ToastContainer } from '@/admin/components/Toast'
@@ -71,6 +71,7 @@ export default function InstructorCoursesPage() {
     const { data: courses = [], isLoading } = useQuery<Course[]>({ queryKey: ['courses'], queryFn: courseService.getAll })
     const { data: allVideos = [] } = useQuery<VideoItem[]>({ queryKey: ['videos'], queryFn: videoService.getAll })
     const { data: categories = [] } = useQuery<any[]>({ queryKey: ['categories'], queryFn: categoryService.getAll })
+    const { data: allNotes = [] } = useQuery<any[]>({ queryKey: ['instructor-notes'], queryFn: noteService.getAll })
 
     const toggleCourse = (id: string) => {
         setExpandedCourses(prev => {
@@ -438,11 +439,32 @@ export default function InstructorCoursesPage() {
                                 placeholder="Select video..."
                             />
                         ) : (
-                            <Input label="Resource Name" value={lectureForm.resourceName} onChange={(e) => setLectureForm(f => ({ ...f, resourceName: e.target.value }))} placeholder="e.g. PDF" />
+                            <div className="flex flex-col gap-4">
+                                <Select
+                                    label="Select from Notes"
+                                    value={''}
+                                    onChange={(val) => {
+                                        const selectedNote = allNotes.find(n => (n._id || n.id) === val);
+                                        if (selectedNote) {
+                                            setLectureForm(f => ({
+                                                ...f,
+                                                resourceUrl: selectedNote.fileUrl,
+                                                resourceName: selectedNote.title
+                                            }))
+                                        }
+                                    }}
+                                    options={(allNotes || []).map(n => ({ value: (n._id || n.id) || '', label: n.title }))}
+                                    placeholder="Pick from repository..."
+                                />
+                                <Input label="Resource Name" value={lectureForm.resourceName} onChange={(e) => setLectureForm(f => ({ ...f, resourceName: e.target.value }))} placeholder="e.g. PDF" />
+                            </div>
                         )}
                     </div>
                     {lectureForm.type !== 'video' && (
-                        <Input label="Resource URL" value={lectureForm.resourceUrl} onChange={(e) => setLectureForm(f => ({ ...f, resourceUrl: e.target.value }))} placeholder="https://..." />
+                        <div className="space-y-4">
+                            <Input label="Resource URL (or S3 Key)" value={lectureForm.resourceUrl} onChange={(e) => setLectureForm(f => ({ ...f, resourceUrl: e.target.value }))} placeholder="https://..." />
+                            <p className="text-[10px] text-muted-foreground uppercase tracking-widest px-1">Tip: You can upload files in the Notes section and pick them above.</p>
+                        </div>
                     )}
                     <div className="flex justify-end gap-3 pt-6 border-t border-slate-800/50">
                         <AdminButton variant="ghost" onClick={() => setLectureModalOpen(false)}>Cancel</AdminButton>

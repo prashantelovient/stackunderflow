@@ -18,11 +18,11 @@ export const studentAuthMiddleware = (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    
-    if (decoded.type !== 'student') {
+
+    if (decoded.role !== 'student') {
       return res.status(403).json({ message: 'Student access required' });
     }
-    
+
     req.student = decoded;
     next();
   } catch (error) {

@@ -25,6 +25,7 @@ import InstructorVideosPage from '@/instructor/pages/VideosPage'
 import InstructorStudentsPage from '@/instructor/pages/StudentsPage'
 import InstructorEnrollmentsPage from '@/instructor/pages/EnrollmentsPage'
 import InstructorAnalyticsPage from '@/instructor/pages/AnalyticsPage'
+import InstructorNotesPage from '@/instructor/pages/NotesPage'
 import InstructorSettingsPage from '@/instructor/pages/InstructorSettingsPage'
 
 
@@ -148,6 +149,7 @@ export default function AppRouter() {
           <Route path="dashboard" element={<InstructorDashboardPage />} />
           <Route path="courses" element={<InstructorCoursesPage />} />
           <Route path="videos" element={<InstructorVideosPage />} />
+          <Route path="notes" element={<InstructorNotesPage />} />
           <Route path="students" element={<InstructorStudentsPage />} />
           <Route path="enrollments" element={<InstructorEnrollmentsPage />} />
           <Route path="analytics" element={<InstructorAnalyticsPage />} />

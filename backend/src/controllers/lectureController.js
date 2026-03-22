@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { Lecture } from '../models/index.js';
+import { getPresignedDownloadUrl } from '../utils/minioClient.js';
 
 export const createLecture = async (req, res, next) => {
     try {
@@ -106,6 +107,30 @@ export const deleteLecture = async (req, res, next) => {
         await Lecture.findByIdAndDelete(req.params.id).exec();
         res.json({ message: 'Lecture deleted successfully' });
     } catch (error) {
+        next(error);
+    }
+};
+
+export const getLectureResourceUrl = async (req, res, next) => {
+    try {
+        const lecture = await Lecture.findById(req.params.id).exec();
+        if (!lecture) return res.status(404).json({ message: 'Lecture not found' });
+
+        if (!lecture.resourceUrl) {
+            return res.status(400).json({ message: 'Lecture has no resource attached' });
+        }
+
+        let downloadUrl = lecture.resourceUrl;
+
+        // If it looks like an S3 key (doesn't start with http/https), get presigned URL
+        if (!lecture.resourceUrl.startsWith('http')) {
+            downloadUrl = await getPresignedDownloadUrl(lecture.resourceUrl);
+        }
+
+        console.log(`Generating resource URL for key: ${lecture.resourceUrl} -> ${downloadUrl}`);
+        res.json({ downloadUrl });
+    } catch (error) {
+        console.error('getLectureResourceUrl error:', error);
         next(error);
     }
 };

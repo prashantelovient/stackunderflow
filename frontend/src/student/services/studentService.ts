@@ -142,6 +142,13 @@ export const studentVideos = {
   },
 }
 
+export const lectureService = {
+  getResourceUrl: async (lectureId: string): Promise<string> => {
+    const res = await studentApiClient.get<{ downloadUrl: string }>(`/lectures/${lectureId}/resource`)
+    return res.data.downloadUrl
+  }
+}
+
 export const studentBlogs = {
   getAll: async (): Promise<Blog[]> => {
     const res = await studentApiClient.get('/blogs')

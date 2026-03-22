@@ -49,6 +49,7 @@ export * as lectureService from './lectureService'
 export * as blogService from './blogService'
 export * as categoryService from './categoryService'
 export * as storageService from './storageService'
+export * as noteService from './noteService'
 
 
 export const MOCK_ANALYTICS = {

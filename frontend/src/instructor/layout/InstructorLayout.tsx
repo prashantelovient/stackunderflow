@@ -14,7 +14,8 @@ import {
     ExternalLink,
     Plus,
     FileVideo,
-    ShieldCheck
+    ShieldCheck,
+    FileText
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -35,6 +36,7 @@ const sidebarItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/instructor/dashboard' },
     { icon: BookOpen, label: 'My Courses', path: '/instructor/courses' },
     { icon: FileVideo, label: 'Videos', path: '/instructor/videos' },
+    { icon: FileText, label: 'Notes', path: '/instructor/notes' },
     { icon: Users, label: 'Students', path: '/instructor/students' },
     { icon: ShieldCheck, label: 'Enrollments', path: '/instructor/enrollments' },
     { icon: MessageSquare, label: 'Messages', path: '/instructor/messages' },
