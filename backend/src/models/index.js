@@ -10,3 +10,4 @@ export { default as Blog } from './Blog.js';
 export { default as Note } from './Note.js';
 export { default as WatchProgress } from './WatchProgress.js';
 export { default as Enrollment } from './Enrollment.js';
+export { default as Purchase } from './Purchase.js';

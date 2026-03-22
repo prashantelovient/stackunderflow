@@ -16,10 +16,10 @@ import { cn } from '@/lib/utils'
 
 interface LectureItem { id: string; title: string; description: string; type: string; videoId: any; resourceUrl: string | null; resourceName: string | null; order: number }
 interface ModuleItem { id: string; title: string; description: string; order: number; lectures: LectureItem[] }
-interface Course { id: string; title: string; description: string; thumbnail: string | null; categoryId: string; category?: string; moduleCount: number; lectureCount: number; modules?: ModuleItem[] }
+interface Course { id: string; title: string; description: string; thumbnail: string | null; categoryId: string; category?: string; moduleCount: number; lectureCount: number; modules?: ModuleItem[]; price: number }
 interface VideoItem { id: string; title: string }
 
-const emptyCourseForm = { title: '', description: '', categoryId: '', thumbnail: '' }
+const emptyCourseForm = { title: '', description: '', categoryId: '', thumbnail: '', price: 0 }
 const emptyModuleForm = { title: '', description: '' }
 const emptyLectureForm = { title: '', description: '', type: 'video', videoId: '', resourceUrl: '', resourceName: '' }
 
@@ -96,7 +96,8 @@ export default function InstructorCoursesPage() {
             title: c.title,
             description: c.description,
             categoryId: (c as any).categoryId || '',
-            thumbnail: c.thumbnail || ''
+            thumbnail: c.thumbnail || '',
+            price: c.price || 0
         });
         setThumbnailFile(null);
         setThumbnailPreview(getThumbnailUrl(c.thumbnail));
@@ -109,6 +110,7 @@ export default function InstructorCoursesPage() {
             formData.append('title', courseForm.title)
             formData.append('description', courseForm.description)
             formData.append('categoryId', courseForm.categoryId)
+            formData.append('price', courseForm.price.toString())
 
             if (thumbnailFile) {
                 formData.append('thumbnail', thumbnailFile)
@@ -231,8 +233,8 @@ export default function InstructorCoursesPage() {
                                     <span className="text-sm font-bold text-foreground">{course.moduleCount || 0}</span>
                                 </div>
                                 <div className="flex flex-col items-center px-4 py-2 bg-background/40 rounded-2xl border border-border/50">
-                                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Lectures</span>
-                                    <span className="text-sm font-bold text-foreground">{course.lectureCount || 0}</span>
+                                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Price</span>
+                                    <span className="text-sm font-black text-emerald-400">₹{course.price || 0}</span>
                                 </div>
                             </div>
 
@@ -358,7 +360,8 @@ export default function InstructorCoursesPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <Input label="Course Title" value={courseForm.title} onChange={(e) => setCourseForm(f => ({ ...f, title: e.target.value }))} placeholder="Enter title..." />
                         <Select label="Category" value={courseForm.categoryId} onChange={(val) => setCourseForm(f => ({ ...f, categoryId: val }))}
-                            options={categories.map(c => ({ value: c.id, label: c.name }))} placeholder="Select category..." />
+                            options={categories.map((c: any) => ({ value: c.id, label: c.name }))} placeholder="Select category..." />
+                        <Input label="Price (₹)" type="number" value={courseForm.price} onChange={(e) => setCourseForm(f => ({ ...f, price: Number(e.target.value) }))} placeholder="Set price (0 for free)..." />
                     </div>
                     <Textarea label="Description" value={courseForm.description} onChange={(e) => setCourseForm(f => ({ ...f, description: e.target.value }))} placeholder="Enter description..." />
 

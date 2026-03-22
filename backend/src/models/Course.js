@@ -7,6 +7,7 @@ const CourseSchema = new mongoose.Schema({
     thumbnail: { type: String, default: null },
     categoryId: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', default: null },
     instructorId: { type: mongoose.Schema.Types.ObjectId, ref: 'Instructor', default: null },
+    price: { type: Number, default: 0 },
     createdAt: { type: Date, default: Date.now },
 });
 

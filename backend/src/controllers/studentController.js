@@ -126,6 +126,8 @@ export const activateStudent = async (req, res, next) => {
 import Enrollment from '../models/Enrollment.js';
 import Course from '../models/Course.js';
 
+import Purchase from '../models/Purchase.js';
+
 export const enrollCourse = async (req, res, next) => {
   try {
     const studentId = req.user.id;
@@ -137,6 +139,17 @@ export const enrollCourse = async (req, res, next) => {
 
     const course = await Course.findById(courseId);
     if (!course) return res.status(404).json({ message: 'Course not found' });
+
+    // Check if purchase is required
+    if ((course.price || 0) > 0) {
+      const purchase = await Purchase.findOne({ userId: studentId, courseId });
+      if (!purchase) {
+        return res.status(403).json({ 
+          message: 'Decryption Error: Course purchase required before initialization.',
+          requiresPurchase: true 
+        });
+      }
+    }
 
     // Check for existing enrollment/request
     const existing = await Enrollment.findOne({ studentId, courseId });

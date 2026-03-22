@@ -4,6 +4,7 @@ import { uploadVideo, createVideoFromS3, getVideos, getVideoById, updateVideo, d
 import { authMiddleware } from '../middleware/authMiddleware.js';
 import { upload } from '../utils/localUpload.js';
 
+import { requirePurchase } from '../middleware/purchaseMiddleware.js';
 const router = express.Router();
 
 router.use(authMiddleware);
@@ -18,7 +19,7 @@ router.post('/s3-create', createVideoFromS3);
 
 
 router.get('/', getVideos);
-router.get('/:id', getVideoById);
+router.get('/:id', (req, res, next) => { req.params.videoId = req.params.id; next(); }, requirePurchase, getVideoById);
 router.put(
   '/:id',
   upload.fields([{ name: 'video', maxCount: 1 }, { name: 'thumbnail', maxCount: 1 }]),

@@ -89,6 +89,8 @@ export interface Course {
   lectureCount: number
   isEnrolled: boolean
   isPending: boolean
+  isPurchased: boolean
+  price: number
   modules?: ModuleItem[]
   createdAt: string
 }

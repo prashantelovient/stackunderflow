@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { toast, ToastContainer } from '@/admin/components/Toast'
 import { courses, watchProgress } from '@/student/services/studentService'
+import { purchaseService } from '@/student/services/purchaseService'
 import type { Video, LectureItem, ModuleItem } from '@/student/services/studentService'
 import { cn } from '@/utils'
 
@@ -161,7 +162,22 @@ export default function CourseDetailPage() {
             qc.invalidateQueries({ queryKey: ['student-courses'] })
             toast.success('Enrollment Established: Content nodes unlocked.')
         },
-        onError: () => toast.error('Enrollment Failed: Security protocol rejection.')
+        onError: (err: any) => {
+             const msg = err.response?.data?.message || 'Enrollment Failed: Security protocol rejection.'
+             toast.error(msg)
+        }
+    })
+
+    const buyMutation = useMutation({
+        mutationFn: () => purchaseService.buyCourse(id!),
+        onSuccess: (data) => {
+            qc.invalidateQueries({ queryKey: ['student-course', id] })
+            toast.success(data.message || 'Transaction Authorized: Course asset linked to your account.')
+        },
+        onError: (err: any) => {
+            const msg = err.response?.data?.message || 'Transaction Terminated: Connection to vault failed.'
+            toast.error(msg)
+        }
     })
 
     const { data: progressList } = useQuery({
@@ -284,6 +300,17 @@ export default function CourseDetailPage() {
                                 <span>{completedCount} completed</span>
                             </div>
                         )}
+                        {(course.price || 0) > 0 && (
+                            <div className="flex items-center gap-2 text-white/90 text-sm font-black tracking-widest bg-emerald-500/20 px-3 py-1.5 rounded-xl border border-emerald-400/30">
+                                <Zap className="w-4 h-4 text-emerald-400 fill-emerald-400/20" />
+                                <span>₹{course.price}</span>
+                            </div>
+                        )}
+                        {course.isPurchased && (
+                            <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30 font-black tracking-widest uppercase text-[10px] px-3 py-1 rounded-xl">
+                                Purchased
+                            </Badge>
+                        )}
                     </div>
 
                     {course.isEnrolled && allVideoLectures.length > 0 && (
@@ -324,14 +351,26 @@ export default function CourseDetailPage() {
                         </div>
                     ) : (
                         <div className="mt-10 flex flex-col sm:flex-row gap-4">
-                            <Button
-                                onClick={() => enrollMutation.mutate()}
-                                disabled={enrollMutation.isPending}
-                                className="h-14 px-10 bg-indigo-500 text-white hover:bg-indigo-400 hover:scale-105 transition-all rounded-2xl font-black text-sm uppercase tracking-[0.15em] shadow-2xl shadow-indigo-500/30 border border-indigo-400/30"
-                            >
-                                {enrollMutation.isPending ? 'Syncing...' : 'Enroll in Course'}
-                                <Zap className="w-4 h-4 ml-3 fill-white/20" />
-                            </Button>
+                            {/* Purchase / Enrollment logic */}
+                            {(course.price > 0 && !course.isPurchased) ? (
+                                <Button
+                                    onClick={() => buyMutation.mutate()}
+                                    disabled={buyMutation.isPending}
+                                    className="h-14 px-10 bg-emerald-500 text-white hover:bg-emerald-400 hover:scale-105 transition-all rounded-2xl font-black text-sm uppercase tracking-[0.15em] shadow-2xl shadow-emerald-500/30 border border-emerald-400/30"
+                                >
+                                    {buyMutation.isPending ? 'Processing Payment...' : `Buy Course (₹${course.price})`}
+                                    <Zap className="w-4 h-4 ml-3 fill-white/20" />
+                                </Button>
+                            ) : (
+                                <Button
+                                    onClick={() => enrollMutation.mutate()}
+                                    disabled={enrollMutation.isPending}
+                                    className="h-14 px-10 bg-indigo-500 text-white hover:bg-indigo-400 hover:scale-105 transition-all rounded-2xl font-black text-sm uppercase tracking-[0.15em] shadow-2xl shadow-indigo-500/30 border border-indigo-400/30"
+                                >
+                                    {enrollMutation.isPending ? 'Syncing...' : 'Enroll in Course'}
+                                    <Zap className="w-4 h-4 ml-3 fill-white/20" />
+                                </Button>
+                            )}
                             <Button variant="outline" className="h-14 px-8 border-white/20 bg-white/5 backdrop-blur-md text-white hover:bg-white/10 rounded-2xl font-black text-sm uppercase tracking-widest">
                                 Watch Trailer
                             </Button>
@@ -342,38 +381,44 @@ export default function CourseDetailPage() {
 
             <ToastContainer />
 
+            {/* Purchase / Enrollment info message */}
             {!course.isEnrolled && (
                 <div className={cn(
-                    "rounded-3xl p-6 mb-10 flex flex-col md:flex-row items-center justify-between gap-6 animate-pulse border",
-                    course.isPending ? "bg-amber-500/5 border-amber-500/20" : "bg-indigo-500/5 border-indigo-500/20"
+                    "rounded-3xl p-6 mb-10 flex flex-col md:flex-row items-center justify-between gap-6 animate-pulse border shadow-lg",
+                    course.isPending ? "bg-amber-500/5 border-amber-500/20 shadow-amber-500/5" : 
+                    (course.price > 0 && !course.isPurchased) ? "bg-emerald-500/5 border-emerald-500/20 shadow-emerald-500/5" :
+                    "bg-indigo-500/5 border-indigo-500/20 shadow-indigo-500/5"
                 )}>
                     <div className="flex items-center gap-4">
                         <div className={cn(
-                            "w-12 h-12 rounded-2xl flex items-center justify-center",
-                            course.isPending ? "bg-amber-500/20" : "bg-indigo-500/20"
+                            "w-12 h-12 rounded-2xl flex items-center justify-center shadow-inner",
+                            course.isPending ? "bg-amber-500/20 shadow-amber-500/20" : 
+                            (course.price > 0 && !course.isPurchased) ? "bg-emerald-500/20 shadow-emerald-500/20" :
+                            "bg-indigo-500/20 shadow-indigo-500/20"
                         )}>
-                            {course.isPending ? <Clock className="w-6 h-6 text-amber-400" /> : <Lock className="w-6 h-6 text-indigo-400" />}
+                            {course.isPending ? <Clock className="w-6 h-6 text-amber-400" /> : 
+                             (course.price > 0 && !course.isPurchased) ? <Zap className="w-6 h-6 text-emerald-400" /> :
+                             <Lock className="w-6 h-6 text-indigo-400" />}
                         </div>
                         <div>
-                            <h4 className={cn("font-black tracking-tight uppercase text-xs", course.isPending ? "text-amber-400" : "text-white")}>
-                                {course.isPending ? 'Enrollment Pending' : 'Access Restricted'}
+                            <h4 className={cn("font-black tracking-tight uppercase text-xs mb-0.5", 
+                                course.isPending ? "text-amber-400" : 
+                                (course.price > 0 && !course.isPurchased) ? "text-emerald-400" :
+                                "text-white"
+                            )}>
+                                {course.isPending ? 'Enrollment Pending' : 
+                                 (course.price > 0 && !course.isPurchased) ? 'Course Locked: Purchase Required' :
+                                 'Course Encrypted: Enrollment Required'}
                             </h4>
-                            <p className="text-slate-400 text-sm">
+                            <p className="text-slate-400 text-sm leading-relaxed">
                                 {course.isPending
                                     ? 'Request transmitted. Instructor authorization is currently in progress.'
-                                    : 'Course binaries are encrypted. Enroll to initialize decryption protocols.'}
+                                    : (course.price > 0 && !course.isPurchased)
+                                    ? `This is a premium course (₹${course.price}). Unlock it now to initialize decryption protocols.`
+                                    : 'Course binaries are locked. Enroll to initialize decryption protocols and unlock content nodes.'}
                             </p>
                         </div>
                     </div>
-                    {!course.isPending && (
-                        <Button
-                            onClick={() => enrollMutation.mutate()}
-                            variant="ghost"
-                            className="text-indigo-400 hover:text-indigo-300 font-black text-[10px] uppercase tracking-widest"
-                        >
-                            Learn More About Enrollment →
-                        </Button>
-                    )}
                 </div>
             )}
 

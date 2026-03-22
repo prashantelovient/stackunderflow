@@ -22,6 +22,7 @@ import instructorRoutes from './src/routes/instructorRoutes.js';
 import storageRoutes from './src/routes/storageRoutes.js';
 import messageRoutes from './src/routes/messageRoutes.js';
 import noteRoutes from './src/routes/noteRoutes.js';
+import purchaseRoutes from './src/routes/purchaseRoutes.js';
 import { initChatSocket } from './src/socket/chatSocket.js';
 
 
@@ -55,6 +56,7 @@ app.use('/api/instructor', instructorRoutes);
 app.use('/api/storage', storageRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/notes', noteRoutes);
+app.use('/api/purchase', purchaseRoutes);
 
 
 /* Health Check */

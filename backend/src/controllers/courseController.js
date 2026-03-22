@@ -1,9 +1,9 @@
 import mongoose from 'mongoose';
-import { Course, Module, Lecture, Student, Enrollment, WatchProgress } from '../models/index.js';
+import { Course, Module, Lecture, Student, Enrollment, WatchProgress, Purchase } from '../models/index.js';
 
 export const createCourse = async (req, res, next) => {
     try {
-        const { title, description, categoryId } = req.body;
+        const { title, description, categoryId, price } = req.body;
         const thumbnailFile = req.file;
         const thumbnailPath = thumbnailFile ? `/thumbnails/${thumbnailFile.filename}` : req.body.thumbnail;
 
@@ -14,6 +14,7 @@ export const createCourse = async (req, res, next) => {
             description,
             thumbnail: thumbnailPath,
             categoryId: categoryObjectId,
+            price: Number(price) || 0,
             instructorId: req.user.role === 'instructor' ? req.user.id : (req.body.instructorId || null),
         });
 
@@ -49,6 +50,12 @@ export const getCourses = async (req, res, next) => {
             const enrollments = await Enrollment.find({ studentId: req.user.id });
             studentEnrolledCourses = enrollments.filter(e => e.status === 'approved').map(e => e.courseId.toString());
             pendingCourses = enrollments.filter(e => e.status === 'pending').map(e => e.courseId.toString());
+            const purchases = await Purchase.find({ userId: req.user.id });
+            const purchasedCourseIds = purchases.map(p => p.courseId.toString());
+            
+            courses.forEach(c => {
+                c._isPurchased = purchasedCourseIds.includes(c._id.toString());
+            });
         }
 
         const formatted = courses.map(c => {
@@ -69,6 +76,7 @@ export const getCourses = async (req, res, next) => {
                 ...obj,
                 isEnrolled,
                 isPending,
+                isPurchased: c._isPurchased || false,
 
                 categoryId: c.categoryId ? (c.categoryId.id || c.categoryId._id?.toString?.()) : null,
                 category: c.categoryId ? c.categoryId.name : 'Uncategorized',
@@ -111,12 +119,15 @@ export const getCourseById = async (req, res, next) => {
         // Check enrollment if current user is a student
         let isEnrolled = false;
         let isPending = false;
+        let isPurchased = false; // Initialize isPurchased
         if (req.user.role === 'student' || !req.user.role) {
             const enrollment = await Enrollment.findOne({ studentId: req.user.id, courseId: req.params.id });
             if (enrollment) {
                 isEnrolled = enrollment.status === 'approved';
                 isPending = enrollment.status === 'pending';
             }
+            const purchase = await Purchase.findOne({ userId: req.user.id, courseId: req.params.id });
+            isPurchased = !!purchase;
         } else if (req.user.role === 'admin' || (req.user.role === 'instructor' && c.instructorId?.toString() === req.user.id)) {
             isEnrolled = true;
         }
@@ -125,6 +136,7 @@ export const getCourseById = async (req, res, next) => {
             ...obj,
             isEnrolled,
             isPending,
+            isPurchased: isPurchased || false,
 
             categoryId: c.categoryId ? (c.categoryId.id || c.categoryId._id?.toString?.()) : null,
             category: c.categoryId ? c.categoryId.name : 'Uncategorized',
@@ -156,13 +168,14 @@ export const getCourseById = async (req, res, next) => {
 
 export const updateCourse = async (req, res, next) => {
     try {
-        const { title, description, categoryId } = req.body;
+        const { title, description, categoryId, price } = req.body;
         const thumbnailFile = req.file;
 
         const updateData = {
             title,
             description,
             categoryId: categoryId && mongoose.Types.ObjectId.isValid(categoryId) ? categoryId : null,
+            price: price !== undefined ? Number(price) : undefined,
         };
 
         if (thumbnailFile) {
