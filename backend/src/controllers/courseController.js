@@ -38,7 +38,7 @@ export const getCourses = async (req, res, next) => {
                 path: 'modules',
                 populate: {
                     path: 'lectures',
-                    populate: { path: 'videoId', select: 'title thumbnail duration status' },
+                    populate: { path: 'videoId', select: 'title thumbnail status' },
                 },
             })
             .exec();
@@ -97,7 +97,7 @@ export const getCourseById = async (req, res, next) => {
                 populate: {
                     path: 'lectures',
                     options: { sort: { order: 1 } },
-                    populate: { path: 'videoId', select: 'title thumbnail duration status videoPath' },
+                    populate: { path: 'videoId', select: 'title thumbnail status videoPath' },
                 },
             })
             .exec();
@@ -141,7 +141,6 @@ export const getCourseById = async (req, res, next) => {
                     videoId: l.videoId ? {
                         title: l.videoId.title,
                         thumbnail: l.videoId.thumbnail,
-                        duration: l.videoId.duration,
                         status: l.videoId.status,
                         // No videoPath
                     } : null

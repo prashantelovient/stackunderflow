@@ -4,7 +4,7 @@ import { processVideoToHLS } from '../workers/videoProcessor.js';
 
 export const uploadVideo = async (req, res, next) => {
   try {
-    const { title, description, duration, courseId } = req.body;
+    const { title, description, courseId } = req.body;
 
     const videoFile = req.files['video'] ? req.files['video'][0] : null;
     const thumbnailFile = req.files['thumbnail'] ? req.files['thumbnail'][0] : null;
@@ -23,7 +23,6 @@ export const uploadVideo = async (req, res, next) => {
       description,
       videoPath: '', // Will be updated by the worker
       thumbnail: thumbnailPath,
-      duration: duration ? parseInt(duration, 10) : null,
       courseId: courseObjectId,
       instructorId: req.user.role === 'instructor' ? req.user.id : (req.body.instructorId || null),
       status: 'processing',
@@ -40,7 +39,7 @@ export const uploadVideo = async (req, res, next) => {
 
 export const createVideoFromS3 = async (req, res, next) => {
   try {
-    const { title, description, duration, courseId, s3Key, thumbnail } = req.body;
+    const { title, description, courseId, s3Key, thumbnail } = req.body;
 
     if (!s3Key) {
       return res.status(400).json({ message: 's3Key is required for direct upload' });
@@ -53,7 +52,6 @@ export const createVideoFromS3 = async (req, res, next) => {
       description,
       videoPath: '', // Will be updated by the worker
       thumbnail: thumbnail, // This might be an S3 key or URL too
-      duration: duration ? parseInt(duration, 10) : null,
       courseId: courseObjectId,
       instructorId: req.user.role === 'instructor' ? req.user.id : (req.body.instructorId || null),
       status: 'processing',
@@ -86,7 +84,6 @@ export const getVideos = async (req, res, next) => {
       courseId: v.courseId ? (v.courseId.id || v.courseId._id?.toString?.()) : null,
       courseTitle: v.courseId ? v.courseId.title : 'No Course',
       uploadDate: v.createdAt,
-      duration: v.duration ? `${Math.floor(v.duration / 60)}:${(v.duration % 60).toString().padStart(2, '0')}` : '0:00',
     }));
 
     res.json(formatted);
@@ -110,7 +107,6 @@ export const getVideoById = async (req, res, next) => {
       courseId: v.courseId ? (v.courseId.id || v.courseId._id?.toString?.()) : null,
       courseTitle: v.courseId ? v.courseId.title : 'No Course',
       uploadDate: v.createdAt,
-      duration: v.duration ? `${Math.floor(v.duration / 60)}:${(v.duration % 60).toString().padStart(2, '0')}` : '0:00',
     };
 
     res.json(formatted);
@@ -121,7 +117,7 @@ export const getVideoById = async (req, res, next) => {
 
 export const updateVideo = async (req, res, next) => {
   try {
-    const { title, description, duration, courseId } = req.body;
+    const { title, description, courseId } = req.body;
 
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       return res.status(404).json({ message: 'Video not found' });
@@ -132,7 +128,6 @@ export const updateVideo = async (req, res, next) => {
     const updateData = {
       title,
       description,
-      duration: duration ? parseInt(duration, 10) : undefined,
       courseId: courseObjectId,
     };
 

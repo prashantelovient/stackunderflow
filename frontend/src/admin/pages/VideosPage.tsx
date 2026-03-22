@@ -18,10 +18,10 @@ import {
 } from "@/admin/components/dropdown-menu"
 import { MoreVertical } from "lucide-react"
 
-interface VideoItem { id: string; title: string; description: string; thumbnail: string | null; courseId: string; courseTitle: string; duration: string; uploadDate: string }
+interface VideoItem { id: string; title: string; description: string; thumbnail: string | null; courseId: string; courseTitle: string; uploadDate: string }
 interface CourseItem { id: string; title: string }
 
-const emptyForm = { title: '', description: '', duration: '', courseId: '' }
+const emptyForm = { title: '', description: '', courseId: '' }
 
 const getThumbnailUrl = (path: string | null) => {
   if (!path) return null
@@ -62,7 +62,7 @@ export default function VideosPage() {
   }
   const openEdit = (v: VideoItem) => {
     setEditItem(v);
-    setForm({ title: v.title, description: v.description, duration: v.duration, courseId: v.courseId, thumbnail: v.thumbnail || '' } as any);
+    setForm({ title: v.title, description: v.description, courseId: v.courseId, thumbnail: v.thumbnail || '' } as any);
     setThumbnailFile(null);
     setVideoFile(null);
     setThumbnailPreview(getThumbnailUrl(v.thumbnail));
@@ -177,16 +177,7 @@ export default function VideosPage() {
         </Badge>
       )
     },
-    {
-      accessorKey: 'duration',
-      header: 'Temporal Length',
-      cell: ({ row }) => (
-        <div className="flex items-center gap-1.5 text-xs font-black font-mono text-muted-foreground">
-          <Clock className="w-3.5 h-3.5" />
-          {row.original.duration}
-        </div>
-      )
-    },
+
     {
       accessorKey: 'uploadDate',
       header: 'Registry Date',
@@ -261,7 +252,7 @@ export default function VideosPage() {
         action={
           <Button onClick={openNew} className="rounded-xl shadow-lg shadow-primary/20 font-bold text-xs px-6 py-6 border-none bg-primary hover:scale-[1.02] transition-transform">
             <UploadCloud className="w-5 h-5 mr-3" />
-            Initialize Uplink
+            Upload Video
           </Button>
         }
       />
@@ -278,8 +269,7 @@ export default function VideosPage() {
           <Input label="Strategic Title" value={form.title} onChange={(e) => setForm(f => ({ ...f, title: e.target.value }))} placeholder="Enter content identifier..." />
           <Textarea label="Executive Summary" value={form.description} onChange={(e) => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Brief description of segments..." />
 
-          <div className="grid grid-cols-2 gap-4">
-            <Input label="Registry Duration" value={form.duration} onChange={(e) => setForm(f => ({ ...f, duration: e.target.value }))} placeholder="e.g. 45:30" />
+          <div className="grid grid-cols-1 gap-4">
             <Select label="Curriculum Parent" value={form.courseId} onChange={(val) => setForm(f => ({ ...f, courseId: val }))}
               options={courses.map((c) => ({ value: c.id, label: c.title }))} placeholder="Assign node..." />
           </div>
@@ -328,7 +318,7 @@ export default function VideosPage() {
                   const file = e.target.files?.[0]
                   if (file) setVideoFile(file)
                 }} className="hidden" />
-                <span className="text-[10px] font-black uppercase tracking-widest bg-foreground text-background px-4 py-2 rounded-xl hover:opacity-80 transition-all">Choose HLS Source</span>
+                <span className="text-[10px] font-black uppercase tracking-widest bg-foreground text-background px-4 py-2 rounded-xl hover:opacity-80 transition-all">Select Video</span>
               </label>
               {videoFile ? (
                 <p className="text-[10px] font-mono font-bold text-emerald-500 uppercase">Ready: {videoFile.name} ({(videoFile.size / (1024 * 1024)).toFixed(2)} MB)</p>
@@ -341,7 +331,7 @@ export default function VideosPage() {
           <div className="flex justify-end gap-3 pt-6 border-t border-border/50">
             <Button variant="ghost" onClick={() => setModalOpen(false)} className="rounded-xl px-6 font-bold text-xs">DISCARD</Button>
             <Button loading={saveMutation.isPending} onClick={() => saveMutation.mutate()} className="rounded-xl px-8 shadow-lg shadow-primary/20 font-bold text-xs uppercase tracking-widest">
-              {editItem ? 'UPDATE CONFIG' : 'INITIALIZE ASSET'}
+              {editItem ? 'UPDATE CONFIG' : 'UPLOAD'}
             </Button>
           </div>
         </div>
@@ -388,10 +378,6 @@ export default function VideosPage() {
                   <Badge variant="outline" className="text-[9px] font-extrabold bg-primary/5 border-primary/20 text-primary uppercase tracking-widest">
                     {viewVideo?.courseTitle}
                   </Badge>
-                  <span className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-                    <Clock className="w-3.5 h-3.5" />
-                    {viewVideo?.duration}
-                  </span>
                 </div>
               </div>
               <Button variant="outline" size="sm" className="rounded-xl font-bold text-[10px] tracking-widest uppercase h-9">

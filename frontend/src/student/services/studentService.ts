@@ -54,7 +54,6 @@ export interface Video {
   description: string
   videoPath: string
   thumbnail: string | null
-  duration: string
   courseId: string | null
   courseTitle: string
   status: string

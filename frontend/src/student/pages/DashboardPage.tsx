@@ -120,8 +120,8 @@ function CourseCard({ course }: { course: Course }) {
   )
 }
 
-function VideoCard({ video, progress }: { video: Video; progress?: number }) {
-  const percent = progress ? Math.min(100, Math.round((progress / (parseInt(video.duration) || 1)) * 100)) : 0
+function VideoCard({ video }: { video: Video; progress?: number }) {
+  const percent = 0 // Duration removed, progress percentage unavailable
 
   return (
     <Link to={`/student/watch/${video.id}`} className="group block">
@@ -156,10 +156,7 @@ function VideoCard({ video, progress }: { video: Video; progress?: number }) {
               </div>
             )}
           </div>
-          <div className="flex-shrink-0 flex items-center gap-1 text-muted-foreground">
-            <Clock className="w-3.5 h-3.5" />
-            <span className="text-xs">{video.duration}</span>
-          </div>
+          <div></div>
         </div>
       </Card>
     </Link>

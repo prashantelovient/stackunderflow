@@ -38,7 +38,7 @@ export const getLecturesByModule = async (req, res, next) => {
 
         const lectures = await Lecture.find({ moduleId })
             .sort({ order: 1 })
-            .populate('videoId', 'title thumbnail duration status videoPath')
+            .populate('videoId', 'title thumbnail status videoPath')
             .exec();
 
         res.json(lectures);
@@ -54,7 +54,7 @@ export const getLectureById = async (req, res, next) => {
         }
 
         const lecture = await Lecture.findById(req.params.id)
-            .populate('videoId', 'title thumbnail duration status videoPath')
+            .populate('videoId', 'title thumbnail status videoPath')
             .exec();
 
         if (!lecture) return res.status(404).json({ message: 'Lecture not found' });

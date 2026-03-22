@@ -35,7 +35,7 @@ export const getModulesByCourse = async (req, res, next) => {
             .populate({
                 path: 'lectures',
                 options: { sort: { order: 1 } },
-                populate: { path: 'videoId', select: 'title thumbnail duration status' },
+                populate: { path: 'videoId', select: 'title thumbnail status' },
             })
             .exec();
 

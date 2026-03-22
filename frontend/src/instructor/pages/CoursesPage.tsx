@@ -17,7 +17,7 @@ import { cn } from '@/lib/utils'
 interface LectureItem { id: string; title: string; description: string; type: string; videoId: any; resourceUrl: string | null; resourceName: string | null; order: number }
 interface ModuleItem { id: string; title: string; description: string; order: number; lectures: LectureItem[] }
 interface Course { id: string; title: string; description: string; thumbnail: string | null; categoryId: string; category?: string; moduleCount: number; lectureCount: number; modules?: ModuleItem[] }
-interface VideoItem { id: string; title: string; duration: string }
+interface VideoItem { id: string; title: string }
 
 const emptyCourseForm = { title: '', description: '', categoryId: '', thumbnail: '' }
 const emptyModuleForm = { title: '', description: '' }

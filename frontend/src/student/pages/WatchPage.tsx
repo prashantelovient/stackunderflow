@@ -188,10 +188,6 @@ function SidebarVideoItem({
         )}>
           {video.title}
         </p>
-        <div className="flex items-center gap-1.5 mt-0.5 opacity-60">
-          <Clock className="w-2.5 h-2.5" />
-          <span className="text-[10px] font-medium font-mono">{video.duration}</span>
-        </div>
       </div>
     </button>
   )
@@ -528,9 +524,6 @@ export default function WatchPage() {
               <div className="flex-1 min-w-0">
                 <h1 className="text-2xl lg:text-3xl font-black tracking-tight leading-tight">{video.title}</h1>
                 <div className="flex items-center gap-3 mt-3 flex-wrap">
-                  <Badge variant="secondary" className="bg-muted text-muted-foreground text-[10px] font-bold uppercase px-2 shadow-none border-none">
-                    {video.duration}
-                  </Badge>
                   {video.courseTitle && (
                     <span className="text-xs font-bold text-muted-foreground/60 uppercase tracking-widest">• {video.courseTitle}</span>
                   )}

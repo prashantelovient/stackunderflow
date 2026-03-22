@@ -27,11 +27,11 @@ export const MOCK_COURSES = [
 ]
 
 export const MOCK_VIDEOS = [
-  { id: '1', title: 'React Hooks Deep Dive', description: 'Mastering useState, useEffect and custom hooks', thumbnail: null, courseId: '1', courseTitle: 'React Mastery', duration: '45:30', uploadDate: '2024-01-10' },
-  { id: '2', title: 'Redux Toolkit Tutorial', description: 'State management with Redux Toolkit', thumbnail: null, courseId: '1', courseTitle: 'React Mastery', duration: '38:15', uploadDate: '2024-01-17' },
-  { id: '3', title: 'Node.js REST API', description: 'Building RESTful APIs with Express', thumbnail: null, courseId: '2', courseTitle: 'Node.js Pro', duration: '52:00', uploadDate: '2024-02-05' },
-  { id: '4', title: 'Python Lists & Dicts', description: 'Data structures in Python', thumbnail: null, courseId: '3', courseTitle: 'Python Basics', duration: '29:45', uploadDate: '2024-02-12' },
-  { id: '5', title: 'Async/Await in JS', description: 'Mastering asynchronous JavaScript', thumbnail: null, courseId: '1', courseTitle: 'React Mastery', duration: '33:20', uploadDate: '2024-03-01' },
+  { id: '1', title: 'React Hooks Deep Dive', description: 'Mastering useState, useEffect and custom hooks', thumbnail: null, courseId: '1', courseTitle: 'React Mastery', uploadDate: '2024-01-10' },
+  { id: '2', title: 'Redux Toolkit Tutorial', description: 'State management with Redux Toolkit', thumbnail: null, courseId: '1', courseTitle: 'React Mastery', uploadDate: '2024-01-17' },
+  { id: '3', title: 'Node.js REST API', description: 'Building RESTful APIs with Express', thumbnail: null, courseId: '2', courseTitle: 'Node.js Pro', uploadDate: '2024-02-05' },
+  { id: '4', title: 'Python Lists & Dicts', description: 'Data structures in Python', thumbnail: null, courseId: '3', courseTitle: 'Python Basics', uploadDate: '2024-02-12' },
+  { id: '5', title: 'Async/Await in JS', description: 'Mastering asynchronous JavaScript', thumbnail: null, courseId: '1', courseTitle: 'React Mastery', uploadDate: '2024-03-01' },
 ]
 
 export const MOCK_BLOGS = [

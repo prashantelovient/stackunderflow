@@ -20,10 +20,10 @@ import {
     DropdownMenuItem,
 } from "@/admin/components/dropdown-menu"
 
-interface VideoItem { id: string; title: string; description: string; thumbnail: string | null; courseId: string; courseTitle: string; duration: string; uploadDate: string }
+interface VideoItem { id: string; title: string; description: string; thumbnail: string | null; courseId: string; courseTitle: string; uploadDate: string }
 interface CourseItem { id: string; title: string }
 
-const emptyForm = { title: '', description: '', duration: '', courseId: '' }
+const emptyForm = { title: '', description: '', courseId: '' }
 
 const getThumbnailUrl = (path: string | null) => {
     if (!path) return null
@@ -62,7 +62,7 @@ export default function InstructorVideosPage() {
     }
     const openEdit = (v: VideoItem) => {
         setEditItem(v);
-        setForm({ title: v.title, description: v.description, duration: v.duration, courseId: v.courseId, thumbnail: v.thumbnail || '' } as any);
+        setForm({ title: v.title, description: v.description, courseId: v.courseId, thumbnail: v.thumbnail || '' } as any);
         setThumbnailFile(null);
         setVideoFile(null);
         setThumbnailPreview(getThumbnailUrl(v.thumbnail));
@@ -139,16 +139,7 @@ export default function InstructorVideosPage() {
                 </Badge>
             )
         },
-        {
-            accessorKey: 'duration',
-            header: 'Duration',
-            cell: ({ row }) => (
-                <div className="flex items-center gap-1.5 text-xs font-black font-mono text-muted-foreground">
-                    <Clock className="w-3.5 h-3.5" />
-                    {row.original.duration}
-                </div>
-            )
-        },
+
         {
             accessorKey: 'uploadDate',
             header: 'Registry Date',
@@ -224,7 +215,7 @@ export default function InstructorVideosPage() {
                         className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-xl gap-2 shadow-lg shadow-indigo-600/20 active:scale-95 transition-all h-12 px-6 font-bold"
                     >
                         <UploadCloud className="w-5 h-5" />
-                        Initialize Uplink
+                        Upload Video
                     </Button>
                 </div>
             </div>
@@ -246,8 +237,7 @@ export default function InstructorVideosPage() {
                     <Input label="Video Title" value={form.title} onChange={(e) => setForm(f => ({ ...f, title: e.target.value }))} placeholder="Enter content identifier..." />
                     <Textarea label="Video Description" value={form.description} onChange={(e) => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Brief description of segments..." />
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <Input label="Duration (Optional)" value={form.duration} onChange={(e) => setForm(f => ({ ...f, duration: e.target.value }))} placeholder="e.g. 45:30" />
+                    <div className="grid grid-cols-1 gap-4">
                         <Select label="Assign to Course" value={form.courseId} onChange={(val) => setForm(f => ({ ...f, courseId: val }))}
                             options={courses.map((c) => ({ value: c.id, label: c.title }))} placeholder="Assign course node..." />
                     </div>
@@ -296,7 +286,7 @@ export default function InstructorVideosPage() {
                                     const file = e.target.files?.[0]
                                     if (file) setVideoFile(file)
                                 }} className="hidden" />
-                                <span className="text-[10px] font-black uppercase tracking-widest bg-indigo-600 text-white px-6 py-3 rounded-xl hover:bg-indigo-500 transition-all shadow-lg shadow-indigo-600/20 active:scale-95">Choose HLS Source</span>
+                                <span className="text-[10px] font-black uppercase tracking-widest bg-indigo-600 text-white px-6 py-3 rounded-xl hover:bg-indigo-500 transition-all shadow-lg shadow-indigo-600/20 active:scale-95">Select Video</span>
                             </label>
                             {videoFile ? (
                                 <p className="text-[10px] font-mono font-bold text-emerald-400 uppercase mt-2">Ready: {videoFile.name} ({(videoFile.size / (1024 * 1024)).toFixed(2)} MB)</p>
@@ -309,7 +299,7 @@ export default function InstructorVideosPage() {
                     <div className="flex justify-end gap-3 pt-6 border-t border-border/50">
                         <Button variant="ghost" onClick={() => setModalOpen(false)} className="rounded-xl px-6 font-bold text-xs text-muted-foreground hover:text-foreground">DISCARD</Button>
                         <Button loading={saveMutation.isPending} onClick={() => saveMutation.mutate()} className="bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl px-8 shadow-lg shadow-indigo-600/20 font-bold text-xs uppercase tracking-widest h-11">
-                            {editItem ? 'UPDATE CONFIG' : 'INITIALIZE ASSET'}
+                            {editItem ? 'UPDATE CONFIG' : 'UPLOAD'}
                         </Button>
                     </div>
                 </div>
@@ -356,10 +346,6 @@ export default function InstructorVideosPage() {
                                     <Badge variant="outline" className="text-[9px] font-extrabold bg-indigo-500/5 border-indigo-500/20 text-indigo-400 uppercase tracking-widest">
                                         {viewVideo?.courseTitle}
                                     </Badge>
-                                    <span className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-                                        <Clock className="w-3.5 h-3.5" />
-                                        {viewVideo?.duration}
-                                    </span>
                                 </div>
                             </div>
                         </div>

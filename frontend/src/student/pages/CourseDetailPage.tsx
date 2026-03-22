@@ -51,8 +51,6 @@ function LectureRow({
     const isLocked = !isEnrolled
     const videoData = typeof lecture.videoId === 'object' && lecture.videoId ? lecture.videoId as Video : null
     const videoId = videoData?.id || (typeof lecture.videoId === 'string' ? lecture.videoId : null)
-    const durationSec = videoData?.duration ? parseInt(videoData.duration) : 0
-    const progressPct = (progress && durationSec) ? Math.min(100, Math.round((progress / durationSec) * 100)) : 0
 
     const handleClick = () => {
         if (isLocked) {
@@ -138,13 +136,7 @@ function LectureRow({
                 </div>
             </div>
 
-            {/* Duration */}
-            {lecture.type === 'video' && videoData?.duration && (
-                <div className="flex-shrink-0 flex items-center gap-1.5 text-gray-500 font-mono text-[10px] font-bold">
-                    <Clock className="w-3.5 h-3.5" />
-                    <span>{videoData.duration}</span>
-                </div>
-            )}
+
 
             {!isLocked && <ChevronRight className="w-4 h-4 text-gray-600 group-hover:text-violet-400 transition-colors flex-shrink-0" />}
         </div>
