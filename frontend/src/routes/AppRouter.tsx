@@ -38,6 +38,7 @@ import WatchPage from '@/student/pages/WatchPage'
 import StudentBlogsPage from '@/student/pages/BlogsPage'
 import BlogDetailPage from '@/student/pages/BlogDetailPage'
 import ProfilePage from '@/student/pages/ProfilePage'
+import StudentNotesPage from '@/student/pages/NotesPage'
 import ChatDashboardPage from '@/pages/chat/ChatDashboardPage'
 
 // ── Route guards ──────────────────────────────────────────────────────────────
@@ -133,6 +134,7 @@ export default function AppRouter() {
           <Route path="blogs" element={<StudentBlogsPage />} />
           <Route path="blog/:id" element={<BlogDetailPage />} />
           <Route path="profile" element={<ProfilePage />} />
+          <Route path="notes" element={<StudentNotesPage />} />
           <Route path="messages" element={<ChatDashboardPage />} />
         </Route>
 

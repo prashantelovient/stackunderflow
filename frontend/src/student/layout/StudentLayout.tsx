@@ -1,7 +1,7 @@
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
 import {
   LayoutDashboard, BookOpen, User, LogOut, Menu, X,
-  Sun, Moon, GraduationCap, PlaySquare, Bell, ChevronRight, MessageSquare
+  Sun, Moon, GraduationCap, PlaySquare, Bell, ChevronRight, MessageSquare, FileText
 } from 'lucide-react'
 import { useState } from 'react'
 import { useAuthStore } from '@/auth/store/authStore'
@@ -12,11 +12,15 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Separator } from '@/components/ui/separator'
 import ChatWidget from '@/components/Chat/ChatWidget'
 
-const navItems = [
+const mainNav = [
   { to: '/student/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/student/courses', icon: PlaySquare, label: 'My Courses' },
-  { to: '/student/blogs', icon: BookOpen, label: 'Blogs' },
   { to: '/student/messages', icon: MessageSquare, label: 'Messages' },
+]
+
+const resourceNav = [
+  { to: '/student/notes', icon: FileText, label: 'My Notes' },
+  { to: '/student/blogs', icon: BookOpen, label: 'Blogs' },
   { to: '/student/profile', icon: User, label: 'Profile' },
 ]
 
@@ -37,7 +41,7 @@ export default function StudentLayout() {
   }
 
   // Get current page title
-  const currentNav = navItems.find(n => location.pathname.startsWith(n.to))
+  const currentNav = [...mainNav, ...resourceNav].find(n => location.pathname.startsWith(n.to))
   const pageTitle = currentNav?.label || 'Learning'
 
   const SidebarContent = ({ mobile = false }: { mobile?: boolean }) => (
@@ -87,42 +91,85 @@ export default function StudentLayout() {
       )}
 
       {/* Nav */}
-      <nav className="flex-1 overflow-y-auto py-3 px-3 space-y-1 scrollbar-none">
-        {(mobile || sidebarOpen) && (
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-3 mb-2">
-            Navigation
-          </p>
-        )}
-        {navItems.map(({ to, icon: Icon, label }) => (
-          <NavLink
-            key={to}
-            to={to}
-            onClick={() => setMobileOpen(false)}
-            className={({ isActive }) =>
-              cn(
-                'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group relative',
-                isActive
-                  ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20'
-                  : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
-              )
-            }
-          >
-            {({ isActive }) => (
-              <>
-                <Icon className={cn('w-[18px] h-[18px] flex-shrink-0', isActive ? 'text-amber-600 dark:text-amber-400' : '')} />
-                {(mobile || sidebarOpen) && (
+      <nav className="flex-1 overflow-y-auto py-3 px-3 space-y-6 scrollbar-none">
+        
+        {/* Main Section */}
+        <div className="space-y-1">
+            {(mobile || sidebarOpen) && (
+              <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground/50 px-3 mb-2">
+                Main
+              </p>
+            )}
+            {mainNav.map(({ to, icon: Icon, label }) => (
+              <NavLink
+                key={to}
+                to={to}
+                onClick={() => setMobileOpen(false)}
+                className={({ isActive }) =>
+                  cn(
+                    'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group relative',
+                    isActive
+                      ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20'
+                      : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+                  )
+                }
+              >
+                {({ isActive }) => (
                   <>
-                    <span className="flex-1">{label}</span>
-                    {isActive && <ChevronRight className="w-3.5 h-3.5 opacity-50" />}
+                    <Icon className={cn('w-[18px] h-[18px] flex-shrink-0', isActive ? 'text-amber-600 dark:text-amber-400' : '')} />
+                    {(mobile || sidebarOpen) && (
+                      <>
+                        <span className="flex-1">{label}</span>
+                        {isActive && <ChevronRight className="w-3.5 h-3.5 opacity-50" />}
+                      </>
+                    )}
+                    {isActive && (
+                      <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-amber-500 rounded-r-full" />
+                    )}
                   </>
                 )}
-                {isActive && (
-                  <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-amber-500 rounded-r-full" />
-                )}
-              </>
+              </NavLink>
+            ))}
+        </div>
+
+        {/* Resources Section */}
+        <div className="space-y-1">
+             {(mobile || sidebarOpen) && (
+              <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground/50 px-3 mb-2">
+                Academic Resources
+              </p>
             )}
-          </NavLink>
-        ))}
+            {resourceNav.map(({ to, icon: Icon, label }) => (
+              <NavLink
+                key={to}
+                to={to}
+                onClick={() => setMobileOpen(false)}
+                className={({ isActive }) =>
+                  cn(
+                    'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group relative',
+                    isActive
+                      ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20'
+                      : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+                  )
+                }
+              >
+                {({ isActive }) => (
+                  <>
+                    <Icon className={cn('w-[18px] h-[18px] flex-shrink-0', isActive ? 'text-amber-600 dark:text-amber-400' : '')} />
+                    {(mobile || sidebarOpen) && (
+                      <>
+                        <span className="flex-1">{label}</span>
+                        {isActive && <ChevronRight className="w-3.5 h-3.5 opacity-50" />}
+                      </>
+                    )}
+                    {isActive && (
+                      <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-amber-500 rounded-r-full" />
+                    )}
+                  </>
+                )}
+              </NavLink>
+            ))}
+        </div>
       </nav>
 
       <Separator className="opacity-20 mx-3 w-auto" />

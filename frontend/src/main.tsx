@@ -19,11 +19,15 @@ function ThemeInitializer() {
   return null
 }
 
+import { ChatProvider } from './components/Chat/ChatContext'
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
-      <ThemeInitializer />
-      <AppRouter />
+      <ChatProvider>
+        <ThemeInitializer />
+        <AppRouter />
+      </ChatProvider>
     </QueryClientProvider>
   </React.StrictMode>
 )

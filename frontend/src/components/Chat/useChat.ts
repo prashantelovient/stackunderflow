@@ -1,15 +1,14 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { chatService } from './chatService';
 import { useAuthStore } from '@/auth/store/authStore';
-import { useEffect, useCallback, useState, useRef } from 'react';
-import { io, Socket } from 'socket.io-client';
+import { useEffect, useCallback, useState } from 'react';
 import { Message, Conversation } from './types';
+import { useChatSocket } from './ChatContext';
 
 export const useChat = (activeConversationId: string | null = null) => {
   const { user } = useAuthStore();
   const queryClient = useQueryClient();
-  const socketRef = useRef<Socket | null>(null);
-  const [typingUsers, setTypingUsers] = useState<Record<string, any>>({});
+  const { socket, typingUsers, sendTyping: sendTypingSocket, joinConversation, leaveConversation } = useChatSocket();
 
   const currentUser = user ? {
     id: user.id || user._id || '',
@@ -54,71 +53,36 @@ export const useChat = (activeConversationId: string | null = null) => {
     },
   });
 
-  // ── Socket.io Setup ────────────────────────────────────────────────────────────
+  // ── Socket Handler for active conversation ────────────────────────────────────
   useEffect(() => {
-    if (!currentUser?.id) return;
-
-    const socket = io('http://localhost:5000', {
-      auth: { token: JSON.parse(localStorage.getItem('vault-auth') || '{}').state?.token }
-    });
-    socketRef.current = socket;
-
-    socket.on('connect', () => console.log('Socket connected'));
-    
-    // Global updates
-    socket.on('conversation-updated', () => {
-      queryClient.invalidateQueries({ queryKey: ['conversations', currentUser.id] });
-    });
-
-    return () => {
-      socket.disconnect();
-    };
-  }, [currentUser?.id, queryClient]);
-
-  // Join/Leave active conversation
-  useEffect(() => {
-    const socket = socketRef.current;
     if (!socket || !activeConversationId) return;
 
-    socket.emit('join-conversation', activeConversationId);
+    joinConversation(activeConversationId);
 
-    socket.on('message-received', (message: any) => {
+    const onMessageReceived = (message: any) => {
       const msgId = message.id || message._id;
       if (message.conversationId === activeConversationId) {
         queryClient.setQueryData(['messages', activeConversationId], (old: Message[] = []) => {
-          // Robust duplicate check
           const isDuplicate = old.some(m => (m.id || (m as any)._id) === msgId);
           if (isDuplicate) return old;
           return [...old, message];
         });
       }
-    });
+    };
 
-    socket.on('user-typing', (data: any) => {
-      if (data.userId !== currentUser?.id) {
-        setTypingUsers(prev => ({ ...prev, [data.userId]: data }));
-        setTimeout(() => {
-          setTypingUsers(prev => {
-            const next = { ...prev };
-            delete next[data.userId];
-            return next;
-          });
-        }, 3000);
-      }
-    });
+    socket.on('message-received', onMessageReceived);
 
     return () => {
-      socket.emit('leave-conversation', activeConversationId);
-      socket.off('message-received');
-      socket.off('user-typing');
+      leaveConversation(activeConversationId);
+      socket.off('message-received', onMessageReceived);
     };
-  }, [activeConversationId, currentUser?.id, queryClient]);
+  }, [activeConversationId, socket, joinConversation, leaveConversation, queryClient]);
 
   const sendTyping = useCallback((isTyping: boolean) => {
-    if (socketRef.current && activeConversationId) {
-      socketRef.current.emit('typing', { conversationId: activeConversationId, isTyping });
+    if (activeConversationId) {
+      sendTypingSocket(activeConversationId, isTyping);
     }
-  }, [activeConversationId]);
+  }, [activeConversationId, sendTypingSocket]);
 
   return {
     currentUser,
@@ -128,7 +92,7 @@ export const useChat = (activeConversationId: string | null = null) => {
     loadingMessages,
     sendMessage: sendMessageMutation.mutate,
     isSending: sendMessageMutation.isPending,
-    typingUsers: Object.values(typingUsers),
+    typingUsers: Object.values(typingUsers).filter((u: any) => u.conversationId === activeConversationId && u.isTyping !== false),
     sendTyping
   };
 };

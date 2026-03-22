@@ -83,6 +83,7 @@ export const initChatSocket = (server) => {
         userName: socket.userName,
         role: socket.userRole,
         isTyping,
+        conversationId,
       });
     });
 
