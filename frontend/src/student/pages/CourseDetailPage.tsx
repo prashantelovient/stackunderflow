@@ -14,6 +14,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { toast, ToastContainer } from '@/admin/components/Toast'
 import { courses, watchProgress } from '@/student/services/studentService'
 import { purchaseService } from '@/student/services/purchaseService'
+import { PurchaseModal } from '@/student/components/PurchaseModal'
 import type { Video, LectureItem, ModuleItem } from '@/student/services/studentService'
 import { cn } from '@/utils'
 
@@ -148,6 +149,7 @@ export default function CourseDetailPage() {
     const qc = useQueryClient()
     const { id } = useParams<{ id: string }>()
     const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set())
+    const [purchaseModalOpen, setPurchaseModalOpen] = useState(false)
 
     const { data: course, isLoading: loadingCourse } = useQuery({
         queryKey: ['student-course', id],
@@ -173,10 +175,12 @@ export default function CourseDetailPage() {
         onSuccess: (data) => {
             qc.invalidateQueries({ queryKey: ['student-course', id] })
             toast.success(data.message || 'Transaction Authorized: Course asset linked to your account.')
+            setPurchaseModalOpen(false)
         },
         onError: (err: any) => {
             const msg = err.response?.data?.message || 'Transaction Terminated: Connection to vault failed.'
             toast.error(msg)
+            setPurchaseModalOpen(false)
         }
     })
 
@@ -354,11 +358,11 @@ export default function CourseDetailPage() {
                             {/* Purchase / Enrollment logic */}
                             {(course.price > 0 && !course.isPurchased) ? (
                                 <Button
-                                    onClick={() => buyMutation.mutate()}
+                                    onClick={() => setPurchaseModalOpen(true)}
                                     disabled={buyMutation.isPending}
                                     className="h-14 px-10 bg-emerald-500 text-white hover:bg-emerald-400 hover:scale-105 transition-all rounded-2xl font-black text-sm uppercase tracking-[0.15em] shadow-2xl shadow-emerald-500/30 border border-emerald-400/30"
                                 >
-                                    {buyMutation.isPending ? 'Processing Payment...' : `Buy Course (₹${course.price})`}
+                                    {buyMutation.isPending ? 'Processing...' : `Buy Course (₹${course.price})`}
                                     <Zap className="w-4 h-4 ml-3 fill-white/20" />
                                 </Button>
                             ) : (
@@ -380,6 +384,15 @@ export default function CourseDetailPage() {
             </div>
 
             <ToastContainer />
+
+            <PurchaseModal 
+                isOpen={purchaseModalOpen}
+                onClose={() => setPurchaseModalOpen(false)}
+                onConfirm={() => buyMutation.mutate()}
+                courseTitle={course.title}
+                coursePrice={course.price}
+                isLoading={buyMutation.isPending}
+            />
 
             {/* Purchase / Enrollment info message */}
             {!course.isEnrolled && (

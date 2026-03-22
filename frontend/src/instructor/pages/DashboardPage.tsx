@@ -1,347 +1,179 @@
-import {
+import React from 'react'
+import { 
+    Users, 
+    BookOpen, 
+    Plus, 
+    ChevronRight,
     TrendingUp,
-    Users,
-    DollarSign,
-    Timer,
+    Star,
     ArrowUpRight,
-    ArrowDownRight,
-    MoreVertical,
-    Play,
-    CheckCircle2,
-    Package,
-    Clock,
-    ExternalLink,
-    Plus,
-    BookOpen
+    LayoutDashboard,
+    Zap
 } from 'lucide-react'
-import { BentoStyles, GlobalSpotlight, ParticleCard } from '@/components/ui/magic-bento'
-import { useRef } from 'react'
-import {
-    BarChart,
-    Bar,
-    XAxis,
-    YAxis,
-    Tooltip,
-    ResponsiveContainer,
-    AreaChart,
-    Area,
-    CartesianGrid
-} from 'recharts'
-import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/badge'
-
-const revenueData = [
-    { name: 'Jan', revenue: 2400 },
-    { name: 'Feb', revenue: 1398 },
-    { name: 'Mar', revenue: 9800 },
-    { name: 'Apr', revenue: 3908 },
-    { name: 'May', revenue: 4800 },
-    { name: 'Jun', revenue: 3800 },
-]
-
-const recentStudents = [
-    { id: 1, name: 'Alex Rivera', course: 'Next.js 14 For Beginners', date: '2 mins ago', amount: '$49.00', status: 'completed' },
-    { id: 2, name: 'Sarah Chen', course: 'Advanced UI Design Patterns', date: '15 mins ago', amount: '$79.00', status: 'completed' },
-    { id: 3, name: 'Michael Smith', course: 'React Meta-Frameworks', date: '1 hour ago', amount: '$59.00', status: 'pending' },
-    { id: 4, name: 'Elena Gilbert', course: 'Framer Motion Masterclass', date: '2 hours ago', amount: '$99.00', status: 'completed' },
-]
-
-const topCourses = [
-    { id: 1, name: 'Next.js 14 For Beginners', sales: 124, revenue: '$6,076', rating: 4.8, thumbnail: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=400&h=250&fit=crop' },
-    { id: 2, name: 'Advanced UI Design Patterns', sales: 89, revenue: '$7,031', rating: 4.9, thumbnail: 'https://images.unsplash.com/photo-1541462608141-ad4d14b0b14c?w=400&h=250&fit=crop' },
-    { id: 3, name: 'Framer Motion Masterclass', sales: 56, revenue: '$5,544', rating: 5.0, thumbnail: 'https://images.unsplash.com/photo-1618477247222-acbdb0e159b3?w=400&h=250&fit=crop' },
-]
-
 import { useQuery } from '@tanstack/react-query'
+import { Link } from 'react-router-dom'
 import { instructorService } from '../services/instructorService'
 import { useAuthStore } from '@/auth/store/authStore'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 
 export default function InstructorDashboard() {
     const { user } = useAuthStore()
-    const { data: analytics, isLoading } = useQuery({
+    
+    const { data: analytics, isLoading: isLoadingAnalytics } = useQuery({
         queryKey: ['instructor-analytics'],
         queryFn: instructorService.getAnalytics,
     })
 
-    const statsRef = useRef<HTMLDivElement>(null)
-    const coursesRef = useRef<HTMLDivElement>(null)
+    const { data: revenue, isLoading: isLoadingRevenue } = useQuery({
+        queryKey: ['instructor-revenue'],
+        queryFn: instructorService.getRevenue,
+    })
+
+    const isLoading = isLoadingAnalytics || isLoadingRevenue
 
     if (isLoading) {
-        return <div className="flex items-center justify-center min-h-[400px]">
-            <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-        </div>
+        return (
+            <div className="flex items-center justify-center min-h-[60vh] bg-background">
+                <div className="relative w-16 h-16">
+                    <div className="absolute inset-0 rounded-full border-4 border-primary/20" />
+                    <div className="absolute inset-0 rounded-full border-4 border-primary border-t-transparent animate-spin" />
+                    <Zap className="absolute inset-0 m-auto w-6 h-6 text-primary animate-pulse" />
+                </div>
+            </div>
+        )
     }
 
-    const stats = [
-        { label: 'Total Revenue', value: analytics?.totalRevenue || '$0', change: '+0%', icon: DollarSign, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
-        { label: 'Active Students', value: analytics?.totalStudents?.toString() || '0', change: '+0%', icon: Users, color: 'text-indigo-500', bg: 'bg-indigo-500/10' },
-        { label: 'Courses Published', value: analytics?.totalCourses?.toString() || '0', change: '0%', icon: BookOpen, color: 'text-purple-500', bg: 'bg-purple-500/10' },
-        { label: 'Avg. Course Rating', value: analytics?.avgRating?.toString() || '0', change: '0', icon: TrendingUp, color: 'text-amber-500', bg: 'bg-amber-500/10' },
-    ]
-
-    const revenueData = analytics?.revenueData || []
-    const recentStudents = analytics?.recentStudents || []
-    const topCourses = analytics?.topCourses || []
-
+    const topCourses = (analytics?.topCourses || []).map((c: any) => {
+        const revData = revenue?.courseWiseRevenue?.find((r: any) => r.courseId === c.id.toString());
+        return {
+            id: c.id,
+            title: c.name,
+            sales: revData ? revData.sales : 0,
+            rating: c.rating || '4.8',
+            thumbnail: c.thumbnail
+        };
+    }).slice(0, 4);
 
     return (
-        <div className="space-y-8 animate-in fade-in duration-700 bento-section">
-            <BentoStyles glowColor="132, 0, 255" />
-            {/* Welcome Section */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold text-foreground tracking-tight">Dashboard Overview</h1>
-                    <p className="text-muted-foreground mt-1">Welcome back, {user?.name}! Here's what's happening today.</p>
-                </div>
-                <div className="flex items-center gap-3">
-                    <div className="flex -space-x-3 overflow-hidden">
-                        {[1, 2, 3, 4].map((i) => (
-                            <Avatar key={i} className="border-2 border-background w-8 h-8">
-                                <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${i + 10}`} />
-                                <AvatarFallback>U</AvatarFallback>
-                            </Avatar>
-                        ))}
+        <div className="min-h-full rounded-[2.5rem] border border-border bg-background p-8 lg:p-12 space-y-12">
+
+            {/* Header */}
+            <div className="flex flex-col lg:flex-row justify-between gap-8">
+                <div className="space-y-3">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-muted border border-border">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                            Instructor Active
+                        </span>
                     </div>
-                    <span className="text-sm text-muted-foreground font-medium">{analytics?.totalStudents || 0} students joined overall</span>
+
+                    <h1 className="text-4xl lg:text-5xl font-black text-foreground">
+                        Welcome {user?.name}
+                    </h1>
+
+                    <p className="text-muted-foreground text-lg max-w-lg">
+                        Manage your courses and track your growth easily.
+                    </p>
+                </div>
+
+                <Link to="/instructor/courses">
+                    <Button className="h-16 px-10 rounded-[2rem] font-black text-sm uppercase tracking-widest shadow-md transition-all active:scale-95 group bg-primary text-primary-foreground hover:bg-primary/90">
+                        <Plus className="w-5 h-5 mr-3 group-hover:rotate-90 transition-transform duration-500" />
+                        Create Course
+                    </Button>
+                </Link>
+            </div>
+
+            {/* Stats */}
+            <div className="grid md:grid-cols-2 gap-6">
+
+                <div className="p-8 rounded-[2.5rem] bg-card border border-border shadow-sm">
+                    <div className="space-y-4">
+                        <Users className="w-7 h-7 text-indigo-500" />
+                        <p className="text-xs font-bold text-muted-foreground uppercase">
+                            Total Students
+                        </p>
+                        <h3 className="text-4xl font-black text-foreground">
+                            {analytics?.totalStudents || 0}
+                        </h3>
+                    </div>
+                </div>
+
+                <div className="p-8 rounded-[2.5rem] bg-card border border-border shadow-sm">
+                    <div className="space-y-4">
+                        <BookOpen className="w-7 h-7 text-emerald-500" />
+                        <p className="text-xs font-bold text-muted-foreground uppercase">
+                            Total Courses
+                        </p>
+                        <h3 className="text-4xl font-black text-foreground">
+                            {analytics?.totalCourses || 0}
+                        </h3>
+                    </div>
                 </div>
             </div>
 
-            {/* Stats Grid */}
-            <GlobalSpotlight gridRef={statsRef} spotlightRadius={400} glowColor="132, 0, 255" />
-            <div ref={statsRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 relative">
-                {stats.map((stat, i) => (
-                    <ParticleCard
-                        key={i}
-                        className="bg-card/40 border-border/80 backdrop-blur-sm hover:border-indigo-500/50 transition-all duration-300 group rounded-3xl overflow-hidden card--border-glow"
-                        enableTilt={true}
-                        enableMagnetism={true}
-                        clickEffect={true}
-                        particleCount={8}
-                    >
-                        <CardContent className="p-6 relative z-10">
-                            <div className="flex items-center justify-between mb-4">
-                                <div className={cn("p-2.5 rounded-xl transition-colors", stat.bg)}>
-                                    <stat.icon className={cn("w-5 h-5", stat.color)} />
+            {/* Courses */}
+            <div className="space-y-6">
+                <div className="flex justify-between items-center">
+                    <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
+                        <LayoutDashboard className="w-5 h-5 text-primary" />
+                        Your Courses
+                    </h2>
+
+                    <Link to="/instructor/courses" className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1">
+                        View All <ChevronRight className="w-4 h-4" />
+                    </Link>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-4">
+                    {topCourses.map((course: any) => (
+                        <Link key={course.id} to={`/instructor/courses`}>
+                            <div className="p-5 rounded-2xl bg-card border border-border hover:shadow-md transition-all">
+
+                                <div className="flex justify-between items-center">
+                                    <div>
+                                        <h4 className="font-semibold text-foreground">
+                                            {course.title}
+                                        </h4>
+
+                                        <div className="flex gap-3 text-xs text-muted-foreground mt-1">
+                                            <span className="flex items-center gap-1">
+                                                <Users className="w-3 h-3" />
+                                                {course.sales}
+                                            </span>
+                                            <span className="flex items-center gap-1">
+                                                <Star className="w-3 h-3 text-amber-500" />
+                                                {course.rating}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <ArrowUpRight className="w-5 h-5 text-muted-foreground" />
                                 </div>
-                                {stat.change !== '0%' && (
-                                    <Badge variant="outline" className={cn(
-                                        "bg-muted/50 border-border/50 px-2 py-0.5 pointer-events-none",
-                                        stat.change.startsWith('+') ? "text-emerald-400" : "text-amber-400"
-                                    )}>
-                                        {stat.change}
-                                    </Badge>
-                                )}
+
                             </div>
-                            <p className="text-sm font-medium text-muted-foreground">{stat.label}</p>
-                            <h3 className="text-2xl font-bold mt-1 text-foreground group-hover:scale-[1.02] origin-left transition-transform">{stat.value}</h3>
-                        </CardContent>
-                    </ParticleCard>
-                ))}
-            </div>
-
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Main Chart */}
-                <Card className="lg:col-span-2 bg-card/40 border-border/80 backdrop-blur-sm">
-                    <CardHeader className="flex flex-row items-center justify-between pb-8">
-                        <div>
-                            <CardTitle className="text-foreground">Revenue Performance</CardTitle>
-                            <CardDescription className="text-muted-foreground/60">Monthly earnings comparison for the current year</CardDescription>
-                        </div>
-                        <select className="bg-muted border border-border text-xs rounded-lg px-2 py-1 outline-none text-muted-foreground focus:ring-1 focus:ring-indigo-500 transition-colors">
-                            <option>Last 6 Months</option>
-                            <option>Last Year</option>
-                        </select>
-                    </CardHeader>
-                    <CardContent className="h-[320px]">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={revenueData}>
-                                <defs>
-                                    <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
-                                        <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
-                                    </linearGradient>
-                                </defs>
-                                <CartesianGrid strokeDasharray="3 3" stroke="currentColor" className="text-border" vertical={false} />
-                                <XAxis
-                                    dataKey="name"
-                                    stroke="#64748b"
-                                    fontSize={12}
-                                    tickLine={false}
-                                    axisLine={false}
-                                    dy={10}
-                                />
-                                <YAxis
-                                    stroke="#64748b"
-                                    fontSize={12}
-                                    tickLine={false}
-                                    axisLine={false}
-                                    tickFormatter={(value) => `$${value}`}
-                                />
-                                <Tooltip
-                                    contentStyle={{
-                                        backgroundColor: 'var(--card)',
-                                        borderColor: 'var(--border)',
-                                        borderRadius: '12px',
-                                        color: 'var(--foreground)'
-                                    }}
-                                    itemStyle={{ color: '#818cf8' }}
-                                />
-                                <Area
-                                    type="monotone"
-                                    dataKey="revenue"
-                                    stroke="#6366f1"
-                                    strokeWidth={3}
-                                    fillOpacity={1}
-                                    fill="url(#colorRevenue)"
-                                />
-                            </AreaChart>
-                        </ResponsiveContainer>
-                    </CardContent>
-                </Card>
-
-                {/* Recently Purchased */}
-                <Card className="bg-card/40 border-border/80 backdrop-blur-sm">
-                    <CardHeader>
-                        <div className="flex items-center justify-between">
-                            <CardTitle className="text-foreground">Recent Sales</CardTitle>
-                            <Button variant="link" className="text-indigo-400 hover:text-indigo-300 p-0 h-auto text-xs font-semibold uppercase tracking-wider">
-                                View All
-                            </Button>
-                        </div>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="space-y-6">
-                            {recentStudents.map((student: any) => (
-                                <div key={student.id} className="flex items-center justify-between group">
-                                    <div className="flex items-center gap-3">
-                                        <Avatar className="w-10 h-10 border border-border ring-2 ring-transparent group-hover:ring-indigo-500/20 transition-all">
-                                            <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${student.name}`} />
-                                            <AvatarFallback>{student.name[0]}</AvatarFallback>
-                                        </Avatar>
-                                        <div className="min-w-0">
-                                            <p className="text-sm font-semibold text-foreground leading-none mb-1 truncate max-w-[120px] md:max-w-none">{student.name}</p>
-                                            <p className="text-xs text-muted-foreground truncate max-w-[120px] md:max-w-none">{student.course}</p>
-                                        </div>
-                                    </div>
-                                    <div className="text-right">
-                                        <p className="text-sm font-bold text-foreground mb-1">{student.amount}</p>
-                                        <p className="text-[10px] text-muted-foreground font-medium">{student.date}</p>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
-
-            {/* Course Management Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-                <div className="lg:col-span-3">
-                    <div className="flex items-center justify-between mb-6">
-                        <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
-                            <Package className="w-5 h-5 text-indigo-400" />
-                            Popular Courses
-                        </h2>
-                        <Button variant="outline" className="text-muted-foreground border-border hover:bg-muted hover:text-foreground rounded-xl gap-2 active:scale-95 transition-all text-xs h-9">
-                            More Courses
-                            <ExternalLink className="w-3 h-3" />
-                        </Button>
-                    </div>
-
-                    <GlobalSpotlight gridRef={coursesRef} spotlightRadius={400} glowColor="132, 0, 255" />
-                    <div ref={coursesRef} className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 relative">
-                        {topCourses.map((course: any) => (
-                            <ParticleCard
-                                key={course.id}
-                                className="group overflow-hidden bg-card/40 border-border/80 backdrop-blur-sm hover:translate-y-[-4px] transition-all duration-300 rounded-2xl card--border-glow"
-                                enableTilt={true}
-                                clickEffect={true}
-                                particleCount={12}
-                            >
-                                <div className="aspect-video relative overflow-hidden">
-                                    <img
-                                        src={course.thumbnail}
-                                        alt={course.name}
-                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                                    />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
-                                        <Button size="sm" className="w-full bg-white text-indigo-600 hover:bg-white/90 rounded-lg font-bold gap-2">
-                                            <Play className="fill-current w-3 h-3" />
-                                            View Analytics
-                                        </Button>
-                                    </div>
-                                    <Badge className="absolute top-3 right-3 bg-black/60 backdrop-blur-md border-slate-700/50 text-[10px] py-0.5 px-2">
-                                        {course.rating} ★
-                                    </Badge>
-                                </div>
-                                <CardContent className="p-4 relative z-10">
-                                    <h4 className="font-bold text-foreground line-clamp-1 mb-3 group-hover:text-indigo-400 transition-colors">{course.name}</h4>
-                                    <div className="flex items-center justify-between pt-3 border-t border-border/50">
-                                        <div className="flex flex-col">
-                                            <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-0.5">Sales</span>
-                                            <span className="text-sm font-bold text-foreground">{course.sales}</span>
-                                        </div>
-                                        <div className="flex flex-col text-right">
-                                            <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-0.5">Revenue</span>
-                                            <span className="text-sm font-bold text-indigo-400">{course.revenue}</span>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </ParticleCard>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Quick Actions / Tips */}
-                <div className="space-y-6">
-                    <Card className="bg-gradient-to-br from-indigo-600 to-purple-700 border-none text-white overflow-hidden relative group">
-                        <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
-                        <CardHeader className="pb-2">
-                            <CardTitle className="text-xl">Go Live Now</CardTitle>
-                            <CardDescription className="text-indigo-200">Start a live Q&A session with your students in one click.</CardDescription>
-                        </CardHeader>
-                        <CardContent className="pt-4">
-                            <Button className="w-full bg-white text-indigo-600 hover:bg-slate-100 rounded-xl font-bold gap-2 shadow-lg active:scale-95 transition-all">
-                                <Play className="fill-current w-4 h-4" />
-                                Go Live
-                            </Button>
-                        </CardContent>
-                    </Card>
-
-                    <Card className="bg-card/40 border-border/80 backdrop-blur-sm">
-                        <CardHeader>
-                            <CardTitle className="text-sm font-bold flex items-center gap-2">
-                                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                                Upcoming Deadlines
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            {[
-                                { task: 'New lesson for Next.js', date: 'Tomorrow', icon: Clock },
-                                { task: 'Update Course Handouts', date: 'Fri, 20 Mar', icon: Clock },
-                            ].map((task, i) => (
-                                <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-muted/40 border border-border hover:bg-muted/60 transition-colors group cursor-pointer">
-                                    <div className="p-2 bg-muted rounded-lg group-hover:scale-110 transition-transform">
-                                        <task.icon className="w-3.5 h-3.5 text-indigo-400" />
-                                    </div>
-                                    <div className="min-w-0">
-                                        <p className="text-xs font-semibold text-foreground truncate">{task.task}</p>
-                                        <p className="text-[10px] text-muted-foreground font-medium">{task.date}</p>
-                                    </div>
-                                </div>
-                            ))}
-                            <Button variant="ghost" className="w-full text-muted-foreground hover:text-foreground hover:bg-muted/50 h-8 text-[11px] font-bold uppercase tracking-wider rounded-lg">
-                                <Plus className="w-3 h-3 mr-1" />
-                                Add New Task
-                            </Button>
-                        </CardContent>
-                    </Card>
+                        </Link>
+                    ))}
                 </div>
             </div>
+
+            {/* Bottom Card */}
+            <div className="p-8 rounded-[2rem] bg-primary/10 border border-border flex justify-between items-center">
+                <div>
+                    <h3 className="text-xl font-bold text-foreground">
+                        Improve Your Courses 🚀
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                        Add more content to boost engagement
+                    </p>
+                </div>
+
+                <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
+                    Upgrade
+                </Button>
+            </div>
+
         </div>
     )
 }
