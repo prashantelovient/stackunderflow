@@ -20,6 +20,8 @@ import progressRoutes from './src/routes/progressRoutes.js';
 import authRoutes from './src/routes/authRoutes.js';
 import instructorRoutes from './src/routes/instructorRoutes.js';
 import storageRoutes from './src/routes/storageRoutes.js';
+import messageRoutes from './src/routes/messageRoutes.js';
+import { initChatSocket } from './src/socket/chatSocket.js';
 
 
 const app = express();
@@ -50,6 +52,7 @@ app.use('/api/progress', progressRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/instructor', instructorRoutes);
 app.use('/api/storage', storageRoutes);
+app.use('/api/messages', messageRoutes);
 
 
 /* Health Check */
@@ -80,6 +83,8 @@ async function startServer() {
       console.log(`Server running on port ${PORT}`);
       console.log(`http://localhost:${PORT}/api/health`);
     });
+
+    initChatSocket(server);
 
     server.on('error', (err) => {
       if (err && err.code === 'EADDRINUSE') {

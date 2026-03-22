@@ -47,39 +47,39 @@
   }
 
   .dark {
-    --background: #0b0e14;
-    --foreground: #ecedf6;
+    --background: #090e1c;
+    --foreground: #e1e4fa;
 
-    --card: #161a21;
-    --card-foreground: #ecedf6;
+    --card: #0d1323;
+    --card-foreground: #e1e4fa;
 
-    --popover: #161a21;
-    --popover-foreground: #ecedf6;
+    --popover: #0d1323;
+    --popover-foreground: #e1e4fa;
 
-    --primary: #70b1ff;
-    --primary-foreground: #002f58;
+    --primary: #ba9eff;
+    --primary-foreground: #090e1c;
 
-    --secondary: #bc87fe;
-    --secondary-foreground: #340064;
+    --secondary: #699cff;
+    --secondary-foreground: #090e1c;
 
-    --muted: #1c2028;
-    --muted-foreground: #a9abb3;
+    --muted: #1e253b;
+    --muted-foreground: #a6aabf;
 
-    --accent: #22262f;
-    --accent-foreground: #ecedf6;
+    --accent: #242b43;
+    --accent-foreground: #e1e4fa;
 
     --destructive: #ff6e84;
     --destructive-foreground: #490013;
 
-    --border: #45484f;
-    --input: #22262f;
-    --ring: #70b1ff;
+    --border: #434759;
+    --input: #13192b;
+    --ring: #ba9eff;
 
-    /* Cosmic Curator Dark Tokens */
-    --cosmic-primary: #70b1ff;
-    --cosmic-secondary: #bc87fe;
-    --cosmic-tertiary: #a0fff0;
-    --cosmic-bg: #0b0e14;
+    /* Cosmic Curator Dark Tokens (The Kinetic Archive) */
+    --cosmic-primary: #ba9eff;
+    --cosmic-secondary: #699cff;
+    --cosmic-tertiary: #a1faff;
+    --cosmic-bg: #090e1c;
   }
 
   * {

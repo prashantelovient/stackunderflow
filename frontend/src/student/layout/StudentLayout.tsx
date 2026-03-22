@@ -10,6 +10,7 @@ import { cn } from '@/utils'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Separator } from '@/components/ui/separator'
+import ChatWidget from '@/components/Chat/ChatWidget'
 
 const navItems = [
   { to: '/student/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -225,6 +226,7 @@ export default function StudentLayout() {
         <main className="flex-1 overflow-y-auto bg-muted/20">
           <Outlet />
         </main>
+        <ChatWidget />
       </div>
     </div>
   )

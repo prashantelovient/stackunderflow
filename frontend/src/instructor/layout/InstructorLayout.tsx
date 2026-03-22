@@ -29,6 +29,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { useAuthStore } from '@/auth/store/authStore'
 import { ThemeToggle } from '@/components/ThemeToggle'
+import ChatWidget from '@/components/Chat/ChatWidget'
 
 const sidebarItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/instructor/dashboard' },
@@ -174,6 +175,7 @@ export default function InstructorLayout() {
                         <Outlet />
                     </div>
                 </main>
+                <ChatWidget />
             </div>
         </div>
     )

@@ -10,6 +10,7 @@ import { useThemeStore } from '@/store/themeStore'
 import { cn } from '@/utils'
 import { Button, Badge } from '@/admin/components/ui'
 import { Separator } from '@/components/ui/separator'
+import ChatWidget from '@/components/Chat/ChatWidget'
 
 const navItems = [
   { to: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -171,6 +172,7 @@ export default function AdminLayout() {
         <main className="flex-1 overflow-y-auto p-6">
           <Outlet />
         </main>
+        <ChatWidget />
       </div>
     </div>
   )
