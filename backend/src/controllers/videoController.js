@@ -1,6 +1,9 @@
 import mongoose from 'mongoose';
 import { Video } from '../models/index.js';
 import { processVideoToHLS } from '../workers/videoProcessor.js';
+import { deleteFile, deleteFolder } from '../utils/minioClient.js';
+import fs from 'fs';
+import path from 'path';
 
 export const uploadVideo = async (req, res, next) => {
   try {
@@ -166,8 +169,33 @@ export const deleteVideo = async (req, res, next) => {
       return res.status(403).json({ message: 'Forbidden: You do not own this video' });
     }
 
+    // 1. Delete HLS assets from S3
+    if (video.videoPath && video.videoPath.startsWith('videos/hls/')) {
+      const hlsPrefix = `videos/hls/${video._id}/`;
+      await deleteFolder(hlsPrefix).catch(e => console.error('Failed to delete HLS folder:', e));
+    }
+
+    // 2. Delete raw video from S3 if it exists
+    if (video.s3Key) {
+      await deleteFile(video.s3Key).catch(e => console.error('Failed to delete raw S3 video:', e));
+    }
+
+    // 3. Delete thumbnail
+    if (video.thumbnail) {
+      if (video.thumbnail.startsWith('thumbnails/')) {
+        // It's an S3 key
+        await deleteFile(video.thumbnail).catch(e => console.error('Failed to delete S3 thumbnail:', e));
+      } else if (video.thumbnail.startsWith('/thumbnails/')) {
+        // It's a local path
+        const localThumbPath = path.join('uploads', video.thumbnail);
+        if (fs.existsSync(localThumbPath)) {
+          fs.unlinkSync(localThumbPath);
+        }
+      }
+    }
+
     await Video.findByIdAndDelete(req.params.id).exec();
-    res.json({ message: 'Video deleted successfully' });
+    res.json({ message: 'Video and associated assets deleted successfully' });
   } catch (error) {
     next(error);
   }

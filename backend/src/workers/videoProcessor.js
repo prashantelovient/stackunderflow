@@ -90,7 +90,7 @@ export const processVideoToHLS = async (videoId, sourcePath, isS3Source = false)
 
     // 6. Cleanup Local Storage
     try {
-      if (isS3Source && fs.existsSync(localRawPath)) fs.unlinkSync(localRawPath);
+      if (localRawPath && fs.existsSync(localRawPath)) fs.unlinkSync(localRawPath);
       // Delete the whole HLS dir since it's and in S3 now
       fs.rmSync(hlsDir, { recursive: true, force: true });
     } catch (cleanErr) {
@@ -103,7 +103,7 @@ export const processVideoToHLS = async (videoId, sourcePath, isS3Source = false)
     console.error(`Error processing video ${videoId}:`, error);
     try {
       await Video.findByIdAndUpdate(videoId, { status: 'failed' }).exec();
-      if (isS3Source && localRawPath && fs.existsSync(localRawPath)) fs.unlinkSync(localRawPath);
+      if (localRawPath && fs.existsSync(localRawPath)) fs.unlinkSync(localRawPath);
       if (fs.existsSync(hlsDir)) fs.rmSync(hlsDir, { recursive: true, force: true });
     } catch (e) { }
     throw error;

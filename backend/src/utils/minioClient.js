@@ -1,9 +1,9 @@
-import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
-
-
+import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, ListObjectsV2Command, DeleteObjectsCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import dotenv from 'dotenv';
 dotenv.config();
+
+const DEFAULT_BUCKET = process.env.MINIO_BUCKET || 'stackunder-assets';
 
 export const minioClient = new S3Client({
   endpoint: process.env.MINIO_ENDPOINT || 'http://localhost:9000',
@@ -17,7 +17,7 @@ export const minioClient = new S3Client({
 
 export const getPresignedUploadUrl = async (key, contentType) => {
   const command = new PutObjectCommand({
-    Bucket: process.env.MINIO_BUCKET || 'videolearn',
+    Bucket: DEFAULT_BUCKET,
     Key: key,
     ContentType: contentType,
   });
@@ -27,7 +27,7 @@ export const getPresignedUploadUrl = async (key, contentType) => {
 
 export const downloadFile = async (key) => {
   const command = new GetObjectCommand({
-    Bucket: process.env.MINIO_BUCKET || 'stackunder-assets',
+    Bucket: DEFAULT_BUCKET,
     Key: key,
   });
 
@@ -37,7 +37,7 @@ export const downloadFile = async (key) => {
 
 export const uploadFile = async (key, body, contentType) => {
   const command = new PutObjectCommand({
-    Bucket: process.env.MINIO_BUCKET || 'stackunder-assets',
+    Bucket: DEFAULT_BUCKET,
     Key: key,
     Body: body,
     ContentType: contentType,
@@ -48,12 +48,44 @@ export const uploadFile = async (key, body, contentType) => {
 
 export const getPresignedDownloadUrl = async (key) => {
   const command = new GetObjectCommand({
-    Bucket: process.env.MINIO_BUCKET || 'stackunder-data',
+    Bucket: DEFAULT_BUCKET,
     Key: key,
   });
 
   return await getSignedUrl(minioClient, command, { expiresIn: 3600 });
 };
+
+export const deleteFile = async (key) => {
+  const command = new DeleteObjectCommand({
+    Bucket: DEFAULT_BUCKET,
+    Key: key,
+  });
+
+  return await minioClient.send(command);
+};
+
+export const deleteFolder = async (prefix) => {
+  // 1. List all objects with prefix
+  const listCommand = new ListObjectsV2Command({
+    Bucket: DEFAULT_BUCKET,
+    Prefix: prefix,
+  });
+
+  const listResponse = await minioClient.send(listCommand);
+
+  if (!listResponse.Contents || listResponse.Contents.length === 0) return;
+
+  // 2. Delete all objects found
+  const deleteCommand = new DeleteObjectsCommand({
+    Bucket: DEFAULT_BUCKET,
+    Delete: {
+      Objects: listResponse.Contents.map((obj) => ({ Key: obj.Key })),
+    },
+  });
+
+  return await minioClient.send(deleteCommand);
+};
+
 
 
 
