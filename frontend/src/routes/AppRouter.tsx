@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 // ── Auth ──────────────────────────────────────────────────────────────────────
 import LoginPage from '@/auth/pages/LoginPage'
 import RegisterPage from '@/auth/pages/RegisterPage'
+import LandingPage from '@/auth/pages/LandingPage'
 
 // ── Admin ────────────────────────────────────────────────────────────────────
 import AdminLayout from '@/admin/layout/AdminLayout'
@@ -107,7 +108,7 @@ export default function AppRouter() {
             isAuthenticated && user ? (
               <Navigate to={user?.role === 'student' ? '/student/dashboard' : user?.role === 'instructor' ? '/instructor/dashboard' : '/admin/dashboard'} replace />
             ) : (
-              <Navigate to="/login" replace />
+              <LandingPage />
             )
           }
         />

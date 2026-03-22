@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import "./landing.css";
@@ -127,26 +128,26 @@ function Stars({ n }: { n: number }) {
 // DATA
 // ─────────────────────────────────────────────
 const COURSES = [
-  { id: 1, emoji: "⚛️", tag: "Frontend",  title: "React 19 + TypeScript Complete Guide",        rating: 4.9, reviews: 5120, students: "14.2k", price: "₹499", badge: "Bestseller", accent: "#38bdf8" },
-  { id: 2, emoji: "🐍", tag: "Backend",   title: "Python for Data Science & Machine Learning",  rating: 4.8, reviews: 3800, students: "10.5k", price: "₹599", badge: null,         accent: "#34d399" },
-  { id: 3, emoji: "🎨", tag: "Design",    title: "UI/UX Design System Mastery in Figma",        rating: 4.7, reviews: 2240, students: "7.1k",  price: "₹399", badge: "New",         accent: "#f472b6" },
-  { id: 4, emoji: "☁️", tag: "DevOps",    title: "AWS Cloud Architect Bootcamp 2024",            rating: 4.9, reviews: 1980, students: "5.8k",  price: "₹699", badge: null,         accent: "#fb923c" },
-  { id: 5, emoji: "🤖", tag: "AI / ML",   title: "Generative AI & LLM Engineering",             rating: 5.0, reviews: 2760, students: "9.3k",  price: "₹799", badge: "🔥 Hot",      accent: "#a78bfa" },
-  { id: 6, emoji: "📱", tag: "Mobile",    title: "Flutter Full-Stack App from Scratch",          rating: 4.6, reviews: 1540, students: "4.9k",  price: "₹549", badge: null,         accent: "#facc15" },
+  { id: 1, emoji: "⚛️", tag: "Frontend", title: "React 19 + TypeScript Complete Guide", rating: 4.9, reviews: 5120, students: "14.2k", price: "₹499", badge: "Bestseller", accent: "#38bdf8" },
+  { id: 2, emoji: "🐍", tag: "Backend", title: "Python for Data Science & Machine Learning", rating: 4.8, reviews: 3800, students: "10.5k", price: "₹599", badge: null, accent: "#34d399" },
+  { id: 3, emoji: "🎨", tag: "Design", title: "UI/UX Design System Mastery in Figma", rating: 4.7, reviews: 2240, students: "7.1k", price: "₹399", badge: "New", accent: "#f472b6" },
+  { id: 4, emoji: "☁️", tag: "DevOps", title: "AWS Cloud Architect Bootcamp 2024", rating: 4.9, reviews: 1980, students: "5.8k", price: "₹699", badge: null, accent: "#fb923c" },
+  { id: 5, emoji: "🤖", tag: "AI / ML", title: "Generative AI & LLM Engineering", rating: 5.0, reviews: 2760, students: "9.3k", price: "₹799", badge: "🔥 Hot", accent: "#a78bfa" },
+  { id: 6, emoji: "📱", tag: "Mobile", title: "Flutter Full-Stack App from Scratch", rating: 4.6, reviews: 1540, students: "4.9k", price: "₹549", badge: null, accent: "#facc15" },
 ];
 
 const REVIEWS = [
-  { name: "Priya Sharma", role: "SDE @ Swiggy",      av: "PS", rating: 5, text: "LearnVerse transformed my career in 3 months. The React course has hands-on projects that companies actually care about. Landed my dream job right after finishing!" },
-  { name: "Arjun Mehta",  role: "ML Eng @ Razorpay", av: "AM", rating: 5, text: "The AI/ML curriculum is second to none. Live sessions, mentorship, and a community that genuinely pushes you forward. Worth every rupee — 10×." },
-  { name: "Sneha Patel",  role: "UX Lead @ Zomato",  av: "SP", rating: 5, text: "Got hired 2 weeks after completing the Design course. The portfolio projects are exactly what hiring managers want to see. Absolutely elite content." },
-  { name: "Rahul Gupta",  role: "DevOps @ PhonePe",  av: "RG", rating: 5, text: "The AWS Bootcamp is brutally practical. Real infra projects, not slides. Passed cert on my first attempt and salary jumped 40%." },
+  { name: "Priya Sharma", role: "SDE @ Swiggy", av: "PS", rating: 5, text: "LearnVerse transformed my career in 3 months. The React course has hands-on projects that companies actually care about. Landed my dream job right after finishing!" },
+  { name: "Arjun Mehta", role: "ML Eng @ Razorpay", av: "AM", rating: 5, text: "The AI/ML curriculum is second to none. Live sessions, mentorship, and a community that genuinely pushes you forward. Worth every rupee — 10×." },
+  { name: "Sneha Patel", role: "UX Lead @ Zomato", av: "SP", rating: 5, text: "Got hired 2 weeks after completing the Design course. The portfolio projects are exactly what hiring managers want to see. Absolutely elite content." },
+  { name: "Rahul Gupta", role: "DevOps @ PhonePe", av: "RG", rating: 5, text: "The AWS Bootcamp is brutally practical. Real infra projects, not slides. Passed cert on my first attempt and salary jumped 40%." },
 ];
 
 const STATS = [
   { v: "2.4M+", l: "Learners Worldwide" },
-  { v: "850+",  l: "Expert Courses"     },
-  { v: "4.9 ★", l: "Average Rating"     },
-  { v: "97%",   l: "Placement Rate"     },
+  { v: "850+", l: "Expert Courses" },
+  { v: "4.9 ★", l: "Average Rating" },
+  { v: "97%", l: "Placement Rate" },
 ];
 
 const NAV = ["Courses", "Paths", "Instructors", "Pricing"];
@@ -185,15 +186,15 @@ function CourseCard({ c }: { c: typeof COURSES[0] }) {
 // MAIN PAGE
 // ─────────────────────────────────────────────
 export default function LandingPage() {
-  const navRef     = useRef<HTMLElement>(null);
-  const hTagRef    = useRef<HTMLDivElement>(null);
-  const hH1Ref     = useRef<HTMLHeadingElement>(null);
-  const hSubRef    = useRef<HTMLParagraphElement>(null);
-  const hCtaRef    = useRef<HTMLDivElement>(null);
-  const statsRef   = useRef<HTMLDivElement>(null);
+  const navRef = useRef<HTMLElement>(null);
+  const hTagRef = useRef<HTMLDivElement>(null);
+  const hH1Ref = useRef<HTMLHeadingElement>(null);
+  const hSubRef = useRef<HTMLParagraphElement>(null);
+  const hCtaRef = useRef<HTMLDivElement>(null);
+  const statsRef = useRef<HTMLDivElement>(null);
   const coursesRef = useRef<HTMLElement>(null);
   const reviewsRef = useRef<HTMLElement>(null);
-  const ctaBRef    = useRef<HTMLElement>(null);
+  const ctaBRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -209,25 +210,33 @@ export default function LandingPage() {
       gsap.fromTo(
         statsRef.current?.querySelectorAll(".stat-card") ?? [],
         { y: 45, opacity: 0, scale: 0.88 },
-        { y: 0, opacity: 1, scale: 1, stagger: 0.11, duration: 0.65, ease: "back.out(1.5)",
-          scrollTrigger: { trigger: statsRef.current, start: "top 84%" } }
+        {
+          y: 0, opacity: 1, scale: 1, stagger: 0.11, duration: 0.65, ease: "back.out(1.5)",
+          scrollTrigger: { trigger: statsRef.current, start: "top 84%" }
+        }
       );
       gsap.fromTo(
         coursesRef.current?.querySelectorAll(".cc") ?? [],
         { y: 65, opacity: 0 },
-        { y: 0, opacity: 1, stagger: 0.08, duration: 0.7, ease: "power3.out",
-          scrollTrigger: { trigger: coursesRef.current, start: "top 80%" } }
+        {
+          y: 0, opacity: 1, stagger: 0.08, duration: 0.7, ease: "power3.out",
+          scrollTrigger: { trigger: coursesRef.current, start: "top 80%" }
+        }
       );
       gsap.fromTo(
         reviewsRef.current?.querySelectorAll(".review-card") ?? [],
         { x: -45, opacity: 0 },
-        { x: 0, opacity: 1, stagger: 0.13, duration: 0.7, ease: "power3.out",
-          scrollTrigger: { trigger: reviewsRef.current, start: "top 80%" } }
+        {
+          x: 0, opacity: 1, stagger: 0.13, duration: 0.7, ease: "power3.out",
+          scrollTrigger: { trigger: reviewsRef.current, start: "top 80%" }
+        }
       );
       gsap.fromTo(ctaBRef.current,
         { scale: 0.9, opacity: 0 },
-        { scale: 1, opacity: 1, duration: 0.8, ease: "back.out(1.3)",
-          scrollTrigger: { trigger: ctaBRef.current, start: "top 84%" } }
+        {
+          scale: 1, opacity: 1, duration: 0.8, ease: "back.out(1.3)",
+          scrollTrigger: { trigger: ctaBRef.current, start: "top 84%" }
+        }
       );
     });
     return () => ctx.revert();
@@ -255,8 +264,8 @@ export default function LandingPage() {
           {NAV.map(l => <li key={l}><a href="#" className="nav-link">{l}</a></li>)}
         </ul>
         <div className="nav-auth">
-          <button className="btn btn--ghost">Log In</button>
-          <button className="btn btn--primary">Sign Up</button>
+          <Link to="/login" className="btn btn--ghost">Log In</Link>
+          <Link to="/register" className="btn btn--primary">Sign Up</Link>
         </div>
       </nav>
 
@@ -282,7 +291,7 @@ export default function LandingPage() {
         </p>
 
         <div ref={hCtaRef} className="hero-cta" style={{ opacity: 0 }}>
-          <button className="btn btn--primary btn--lg">🚀 Get Started Free</button>
+          <Link to="/register" className="btn btn--primary btn--lg">🚀 Get Started Free</Link>
           <button className="btn btn--ghost btn--lg">▶ Watch Demo</button>
         </div>
 
@@ -353,7 +362,7 @@ export default function LandingPage() {
           <span className="cta-ico">🎯</span>
           <h2 className="cta-h2">Ready to <em>Level Up?</em></h2>
           <p className="cta-sub">Start your 7-day free trial. No credit card required.</p>
-          <button className="btn btn--primary btn--lg">🚀 Start Learning Free</button>
+          <Link to="/register" className="btn btn--primary btn--lg">🚀 Start Learning Free</Link>
         </div>
       </section>
 
@@ -363,7 +372,7 @@ export default function LandingPage() {
           <div className="footer-brand">
             <a href="#" className="logo logo--light">
               <span className="logo__icon">🎓</span>
-              Learn<span className="logo__ac">Verse</span>
+              Vault<span className="logo__ac">Learn</span>
             </a>
             <p className="footer-desc">
               Empowering 2.4M+ learners with world-class tech education.
@@ -376,9 +385,9 @@ export default function LandingPage() {
             </div>
           </div>
           {[
-            { h: "Learn",   ls: ["All Courses","Learning Paths","Certifications","Live Classes","Workshops"] },
-            { h: "Company", ls: ["About Us","Careers","Blog","Press","Investors"] },
-            { h: "Support", ls: ["Help Center","Contact Us","Privacy Policy","Terms","Refunds"] },
+            { h: "Learn", ls: ["All Courses", "Learning Paths", "Certifications", "Live Classes", "Workshops"] },
+            { h: "Company", ls: ["About Us", "Careers", "Blog", "Press", "Investors"] },
+            { h: "Support", ls: ["Help Center", "Contact Us", "Privacy Policy", "Terms", "Refunds"] },
           ].map(col => (
             <div className="footer-col" key={col.h}>
               <h4 className="footer-col-h">{col.h}</h4>
@@ -387,9 +396,9 @@ export default function LandingPage() {
           ))}
         </div>
         <div className="footer-bar">
-          <span>© 2024 LearnVerse Technologies Pvt. Ltd. All rights reserved.</span>
+          <span>© 2026 VaultLearn Technologies Pvt. Ltd. All rights reserved.</span>
           <div className="footer-legal">
-            {["Privacy","Terms","Cookies"].map(l => <a href="#" key={l}>{l}</a>)}
+            {["Privacy", "Terms", "Cookies"].map(l => <a href="#" key={l}>{l}</a>)}
           </div>
         </div>
       </footer>
