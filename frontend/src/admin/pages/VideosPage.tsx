@@ -2,7 +2,8 @@ import { useState, useMemo } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { type ColumnDef } from '@tanstack/react-table'
 import { Plus, Pencil, Trash2, Video, Play, Clock, Calendar, Layout, Trash, Edit, Eye, UploadCloud, Film } from 'lucide-react'
-import { videoService, courseService } from '@/admin/services'
+import { videoService, courseService, storageService } from '@/admin/services'
+
 import { DataTable } from '@/admin/components/DataTable'
 import VideoPlayer from '@/admin/components/VideoPlayer'
 import { PageHeader, Badge, Spinner, Card, CardContent, Button, Input, Textarea, Select } from '@/admin/components/ui'
@@ -25,9 +26,17 @@ const emptyForm = { title: '', description: '', duration: '', courseId: '' }
 const getThumbnailUrl = (path: string | null) => {
   if (!path) return null
   if (path.startsWith('http')) return path
+
   const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace('/api', '')
+
+  // If it's an S3 key (doesn't start with /), use our proxy route
+  if (path.startsWith('thumbnails/')) {
+    return `${baseUrl}/api/storage/thumbnail?key=${path}`
+  }
+
   return `${baseUrl}${path}`
 }
+
 
 export default function VideosPage() {
   const qc = useQueryClient()
@@ -62,6 +71,41 @@ export default function VideosPage() {
 
   const saveMutation = useMutation({
     mutationFn: async () => {
+      // If we have a new video file, use the direct S3 upload flow
+      if (videoFile) {
+        toast.info('Initializing secure S3 uplink...');
+
+        // 1. Get Presigned URL for Video
+        const { url: videoUrl, key: videoKey } = await storageService.getPresignedUrl(
+          videoFile.name,
+          videoFile.type,
+          'videos/raw'
+        );
+
+        // 2. Upload Video to S3
+        await storageService.uploadFileToS3(videoUrl, videoFile);
+
+        // 3. Handle Thumbnail if exists
+        let finalThumbnail = (form as any).thumbnail;
+        if (thumbnailFile) {
+          const { url: thumbUrl, key: thumbKey } = await storageService.getPresignedUrl(
+            thumbnailFile.name,
+            thumbnailFile.type,
+            'thumbnails'
+          );
+          await storageService.uploadFileToS3(thumbUrl, thumbnailFile);
+          finalThumbnail = thumbKey; // Use S3 key
+        }
+
+        // 4. Register with Backend
+        return videoService.createFromS3({
+          ...form,
+          s3Key: videoKey,
+          thumbnail: finalThumbnail
+        });
+      }
+
+      // Fallback to existing FormData flow for edits or legacy uploads
       const fd = new FormData()
       Object.entries(form).forEach(([k, v]) => fd.append(k, v))
       if (thumbnailFile) {
@@ -69,16 +113,19 @@ export default function VideosPage() {
       } else if ((form as any).thumbnail) {
         fd.append('thumbnail', (form as any).thumbnail)
       }
-      if (videoFile) fd.append('video', videoFile)
       return editItem ? videoService.update(editItem.id, fd) : videoService.create(fd)
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['videos'] });
-      toast.success(editItem ? 'HLS Asset reconfigured.' : 'Broadcast segment initialized.');
+      toast.success(editItem ? 'Signal configuration updated.' : 'Asset archived in S3 storage.');
       setModalOpen(false)
     },
-    onError: () => toast.error('Security Protocol Failure: Asset sync rejected.'),
+    onError: (err: any) => {
+      console.error(err);
+      toast.error('Sync Interrupted: Protocol rejection or network failure.');
+    },
   })
+
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => videoService.delete(id),
@@ -151,51 +198,51 @@ export default function VideosPage() {
       )
     },
     {
-  id: 'actions',
-  header: 'Management',
-  cell: ({ row }) => (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-9 w-9 rounded-xl hover:bg-muted/50 transition-all"
-        >
-          <MoreVertical className="w-4 h-4" />
-        </Button>
-      </DropdownMenuTrigger>
+      id: 'actions',
+      header: 'Management',
+      cell: ({ row }) => (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9 rounded-xl hover:bg-muted/50 transition-all"
+            >
+              <MoreVertical className="w-4 h-4" />
+            </Button>
+          </DropdownMenuTrigger>
 
-      <DropdownMenuContent
-        align="end"
-        className="w-40 rounded-xl border-border/50 shadow-lg z-50"
-      >
-        <DropdownMenuItem
-          onClick={() => setViewVideo(row.original)}
-          className="flex items-center gap-2 cursor-pointer"
-        >
-          <Eye className="w-4 h-4" />
-          View
-        </DropdownMenuItem>
+          <DropdownMenuContent
+            align="end"
+            className="w-40 rounded-xl border-border/50 shadow-lg z-50"
+          >
+            <DropdownMenuItem
+              onClick={() => setViewVideo(row.original)}
+              className="flex items-center gap-2 cursor-pointer"
+            >
+              <Eye className="w-4 h-4" />
+              View
+            </DropdownMenuItem>
 
-        <DropdownMenuItem
-          onClick={() => openEdit(row.original)}
-          className="flex items-center gap-2 cursor-pointer"
-        >
-          <Edit className="w-4 h-4" />
-          Edit
-        </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => openEdit(row.original)}
+              className="flex items-center gap-2 cursor-pointer"
+            >
+              <Edit className="w-4 h-4" />
+              Edit
+            </DropdownMenuItem>
 
-        <DropdownMenuItem
-          onClick={() => setDeleteId(row.original.id)}
-          className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive"
-        >
-          <Trash className="w-4 h-4" />
-          Delete
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  ),
-},
+            <DropdownMenuItem
+              onClick={() => setDeleteId(row.original.id)}
+              className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive"
+            >
+              <Trash className="w-4 h-4" />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ),
+    },
   ], [courses])
 
   if (isLoading) return (

@@ -48,6 +48,8 @@ export * as moduleService from './moduleService'
 export * as lectureService from './lectureService'
 export * as blogService from './blogService'
 export * as categoryService from './categoryService'
+export * as storageService from './storageService'
+
 
 export const MOCK_ANALYTICS = {
   totalStudents: 1284,

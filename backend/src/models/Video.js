@@ -10,8 +10,10 @@ const VideoSchema = new mongoose.Schema({
   courseId: { type: mongoose.Schema.Types.ObjectId, ref: 'Course', default: null },
   instructorId: { type: mongoose.Schema.Types.ObjectId, ref: 'Instructor', default: null },
   status: { type: String, default: 'processing' },
+  s3Key: { type: String, default: null }, // Original video key in S3
   createdAt: { type: Date, default: Date.now },
 });
+
 
 applySchemaTransform(VideoSchema);
 

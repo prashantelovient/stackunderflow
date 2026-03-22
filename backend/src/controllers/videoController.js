@@ -38,6 +38,40 @@ export const uploadVideo = async (req, res, next) => {
   }
 };
 
+export const createVideoFromS3 = async (req, res, next) => {
+  try {
+    const { title, description, duration, courseId, s3Key, thumbnail } = req.body;
+
+    if (!s3Key) {
+      return res.status(400).json({ message: 's3Key is required for direct upload' });
+    }
+
+    const courseObjectId = courseId && mongoose.Types.ObjectId.isValid(courseId) ? courseId : null;
+
+    const video = await Video.create({
+      title,
+      description,
+      videoPath: '', // Will be updated by the worker
+      thumbnail: thumbnail, // This might be an S3 key or URL too
+      duration: duration ? parseInt(duration, 10) : null,
+      courseId: courseObjectId,
+      instructorId: req.user.role === 'instructor' ? req.user.id : (req.body.instructorId || null),
+      status: 'processing',
+      s3Key: s3Key, // Store the raw video S3 key
+    });
+
+    // In a full implementation, the worker would download from S3, 
+    // process, then upload HLS back to S3.
+    // For now, we trigger the processor. We might need to handle the S3 source in the worker.
+    processVideoToHLS(video.id, s3Key, true).catch(console.error);
+
+    res.status(201).json({ ...video, message: 'Video record created. Processing initiated from S3 source.' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
 export const getVideos = async (req, res, next) => {
   try {
     const query = {};

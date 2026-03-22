@@ -19,6 +19,12 @@ export const create = async (formData: FormData) => {
   return response.data;
 };
 
+export const createFromS3 = async (data: any) => {
+  const response = await api.post('/videos/s3-create', data);
+  return response.data;
+};
+
+
 export const update = async (id: string, data: any) => {
   const response = await api.put(`/videos/${id}`, data);
   return response.data;
