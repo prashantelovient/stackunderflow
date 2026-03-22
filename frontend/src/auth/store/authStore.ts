@@ -5,6 +5,7 @@ export type UserRole = 'student' | 'instructor' | 'admin'
 
 interface User {
     id: string
+    _id?: string
     name: string
     email: string
     avatar?: string

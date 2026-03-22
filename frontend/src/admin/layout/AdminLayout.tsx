@@ -2,7 +2,7 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard, Users, Video, ListVideo, BookOpen,
   Tag, Settings, LogOut, Menu, X, Bell, Sun, Moon,
-  GraduationCap, ChevronLeft, ChevronRight
+  GraduationCap, ChevronLeft, ChevronRight, MessageSquare
 } from 'lucide-react'
 import { useState } from 'react'
 import { useAuthStore } from '@/auth/store/authStore'
@@ -19,6 +19,7 @@ const navItems = [
   { to: '/admin/courses', icon: ListVideo, label: 'Courses' },
   { to: '/admin/blogs', icon: BookOpen, label: 'Blogs' },
   { to: '/admin/categories', icon: Tag, label: 'Categories' },
+  { to: '/admin/messages', icon: MessageSquare, label: 'Messages' },
   { to: '/admin/settings', icon: Settings, label: 'Settings' },
 ]
 

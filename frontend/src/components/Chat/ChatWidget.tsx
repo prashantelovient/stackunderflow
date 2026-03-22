@@ -1,212 +1,138 @@
-import React, { useState, useEffect, useRef } from 'react'
-import { io, Socket } from 'socket.io-client'
-import { MessageCircle, Send, X, User, Shield, GraduationCap, Laptop } from 'lucide-react'
-import { useAuthStore } from '../../auth/store/authStore'
-import { chatService, Message } from './chatService'
-import './ChatWidget.css'
-
-const SOCKET_URL = 'http://localhost:5000'
+import React from 'react';
+import { MessageCircle, X, Maximize2, Minimize2 } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useChatStore } from './useChatStore';
+import ChatList from './ChatList';
+import ChatWindow from './ChatWindow';
+import { cn } from '@/lib/utils';
+import { useChat } from './useChat';
+import { useNavigate, useLocation } from 'react-router-dom';
+import './ChatWidget.css';
 
 const ChatWidget: React.FC = () => {
-    const { user, token, isAuthenticated } = useAuthStore()
-    const [isOpen, setIsOpen] = useState(false)
-    const [messages, setMessages] = useState<Message[]>([])
-    const [inputValue, setInputValue] = useState('')
-    const [isSocketConnected, setIsSocketConnected] = useState(false)
-    const [typingUser, setTypingUser] = useState<{name: string, role: string} | null>(null)
-    const socketRef = useRef<Socket | null>(null)
-    const messagesEndRef = useRef<HTMLDivElement>(null)
-    const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const { isOpen, toggleChat, activeConversationId, setActiveConversation } = useChatStore();
+  const { conversations } = useChat(activeConversationId);
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Calculate unread? (Optional, if seenBy is implemented)
+  const unreadTotal = 0; 
 
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  const handleFullView = () => {
+    const basePath = location.pathname.split('/')[1];
+    if (['admin', 'instructor', 'student'].includes(basePath)) {
+        navigate(`/${basePath}/messages`);
+    } else {
+        navigate('/instructor/messages');
     }
+    toggleChat(false);
+  };
 
-    useEffect(() => {
-        if (isOpen) {
-            scrollToBottom()
-        }
-    }, [messages, isOpen])
+  return (
+    <div className="fixed bottom-6 right-6 z-[9999] flex flex-col items-end pointer-events-none">
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 30, scale: 0.9, filter: 'blur(10px)' }}
+            animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
+            exit={{ opacity: 0, y: 30, scale: 0.95, filter: 'blur(10px)' }}
+            transition={{ type: 'spring', damping: 20, stiffness: 200 }}
+            className="w-[26rem] h-[34rem] bg-background/60 backdrop-blur-2xl border border-border/80 rounded-[2.5rem] shadow-[0_32px_96px_-16px_rgba(0,0,0,0.5)] overflow-hidden flex flex-col mb-4 pointer-events-auto"
+          >
+            {/* Header / Global Controls */}
+            <div className="p-4 flex items-center justify-between border-b border-border/40 bg-background/40 backdrop-blur-3xl z-30">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-primary/10 text-primary rounded-[1.25rem] shadow-sm">
+                  <MessageCircle size={22} className="stroke-[2.5]" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-[16px] leading-tight flex items-center gap-2">
+                    Vault Chat
+                    {unreadTotal > 0 && <span className="bg-red-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-lg animate-pulse">{unreadTotal}</span>}
+                  </h3>
+                  <p className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-widest">{activeConversationId ? 'Chatting' : 'Select Thread'}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 text-foreground">
+                {activeConversationId && (
+                    <button 
+                        onClick={() => setActiveConversation(null)} 
+                        className="p-2 text-muted-foreground hover:bg-secondary rounded-xl transition-all"
+                        title="Back to List"
+                    >
+                        <Minimize2 size={18} />
+                    </button>
+                )}
+                <button 
+                    onClick={handleFullView} 
+                    className="p-2 text-muted-foreground hover:bg-secondary rounded-xl transition-all"
+                    title="Full View"
+                >
+                    <Maximize2 size={18} />
+                </button>
+                <button 
+                    onClick={() => toggleChat(false)} 
+                    className="p-2 text-muted-foreground hover:bg-red-500/10 hover:text-red-500 rounded-xl transition-all active:scale-95"
+                    title="Close"
+                >
+                    <X size={20} strokeWidth={2.5} />
+                </button>
+              </div>
+            </div>
 
-    useEffect(() => {
-        if (!isAuthenticated || !token || !user) return
-
-        // Initialize Socket
-        const socket = io(SOCKET_URL, {
-            auth: { token },
-            transports: ['websocket']
-        })
-
-        socketRef.current = socket
-
-        socket.on('connect', () => {
-            console.log('Socket connected')
-            setIsSocketConnected(true)
-            socket.emit('join-chat')
-        })
-
-        socket.on('disconnect', () => {
-            console.log('Socket disconnected')
-            setIsSocketConnected(false)
-        })
-
-        socket.on('new-message', (message: Message) => {
-            setMessages(prev => [...prev, message])
-        })
-
-        socket.on('user-typing', (data: {userId: string, userName: string, role: string, isTyping: boolean}) => {
-            if (data.userId !== user.id) {
-                if (data.isTyping) {
-                    setTypingUser({ name: data.userName, role: data.role })
-                } else {
-                    setTypingUser(null)
-                }
-            }
-        })
-
-        // Fetch initial messages
-        const fetchHistory = async () => {
-            try {
-                const history = await chatService.getMessages(token)
-                setMessages(history)
-            } catch (err) {
-                console.error('Failed to fetch chat history', err)
-            }
-        }
-
-        fetchHistory()
-
-        return () => {
-            socket.disconnect()
-        }
-    }, [isAuthenticated, token, user])
-
-    const handleSendMessage = () => {
-        if (!inputValue.trim() || !socketRef.current || !user) return
-
-        const messageData = {
-            message: inputValue,
-            senderName: user.name,
-            senderRole: user.role,
-            senderId: user.id,
-            senderModel: user.role.charAt(0).toUpperCase() + user.role.slice(1)
-        }
-
-        socketRef.current.emit('send-message', messageData)
-        setInputValue('')
-        
-        // Notify not typing anymore
-        socketRef.current.emit('typing', { isTyping: false })
-    }
-
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setInputValue(e.target.value)
-
-        if (!socketRef.current) return
-
-        // Handle typing indicator
-        socketRef.current.emit('typing', { isTyping: true })
-
-        if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current)
-        
-        typingTimeoutRef.current = setTimeout(() => {
-            socketRef.current?.emit('typing', { isTyping: false })
-        }, 3000)
-    }
-
-    const handleKeyPress = (e: React.KeyboardEvent) => {
-        if (e.key === 'Enter') handleSendMessage()
-    }
-
-    const getRoleIcon = (role: string) => {
-        switch (role) {
-            case 'admin': return <Shield size={12} />
-            case 'instructor': return <GraduationCap size={12} />
-            case 'student': return <Laptop size={12} />
-            default: return <User size={12} />
-        }
-    }
-
-    if (!isAuthenticated) return null
-
-    return (
-        <div className="chat-widget-container">
-            {isOpen ? (
-                <div className="chat-window shadow-xl">
-                    <div className="chat-header">
-                        <div className="flex items-center gap-3">
-                            <MessageCircle size={20} />
-                            <div>
-                                <h3>Global Team Chat</h3>
-                                <div className="chat-status">
-                                    <div className={`status-dot ${isSocketConnected ? 'bg-green-400' : 'bg-red-400'}`} />
-                                    <span>{isSocketConnected ? 'Connected' : 'Disconnected'}</span>
-                                </div>
-                            </div>
-                        </div>
-                        <button onClick={() => setIsOpen(false)} className="hover:bg-white/20 p-1 rounded-full transition-colors">
-                            <X size={20} strokeWidth={2.5} />
-                        </button>
+            {/* Content Area */}
+            <div className="flex-1 overflow-hidden flex relative">
+                <div className={cn(
+                    "flex w-[200%] h-full transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)]",
+                    activeConversationId ? "-translateX-1/2" : "translateX-0"
+                )}>
+                    <div className="w-1/2 h-full">
+                        <ChatList />
                     </div>
-
-                    <div className="chat-messages">
-                        {messages.length === 0 && (
-                            <div className="flex flex-col items-center justify-center h-full opacity-40 text-center px-6">
-                                <MessageCircle size={48} className="mb-4" />
-                                <p>No messages yet. Start the conversation!</p>
-                            </div>
-                        )}
-                        {messages.map((msg, idx) => (
-                            <div key={msg.id || idx} className={`message-item ${msg.senderId === user?.id ? 'own' : 'others'}`}>
-                                <div className="message-header">
-                                    <span className="sender-name">{msg.senderName}</span>
-                                    <span className={`role-badge role-${msg.senderRole} flex items-center gap-1`}>
-                                        {getRoleIcon(msg.senderRole)}
-                                        {msg.senderRole}
-                                    </span>
-                                </div>
-                                <div className="message-bubble shadow-sm">
-                                    {msg.message}
-                                </div>
-                                <div className="message-time">
-                                    {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                </div>
-                            </div>
-                        ))}
-                        <div ref={messagesEndRef} />
-                    </div>
-
-                    <div className="chat-input-area">
-                        <div className="typing-indicator">
-                            {typingUser && `${typingUser.name} is typing...`}
-                        </div>
-                        <div className="chat-input-wrapper">
-                            <input
-                                type="text"
-                                className="chat-input"
-                                placeholder="Write a message..."
-                                value={inputValue}
-                                onChange={handleInputChange}
-                                onKeyDown={handleKeyPress}
-                            />
-                            <button 
-                                className="send-button"
-                                onClick={handleSendMessage}
-                                disabled={!inputValue.trim()}
-                            >
-                                <Send size={18} />
-                            </button>
-                        </div>
+                    <div className="w-1/2 h-full">
+                        <ChatWindow />
                     </div>
                 </div>
-            ) : (
-                <button className="chat-button" onClick={() => setIsOpen(true)}>
-                    <MessageCircle size={24} />
-                    {/* Optional: Add badge for new messages here */}
-                </button>
-            )}
-        </div>
-    )
-}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-export default ChatWidget
+      {/* Toggle Button */}
+      <motion.button
+        whileHover={{ scale: 1.1, rotate: 5 }}
+        whileTap={{ scale: 0.9, rotate: -5 }}
+        onClick={() => toggleChat()}
+        className={cn(
+            "w-16 h-16 rounded-[2rem] bg-gradient-to-br from-primary to-cosmic-secondary text-white shadow-[0_16px_32px_-8px_rgba(0,0,0,0.3)] flex items-center justify-center relative pointer-events-auto transition-all transition-shadow",
+            isOpen ? "shadow-[0_4px_16px_rgba(0,0,0,0.2)] scale-90" : "hover:shadow-[0_24px_48px_rgba(0,0,0,0.4)]"
+        )}
+      >
+        <AnimatePresence mode="wait">
+          {isOpen ? (
+            <motion.div
+              key="close"
+              initial={{ rotate: -90, opacity: 0, scale: 0.5 }}
+              animate={{ rotate: 0, opacity: 1, scale: 1 }}
+              exit={{ rotate: 90, opacity: 0, scale: 0.5 }}
+            >
+              <Minimize2 size={28} className="stroke-[2.5]" />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="open"
+              initial={{ rotate: 90, opacity: 0, scale: 0.5 }}
+              animate={{ rotate: 0, opacity: 1, scale: 1 }}
+              exit={{ rotate: -90, opacity: 0, scale: 0.5 }}
+              className="relative"
+            >
+              <MessageCircle size={28} className="stroke-[2.5]" />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.button>
+    </div>
+  );
+};
+
+export default ChatWidget;

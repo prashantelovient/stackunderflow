@@ -1,29 +1,50 @@
-import axios from 'axios'
+import axios from 'axios';
+import { Conversation, Message } from './types';
 
-const API_BASE = 'http://localhost:5000/api/messages'
+const API_BASE_URL = 'http://localhost:5000/api/messages'; // Or project environment variable
 
-export interface Message {
-    id: string
-    senderId: string
-    senderName: string
-    senderRole: 'admin' | 'instructor' | 'student'
-    senderModel: 'Admin' | 'Instructor' | 'Student'
-    message: string
-    timestamp: string
-}
+const getAuthToken = () => {
+  const authStore = JSON.parse(localStorage.getItem('vault-auth') || '{}');
+  return authStore.state?.token || '';
+};
+
+const api = axios.create({
+  baseURL: API_BASE_URL,
+});
+
+api.interceptors.request.use((config) => {
+  const token = getAuthToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
 
 export const chatService = {
-    async getMessages(token: string, before?: string): Promise<Message[]> {
-        const response = await axios.get(API_BASE, {
-            headers: { Authorization: `Bearer ${token}` },
-            params: { before }
-        })
-        return response.data
-    },
-    async sendMessageByHttp(token: string, data: Partial<Message>): Promise<Message> {
-        const response = await axios.post(API_BASE, data, {
-            headers: { Authorization: `Bearer ${token}` }
-        })
-        return response.data
-    }
-}
+  getConversations: async (userId: string): Promise<Conversation[]> => {
+    const response = await api.get(`/conversations?userId=${userId}`);
+    return response.data;
+  },
+
+  getMessages: async (conversationId: string): Promise<Message[]> => {
+    const response = await api.get(`/?conversationId=${conversationId}`);
+    return response.data;
+  },
+
+  sendMessage: async (messageData: {
+    conversationId: string;
+    senderId: string;
+    senderRole: string;
+    senderName: string;
+    senderModel: string;
+    text: string;
+  }): Promise<Message> => {
+    const response = await api.post('/', messageData);
+    return response.data.data;
+  },
+
+  createConversation: async (participants: Array<{ userId: string; role: string; name: string; roleModel: string }>): Promise<Conversation> => {
+    const response = await api.post('/conversations', participants);
+    return response.data;
+  }
+};

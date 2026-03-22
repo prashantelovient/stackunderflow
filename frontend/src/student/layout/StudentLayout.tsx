@@ -1,7 +1,7 @@
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
 import {
   LayoutDashboard, BookOpen, User, LogOut, Menu, X,
-  Sun, Moon, GraduationCap, PlaySquare, Bell, ChevronRight
+  Sun, Moon, GraduationCap, PlaySquare, Bell, ChevronRight, MessageSquare
 } from 'lucide-react'
 import { useState } from 'react'
 import { useAuthStore } from '@/auth/store/authStore'
@@ -16,6 +16,7 @@ const navItems = [
   { to: '/student/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/student/courses', icon: PlaySquare, label: 'My Courses' },
   { to: '/student/blogs', icon: BookOpen, label: 'Blogs' },
+  { to: '/student/messages', icon: MessageSquare, label: 'Messages' },
   { to: '/student/profile', icon: User, label: 'Profile' },
 ]
 

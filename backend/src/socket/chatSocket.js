@@ -1,6 +1,7 @@
 import { Server } from 'socket.io';
 import jwt from 'jsonwebtoken';
 import Message from '../models/Message.js';
+import Conversation from '../models/Conversation.js';
 
 let io;
 
@@ -19,7 +20,9 @@ export const initChatSocket = (server) => {
     }
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      socket.user = decoded;
+      socket.userId = decoded.id;
+      socket.userRole = decoded.role;
+      socket.userName = decoded.name;
       next();
     } catch (err) {
       return next(new Error('Invalid token'));
@@ -27,44 +30,64 @@ export const initChatSocket = (server) => {
   });
 
   io.on('connection', (socket) => {
-    console.log(`User connected: ${socket.user.id} (${socket.user.role})`);
+    console.log(`User connected: ${socket.userId} (${socket.userRole})`);
 
-    socket.on('join-chat', () => {
-      socket.join('global-chat');
-      console.log(`User ${socket.user.id} joined global chat`);
+    socket.on('join-conversation', (conversationId) => {
+      socket.join(conversationId);
+      console.log(`User ${socket.userId} joined conversation: ${conversationId}`);
+    });
+
+    socket.on('leave-conversation', (conversationId) => {
+      socket.leave(conversationId);
+      console.log(`User ${socket.userId} left conversation: ${conversationId}`);
     });
 
     socket.on('send-message', async (data) => {
       try {
-        const { message, senderName, senderRole, senderId, senderModel } = data;
+        const { conversationId, text, senderName, senderRole, senderId, senderModel } = data;
 
-        if (!message || message.trim() === '') return;
+        if (!text || text.trim() === '') return;
 
-        const newMessage = await Message.create({
-          message,
-          senderId: senderId || socket.user.id,
-          senderName: senderName || socket.user.name,
-          senderRole: senderRole || socket.user.role,
-          senderModel: senderModel || (socket.user.role.charAt(0).toUpperCase() + socket.user.role.slice(1)),
+        const newMessage = new Message({
+          conversationId,
+          text,
+          senderId: senderId || socket.userId,
+          senderName: senderName || socket.userName,
+          senderRole: senderRole || socket.userRole,
+          senderModel: senderModel || (socket.userRole.charAt(0).toUpperCase() + socket.userRole.slice(1)),
         });
 
-        io.to('global-chat').emit('new-message', newMessage);
+        await newMessage.save();
+
+        // Update conversation
+        await Conversation.findByIdAndUpdate(conversationId, {
+          lastMessage: {
+            text,
+            senderId: socket.userId,
+            timestamp: new Date(),
+          },
+          updatedAt: new Date(),
+        });
+
+        io.to(conversationId).emit('message-received', newMessage);
+        io.emit('conversation-updated', { conversationId, lastMessage: newMessage });
       } catch (error) {
         console.error('Socket error sending message:', error);
       }
     });
 
     socket.on('typing', (data) => {
-      socket.to('global-chat').emit('user-typing', {
-        userId: socket.user.id,
-        userName: socket.user.name,
-        role: socket.user.role,
-        isTyping: data.isTyping,
+      const { conversationId, isTyping } = data;
+      socket.to(conversationId).emit('user-typing', {
+        userId: socket.userId,
+        userName: socket.userName,
+        role: socket.userRole,
+        isTyping,
       });
     });
 
     socket.on('disconnect', () => {
-      console.log(`User disconnected: ${socket.user.id}`);
+      console.log(`User disconnected: ${socket.userId}`);
     });
   });
 

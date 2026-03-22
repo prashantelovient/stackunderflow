@@ -37,6 +37,7 @@ import WatchPage from '@/student/pages/WatchPage'
 import StudentBlogsPage from '@/student/pages/BlogsPage'
 import BlogDetailPage from '@/student/pages/BlogDetailPage'
 import ProfilePage from '@/student/pages/ProfilePage'
+import ChatDashboardPage from '@/pages/chat/ChatDashboardPage'
 
 // ── Route guards ──────────────────────────────────────────────────────────────
 function ProtectedRoute({
@@ -131,6 +132,7 @@ export default function AppRouter() {
           <Route path="blogs" element={<StudentBlogsPage />} />
           <Route path="blog/:id" element={<BlogDetailPage />} />
           <Route path="profile" element={<ProfilePage />} />
+          <Route path="messages" element={<ChatDashboardPage />} />
         </Route>
 
         {/* ── Instructor protected ──────────────────────────── */}
@@ -150,7 +152,7 @@ export default function AppRouter() {
           <Route path="enrollments" element={<InstructorEnrollmentsPage />} />
           <Route path="analytics" element={<InstructorAnalyticsPage />} />
 
-          <Route path="messages" element={<div className="p-8 text-white h-[400px] flex items-center justify-center border border-dashed border-slate-800 rounded-3xl bg-slate-900/40">Instructor Messages (Coming Soon)</div>} />
+          <Route path="messages" element={<ChatDashboardPage />} />
           <Route path="settings" element={<InstructorSettingsPage />} />
         </Route>
 
@@ -170,6 +172,7 @@ export default function AppRouter() {
           <Route path="courses" element={<AdminCoursesPage />} />
           <Route path="blogs" element={<AdminBlogsPage />} />
           <Route path="categories" element={<CategoriesPage />} />
+          <Route path="messages" element={<ChatDashboardPage />} />
           <Route path="settings" element={<SettingsPage />} />
         </Route>
 
