@@ -25,6 +25,7 @@ import InstructorVideosPage from '@/instructor/pages/VideosPage'
 import InstructorStudentsPage from '@/instructor/pages/StudentsPage'
 import InstructorEnrollmentsPage from '@/instructor/pages/EnrollmentsPage'
 import InstructorAnalyticsPage from '@/instructor/pages/AnalyticsPage'
+import InstructorSettingsPage from '@/instructor/pages/InstructorSettingsPage'
 
 
 // ── Student ───────────────────────────────────────────────────────────────────
@@ -150,7 +151,7 @@ export default function AppRouter() {
           <Route path="analytics" element={<InstructorAnalyticsPage />} />
 
           <Route path="messages" element={<div className="p-8 text-white h-[400px] flex items-center justify-center border border-dashed border-slate-800 rounded-3xl bg-slate-900/40">Instructor Messages (Coming Soon)</div>} />
-          <Route path="settings" element={<div className="p-8 text-white h-[400px] flex items-center justify-center border border-dashed border-slate-800 rounded-3xl bg-slate-900/40">Instructor Settings (Coming Soon)</div>} />
+          <Route path="settings" element={<InstructorSettingsPage />} />
         </Route>
 
         {/* ── Admin protected ─────────────────────────────── */}
