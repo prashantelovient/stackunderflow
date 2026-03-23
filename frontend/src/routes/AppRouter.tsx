@@ -1,47 +1,57 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuthStore } from '@/auth/store/authStore'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense, lazy } from 'react'
 
-// ── Auth ──────────────────────────────────────────────────────────────────────
-import LoginPage from '@/auth/pages/LoginPage'
-import RegisterPage from '@/auth/pages/RegisterPage'
-import LandingPage from '@/auth/pages/LandingPage'
+// 🔥 Lazy Imports
 
-// ── Admin ────────────────────────────────────────────────────────────────────
-import AdminLayout from '@/admin/layout/AdminLayout'
-import DashboardPage from '@/admin/pages/DashboardPage'
-import StudentsPage from '@/admin/pages/StudentsPage'
-import VideosPage from '@/admin/pages/VideosPage'
-import AdminCoursesPage from '@/admin/pages/CoursesPage'
-import AdminBlogsPage from '@/admin/pages/BlogsPage'
-import CategoriesPage from '@/admin/pages/CategoriesPage'
-import SettingsPage from '@/admin/pages/SettingsPage'
+// Auth
+const LoginPage = lazy(() => import('@/auth/pages/LoginPage'))
+const RegisterPage = lazy(() => import('@/auth/pages/RegisterPage'))
+const LandingPage = lazy(() => import('@/auth/pages/LandingPage'))
 
-// ── Instructor ──────────────────────────────────────────────────────────────
-import InstructorLayout from '@/instructor/layout/InstructorLayout'
-import InstructorDashboardPage from '@/instructor/pages/DashboardPage'
-import InstructorCoursesPage from '@/instructor/pages/CoursesPage'
-import InstructorVideosPage from '@/instructor/pages/VideosPage'
-import InstructorStudentsPage from '@/instructor/pages/StudentsPage'
-import InstructorEnrollmentsPage from '@/instructor/pages/EnrollmentsPage'
-import InstructorAnalyticsPage from '@/instructor/pages/AnalyticsPage'
-import InstructorNotesPage from '@/instructor/pages/NotesPage'
-import InstructorSettingsPage from '@/instructor/pages/InstructorSettingsPage'
+// Admin
+const AdminLayout = lazy(() => import('@/admin/layout/AdminLayout'))
+const DashboardPage = lazy(() => import('@/admin/pages/DashboardPage'))
+const StudentsPage = lazy(() => import('@/admin/pages/StudentsPage'))
+const VideosPage = lazy(() => import('@/admin/pages/VideosPage'))
+const AdminCoursesPage = lazy(() => import('@/admin/pages/CoursesPage'))
+const AdminBlogsPage = lazy(() => import('@/admin/pages/BlogsPage'))
+const CategoriesPage = lazy(() => import('@/admin/pages/CategoriesPage'))
+const SettingsPage = lazy(() => import('@/admin/pages/SettingsPage'))
 
+// Instructor
+const InstructorLayout = lazy(() => import('@/instructor/layout/InstructorLayout'))
+const InstructorDashboardPage = lazy(() => import('@/instructor/pages/DashboardPage'))
+const InstructorCoursesPage = lazy(() => import('@/instructor/pages/CoursesPage'))
+const InstructorVideosPage = lazy(() => import('@/instructor/pages/VideosPage'))
+const InstructorStudentsPage = lazy(() => import('@/instructor/pages/StudentsPage'))
+const InstructorEnrollmentsPage = lazy(() => import('@/instructor/pages/EnrollmentsPage'))
+const InstructorAnalyticsPage = lazy(() => import('@/instructor/pages/AnalyticsPage'))
+const InstructorNotesPage = lazy(() => import('@/instructor/pages/NotesPage'))
+const InstructorSettingsPage = lazy(() => import('@/instructor/pages/InstructorSettingsPage'))
 
-// ── Student ───────────────────────────────────────────────────────────────────
-import StudentLayout from '@/student/layout/StudentLayout'
-import StudentDashboardPage from '@/student/pages/DashboardPage'
-import CoursesPage from '@/student/pages/CoursesPage'
-import CourseDetailPage from '@/student/pages/CourseDetailPage'
-import WatchPage from '@/student/pages/WatchPage'
-import StudentBlogsPage from '@/student/pages/BlogsPage'
-import BlogDetailPage from '@/student/pages/BlogDetailPage'
-import ProfilePage from '@/student/pages/ProfilePage'
-import StudentNotesPage from '@/student/pages/NotesPage'
-import ChatDashboardPage from '@/pages/chat/ChatDashboardPage'
+// Student
+const StudentLayout = lazy(() => import('@/student/layout/StudentLayout'))
+const StudentDashboardPage = lazy(() => import('@/student/pages/DashboardPage'))
+const CoursesPage = lazy(() => import('@/student/pages/CoursesPage'))
+const CourseDetailPage = lazy(() => import('@/student/pages/CourseDetailPage'))
+const WatchPage = lazy(() => import('@/student/pages/WatchPage'))
+const StudentBlogsPage = lazy(() => import('@/student/pages/BlogsPage'))
+const BlogDetailPage = lazy(() => import('@/student/pages/BlogDetailPage'))
+const ProfilePage = lazy(() => import('@/student/pages/ProfilePage'))
+const StudentNotesPage = lazy(() => import('@/student/pages/NotesPage'))
+const ChatDashboardPage = lazy(() => import('@/pages/chat/ChatDashboardPage'))
 
-// ── Route guards ──────────────────────────────────────────────────────────────
+// 🔥 Loader
+function PageLoader() {
+  return (
+    <div className="flex items-center justify-center min-h-[60vh] bg-background">
+      <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+    </div>
+  )
+}
+
+// Route Guard
 function ProtectedRoute({
   children,
   requiredRole
@@ -51,138 +61,129 @@ function ProtectedRoute({
 }) {
   const { isAuthenticated, user } = useAuthStore()
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />
-  }
+  if (!isAuthenticated) return <Navigate to="/login" replace />
+  if (!user) return null
 
-  // Handle case where auth is authenticated but user info hasn't loaded (hydration)
-  if (!user) {
-    return null; // Return null effectively "waiting" for store hydration
-  }
-
-  if (requiredRole && user?.role !== requiredRole) {
-    const role = user?.role || 'student'
-    const homeMap: Record<string, string> = {
+  if (requiredRole && user.role !== requiredRole) {
+    const homeMap = {
       student: '/student/dashboard',
       instructor: '/instructor/dashboard',
       admin: '/admin/dashboard'
     }
-    return <Navigate to={homeMap[role] || '/login'} replace />
+    return <Navigate to={homeMap[user.role]} replace />
   }
 
   return <>{children}</>
 }
 
-// ── Router ────────────────────────────────────────────────────────────────────
+// Router
 export default function AppRouter() {
   const { isAuthenticated, user } = useAuthStore()
   const [isHydrated, setIsHydrated] = useState(false)
 
   useEffect(() => {
-    // Zustand persist/hydrate check
-    const checkHydration = () => {
-      setIsHydrated(true)
-    }
-    checkHydration()
+    setIsHydrated(true)
   }, [])
 
   if (!isHydrated) return null
 
   return (
     <BrowserRouter>
-      <Routes>
-        {/* Auth routes */}
-        <Route
-          path="/login"
-          element={
-            isAuthenticated && user ? (
-              <Navigate to={user?.role === 'student' ? '/student/dashboard' : user?.role === 'instructor' ? '/instructor/dashboard' : '/admin/dashboard'} replace />
-            ) : (
-              <LoginPage />
-            )
-          }
-        />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/admin/login" element={<Navigate to="/login" replace />} />
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
 
-        {/* Root redirect based on auth */}
-        <Route
-          path="/"
-          element={
-            isAuthenticated && user ? (
-              <Navigate to={user?.role === 'student' ? '/student/dashboard' : user?.role === 'instructor' ? '/instructor/dashboard' : '/admin/dashboard'} replace />
-            ) : (
-              <LandingPage />
-            )
-          }
-        />
+          {/* Auth */}
+          <Route
+            path="/login"
+            element={
+              isAuthenticated && user ? (
+                <Navigate to={`/${user.role}/dashboard`} replace />
+              ) : (
+                <LoginPage />
+              )
+            }
+          />
+          <Route path="/register" element={<RegisterPage />} />
 
-        {/* ── Student protected ───────────────────────────── */}
-        <Route
-          path="/student"
-          element={
-            <ProtectedRoute requiredRole="student">
-              <StudentLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<Navigate to="/student/dashboard" replace />} />
-          <Route path="dashboard" element={<StudentDashboardPage />} />
-          <Route path="courses" element={<CoursesPage />} />
-          <Route path="courses/:id" element={<CourseDetailPage />} />
-          <Route path="watch/:videoId" element={<WatchPage />} />
-          <Route path="blogs" element={<StudentBlogsPage />} />
-          <Route path="blog/:id" element={<BlogDetailPage />} />
-          <Route path="profile" element={<ProfilePage />} />
-          <Route path="notes" element={<StudentNotesPage />} />
-          <Route path="messages" element={<ChatDashboardPage />} />
-        </Route>
+          {/* Root */}
+          <Route
+            path="/"
+            element={
+              isAuthenticated && user ? (
+                <Navigate to={`/${user.role}/dashboard`} replace />
+              ) : (
+                <LandingPage />
+              )
+            }
+          />
 
-        {/* ── Instructor protected ──────────────────────────── */}
-        <Route
-          path="/instructor"
-          element={
-            <ProtectedRoute requiredRole="instructor">
-              <InstructorLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<Navigate to="/instructor/dashboard" replace />} />
-          <Route path="dashboard" element={<InstructorDashboardPage />} />
-          <Route path="courses" element={<InstructorCoursesPage />} />
-          <Route path="videos" element={<InstructorVideosPage />} />
-          <Route path="notes" element={<InstructorNotesPage />} />
-          <Route path="students" element={<InstructorStudentsPage />} />
-          <Route path="enrollments" element={<InstructorEnrollmentsPage />} />
-          <Route path="analytics" element={<InstructorAnalyticsPage />} />
+          {/* Student */}
+          <Route
+            path="/student"
+            element={
+              <ProtectedRoute requiredRole="student">
+                <StudentLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<Navigate to="dashboard" replace />} />
+            <Route path="dashboard" element={<StudentDashboardPage />} />
+            <Route path="courses" element={<CoursesPage />} />
+            <Route path="courses/:id" element={<CourseDetailPage />} />
+            <Route path="watch/:videoId" element={<WatchPage />} />
+            <Route path="blogs" element={<StudentBlogsPage />} />
+            <Route path="blog/:id" element={<BlogDetailPage />} />
+            <Route path="profile" element={<ProfilePage />} />
+            <Route path="notes" element={<StudentNotesPage />} />
+            <Route path="messages" element={<ChatDashboardPage />} />
+          </Route>
 
-          <Route path="messages" element={<ChatDashboardPage />} />
-          <Route path="settings" element={<InstructorSettingsPage />} />
-        </Route>
+          {/* Instructor */}
+          <Route
+            path="/instructor"
+            element={
+              <ProtectedRoute requiredRole="instructor">
+                <InstructorLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<Navigate to="dashboard" replace />} />
+            <Route path="dashboard" element={<InstructorDashboardPage />} />
+            <Route path="courses" element={<InstructorCoursesPage />} />
+            <Route path="videos" element={<InstructorVideosPage />} />
+            <Route path="notes" element={<InstructorNotesPage />} />
+            <Route path="students" element={<InstructorStudentsPage />} />
+            <Route path="enrollments" element={<InstructorEnrollmentsPage />} />
+            <Route path="analytics" element={<InstructorAnalyticsPage />} />
+            <Route path="messages" element={<ChatDashboardPage />} />
+            <Route path="settings" element={<InstructorSettingsPage />} />
+          </Route>
 
-        {/* ── Admin protected ─────────────────────────────── */}
-        <Route
-          path="/admin"
-          element={
-            <ProtectedRoute requiredRole="admin">
-              <AdminLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<Navigate to="/admin/dashboard" replace />} />
-          <Route path="dashboard" element={<DashboardPage />} />
-          <Route path="students" element={<StudentsPage />} />
-          <Route path="videos" element={<VideosPage />} />
-          <Route path="courses" element={<AdminCoursesPage />} />
-          <Route path="blogs" element={<AdminBlogsPage />} />
-          <Route path="categories" element={<CategoriesPage />} />
-          <Route path="messages" element={<ChatDashboardPage />} />
-          <Route path="settings" element={<SettingsPage />} />
-        </Route>
+          {/* Admin */}
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <AdminLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<Navigate to="dashboard" replace />} />
+            <Route path="dashboard" element={<DashboardPage />} />
+            <Route path="students" element={<StudentsPage />} />
+            <Route path="videos" element={<VideosPage />} />
+            <Route path="courses" element={<AdminCoursesPage />} />
+            <Route path="blogs" element={<AdminBlogsPage />} />
+            <Route path="categories" element={<CategoriesPage />} />
+            <Route path="messages" element={<ChatDashboardPage />} />
+            <Route path="settings" element={<SettingsPage />} />
+          </Route>
 
-        {/* Catch-all */}
-        <Route path="*" element={<Navigate to="/login" replace />} />
-      </Routes>
+          {/* Fallback */}
+          <Route path="*" element={<Navigate to="/login" replace />} />
+
+        </Routes>
+      </Suspense>
     </BrowserRouter>
   )
 }
