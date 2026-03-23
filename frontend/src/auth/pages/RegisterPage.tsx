@@ -29,6 +29,8 @@ import {
 } from "@/components/ui/select"
 import loginBg from '@/assets/login-bg.png'
 
+import { ThemeToggle } from '@/components/ThemeToggle'
+
 export default function UnifiedRegisterPage() {
     const [name, setName] = useState('')
     const [email, setEmail] = useState('')
@@ -72,7 +74,22 @@ export default function UnifiedRegisterPage() {
     }
 
     return (
-        <div className="min-h-screen bg-background flex flex-col md:flex-row-reverse overflow-hidden font-sans">
+        <div className="min-h-screen bg-background flex flex-col md:flex-row-reverse overflow-hidden font-sans relative">
+            {/* Added Brand Header and Theme Toggle positioned definitely */}
+            <div className="fixed top-0 left-0 w-full flex justify-between items-center px-6 md:px-12 py-6 z-[100] pointer-events-none">
+                <Link to="/" className="flex items-center gap-2 group/logo pointer-events-auto">
+                    <div className="w-8 h-8 bg-gradient-to-br from-primary to-indigo-600 rounded-lg flex items-center justify-center shadow-lg group-hover/logo:scale-110 transition-transform">
+                        <UserPlus className="w-4 h-4 text-white" />
+                    </div>
+                    <div className="text-xl md:text-2xl font-black tracking-tighter text-foreground font-headline italic">
+                        VaultLearn
+                    </div>
+                </Link>
+                <div className="p-1 rounded-full bg-background/40 backdrop-blur-xl border border-white/10 shadow-2xl overflow-hidden pointer-events-auto">
+                    <ThemeToggle />
+                </div>
+            </div>
+
             {/* Left Side: Visual Experience (Reversed for variety) */}
             <motion.div
                 initial={{ opacity: 0, x: 20 }}
@@ -314,9 +331,9 @@ export default function UnifiedRegisterPage() {
 
                     {/* Footer Links */}
                     <div className="pt-8 flex items-center justify-between border-t border-muted/50">
-                        <span className="text-[10px] font-bold text-muted-foreground/40 tracking-[0.2em] uppercase">
+                        <Link to="/" className="text-[10px] font-bold text-muted-foreground/40 hover:text-primary tracking-[0.2em] uppercase transition-colors">
                             VaultLearn OS v2.0
-                        </span>
+                        </Link>
                         <div className="flex gap-4">
                             <Link to="#" className="text-[10px] font-bold text-muted-foreground/40 hover:text-primary uppercase tracking-widest transition-colors">Privacy</Link>
                             <Link to="#" className="text-[10px] font-bold text-muted-foreground/40 hover:text-primary uppercase tracking-widest transition-colors">Terms</Link>

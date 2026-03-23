@@ -18,6 +18,8 @@ import backgroundlogin_dark from '@/assets/backgroundlogin_dark.png'
 import cardimageleft from '@/assets/cardimageleft.png'
 import cardimageleft_dark from '@/assets/cardimageleft_dark.png'
 
+import { ThemeToggle } from '@/components/ThemeToggle'
+
 export default function UnifiedLoginPage() {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
@@ -67,20 +69,23 @@ export default function UnifiedLoginPage() {
             <motion.header
                 initial={{ y: -100, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                className="fixed top-0 w-full flex justify-between items-center px-12 py-6 z-50 bg-white/40 dark:bg-card/40 backdrop-blur-2xl border-b border-white/20 dark:border-white/5 shadow-sm"
+                className="fixed top-0 w-full flex justify-between items-center px-6 md:px-12 py-4 md:py-6 z-50 bg-white/40 dark:bg-card/40 backdrop-blur-2xl border-b border-white/20 dark:border-white/5 shadow-sm"
             >
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 dark:from-primary dark:to-secondary rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+                <Link to="/" className="flex items-center gap-3 group/logo">
+                    <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 dark:from-primary dark:to-secondary rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20 group-hover/logo:scale-110 transition-transform">
                         <ShieldCheck className="w-6 h-6 text-white" />
                     </div>
-                    <div className="text-3xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 dark:from-primary dark:via-secondary dark:to-primary font-headline italic">
+                    <div className="text-2xl md:text-3xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 dark:from-primary dark:via-secondary dark:to-primary font-headline italic">
                         VaultLearn
                     </div>
-                </div>
-                <div className="hidden md:flex gap-8">
-                    {['Academy', 'Library', 'Community'].map((item) => (
-                        <Link key={item} to="#" className="text-sm font-bold text-slate-600 dark:text-muted-foreground hover:text-blue-600 dark:hover:text-primary transition-colors tracking-widest uppercase">{item}</Link>
-                    ))}
+                </Link>
+                <div className="flex items-center gap-4 md:gap-8">
+                    <div className="hidden md:flex gap-8">
+                        {['Academy', 'Library', 'Community'].map((item) => (
+                            <Link key={item} to="#" className="text-sm font-bold text-slate-600 dark:text-muted-foreground hover:text-blue-600 dark:hover:text-primary transition-colors tracking-widest uppercase">{item}</Link>
+                        ))}
+                    </div>
+                    <ThemeToggle />
                 </div>
             </motion.header>
 
@@ -236,10 +241,10 @@ export default function UnifiedLoginPage() {
                 transition={{ delay: 1 }}
                 className="w-full flex flex-col md:flex-row justify-between items-center px-16 py-10 gap-6 bg-white/40 dark:bg-card/40 backdrop-blur-2xl border-t border-white/20 dark:border-white/5"
             >
-                <div className="flex items-center gap-2">
-                    <span className="text-xl font-black text-slate-900 dark:text-foreground font-headline italic tracking-tighter">VaultLearn</span>
+                <Link to="/" className="flex items-center gap-2 group/footer-logo">
+                    <span className="text-xl font-black text-slate-900 dark:text-foreground font-headline italic tracking-tighter group-hover/footer-logo:text-blue-600 dark:group-hover/footer-logo:text-primary transition-colors">VaultLearn</span>
                     <span className="w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-primary" />
-                </div>
+                </Link>
                 <div className="flex flex-wrap justify-center gap-10">
                     {['Governance', 'Directives', 'Cookies', 'System'].map((text) => (
                         <Link key={text} className="text-slate-500 dark:text-muted-foreground hover:text-blue-600 dark:hover:text-primary transition-colors font-bold text-[10px] uppercase tracking-[0.3em]" to="#">{text}</Link>
