@@ -211,8 +211,8 @@ export default function WatchPage() {
 
   // Queries
   const { data: video, isLoading: loadingVideo } = useQuery({
-    queryKey: ['student-video', videoId],
-    queryFn: () => studentVideos.getById(videoId!),
+    queryKey: ['student-video', videoId, courseId],
+    queryFn: () => studentVideos.getById(videoId!, courseId),
     enabled: !!videoId,
   })
 

@@ -134,8 +134,8 @@ export const studentVideos = {
     const res = await studentApiClient.get('/videos')
     return res.data
   },
-  getById: async (id: string): Promise<Video> => {
-    const res = await studentApiClient.get(`/videos/${id}`)
+  getById: async (id: string, courseId?: string | null): Promise<Video> => {
+    const res = await studentApiClient.get(`/videos/${id}`, { params: { course: courseId } })
     return res.data
   },
   getByCourse: async (courseId: string): Promise<Video[]> => {

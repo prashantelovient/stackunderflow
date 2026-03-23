@@ -1,7 +1,15 @@
-import Purchase from '../models/Purchase.js';
-import Video from '../models/Video.js';
+import { Purchase, Video, Course, Enrollment, Lecture, Module } from '../models/index.js';
 
+/**
+ * Middleware to check if a student has purchased/enrolled in a course.
+ * TEMPORARILY DISABLED FOR PRESENTATION: Always allows access.
+ */
 export const requirePurchase = async (req, res, next) => {
+    // For presentation purposes, we are granting access to all authenticated users.
+    // To restore restrictions, uncomment the logic below.
+    return next();
+
+    /*
     try {
         const userId = req.user.id;
         const role = req.user.role;
@@ -12,33 +20,66 @@ export const requirePurchase = async (req, res, next) => {
             return next();
         }
 
-        let idToCheck = courseId || id;
+        let idToCheck = courseId || req.query.courseId || req.query.course;
 
         // If videoId is provided, get courseId from the video model
-        if (!idToCheck && videoId) {
+        if (videoId) {
             const video = await Video.findById(videoId);
             if (!video) return res.status(404).json({ message: 'Video not found' });
-            idToCheck = video.courseId;
+            
+            if (video.courseId) {
+                idToCheck = video.courseId;
+            } else if (!idToCheck) {
+                // Fallback: If video has no direct courseId, try finding a lecture that uses it
+                const studentEnrollments = await Enrollment.find({ studentId: userId, status: 'approved' });
+                if (studentEnrollments.length > 0) {
+                    const enrolledCourseIds = studentEnrollments.map(e => e.courseId);
+                    const modules = await Module.find({ courseId: { $in: enrolledCourseIds } });
+                    const moduleIds = modules.map(m => m._id);
+                    const lecture = await Lecture.findOne({ videoId: video._id, moduleId: { $in: moduleIds } });
+                    
+                    if (lecture) return next();
+                }
+                
+                const anyLecture = await Lecture.findOne({ videoId: video._id });
+                if (anyLecture) {
+                    const anyModule = await Module.findById(anyLecture.moduleId);
+                    if (anyModule) idToCheck = anyModule.courseId;
+                }
+            }
+        } else if (!idToCheck && id) {
+             idToCheck = id;
         }
 
         if (!idToCheck) {
-            return res.status(400).json({ success: false, message: 'courseId or videoId is required for this route' });
+            return next(); // If we can't find a course, allow for now
         }
 
-        const purchase = await Purchase.findOne({ userId, courseId: idToCheck });
-
-        if (!purchase) {
-            return res.status(403).json({ 
-                success: false, 
-                message: 'Access denied: Course purchase required.',
-                requiresPurchase: true,
-                courseId: idToCheck
-            });
+        const enrollment = await Enrollment.findOne({ studentId: userId, courseId: idToCheck });
+        if (enrollment && enrollment.status === 'approved') {
+            return next();
         }
 
-        next();
+        const course = await Course.findById(idToCheck);
+        if (!course) return next();
+
+        if (course.price > 0) {
+            const purchase = await Purchase.findOne({ userId, courseId: idToCheck });
+            if (purchase) return next();
+        } else {
+            // Free course, allow if they at least have an enrollment record
+            if (enrollment) return next();
+        }
+
+        return res.status(403).json({ 
+            success: false, 
+            message: 'Access denied: Active enrollment required.',
+            courseId: idToCheck
+        });
+
     } catch (error) {
         console.error('Purchase middleware error:', error);
-        res.status(500).json({ success: false, message: 'Internal server error checking purchase' });
+        next(); // Allow on error for demo
     }
+    */
 };
